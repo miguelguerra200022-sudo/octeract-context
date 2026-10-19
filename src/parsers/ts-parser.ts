@@ -24,14 +24,22 @@ export class TypeScriptParser implements LanguageParser {
     const symbols: HyperSymbol[] = [];
     const dependencies: string[] = [];
 
-    // 1. Extraer importaciones (Dependencias de grafo)
-    const importRegex = /(?:import\s+(?:[\w*\s{},$]+from\s+)?['"]([^'"]+)['"]|require\(['"]([^'"]+)['"]\))/g;
-    let match: RegExpExecArray | null;
+    // 1. Extraer importaciones (Dependencias de grafo) de forma lineal y segura
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line || line.startsWith('//') || line.startsWith('*')) continue;
 
-    while ((match = importRegex.exec(content)) !== null) {
-      const dep = match[1] || match[2];
-      if (dep && !dependencies.includes(dep)) {
-        dependencies.push(dep);
+      const importMatch = line.match(/^import\s+(?:.+?\s+from\s+)?['"]([^'"]+)['"]/);
+      if (importMatch && importMatch[1]) {
+        const dep = importMatch[1];
+        if (!dependencies.includes(dep)) dependencies.push(dep);
+        continue;
+      }
+
+      const reqMatch = line.match(/require\(['"]([^'"]+)['"]\)/);
+      if (reqMatch && reqMatch[1]) {
+        const dep = reqMatch[1];
+        if (!dependencies.includes(dep)) dependencies.push(dep);
       }
     }
 
@@ -50,6 +58,27 @@ export class TypeScriptParser implements LanguageParser {
         continue;
       }
 
+      // Importaciones con nombre: import { a, b } from '...'
+      const namedImportMatch = line.match(/^import\s*\{([^}]+)\}\s*from\s*['"]([^'"]+)['"]/);
+      if (namedImportMatch) {
+        const parts = namedImportMatch[1].split(',');
+        const targetDep = namedImportMatch[2];
+        for (const part of parts) {
+          const symName = part.trim().replace(/^type\s+/, '').split(/\s+as\s+/)[0].trim();
+          if (symName && !symbols.some((s) => s.name === symName && s.kind === 'import')) {
+            symbols.push({
+              name: symName,
+              kind: 'import',
+              lineStart: lineNum,
+              lineEnd: lineNum,
+              signature: line.slice(0, 80),
+              dependencies: [targetDep],
+            });
+          }
+        }
+        continue;
+      }
+
       // Clases
       const classMatch = line.match(/^(?:export\s+)?(?:abstract\s+)?class\s+([A-Za-z0-9_$]+)/);
       if (classMatch) {
@@ -60,6 +89,7 @@ export class TypeScriptParser implements LanguageParser {
           lineEnd: lineNum,
           signature: line.replace(/\{.*$/, '').trim(),
           dependencies: [],
+          isExported: line.startsWith('export'),
         });
         inClassOrInterface = true;
         continue;
@@ -75,6 +105,7 @@ export class TypeScriptParser implements LanguageParser {
           lineEnd: lineNum,
           signature: line.replace(/\{.*$/, '').trim(),
           dependencies: [],
+          isExported: line.startsWith('export'),
         });
         inClassOrInterface = true;
         continue;
@@ -90,6 +121,7 @@ export class TypeScriptParser implements LanguageParser {
           lineEnd: lineNum,
           signature: line.replace(/\{.*$/, '').trim(),
           dependencies: [],
+          isExported: line.startsWith('export'),
         });
         continue;
       }
@@ -104,6 +136,7 @@ export class TypeScriptParser implements LanguageParser {
           lineEnd: lineNum,
           signature: line.slice(0, 80),
           dependencies: [],
+          isExported: line.startsWith('export'),
         });
         continue;
       }
@@ -119,6 +152,7 @@ export class TypeScriptParser implements LanguageParser {
             lineEnd: lineNum,
             signature: line.slice(0, 80),
             dependencies: [],
+            isExported: line.startsWith('export'),
           });
         }
         continue;
@@ -138,6 +172,7 @@ export class TypeScriptParser implements LanguageParser {
               lineEnd: lineNum,
               signature: line.slice(0, 80),
               dependencies: [],
+              isExported: true,
             });
           }
         }
@@ -145,7 +180,7 @@ export class TypeScriptParser implements LanguageParser {
       }
 
       // Constantes, variables y funciones flecha exportadas
-      const constMatch = line.match(/^(?:export\s+)?(?:const|let|var)\s+([A-Za-z0-9_$]+)\s*[:=]/);
+      const constMatch = line.match(/^export\s+(?:const|let|var)\s+([A-Za-z0-9_$]+)\s*[:=]/);
       if (constMatch) {
         if (!symbols.some((s) => s.name === constMatch[1])) {
           const isArrow = line.includes('=>');
@@ -156,6 +191,7 @@ export class TypeScriptParser implements LanguageParser {
             lineEnd: lineNum,
             signature: isArrow ? `const ${constMatch[1]} = (...) =>` : line.slice(0, 80),
             dependencies: [],
+            isExported: true,
           });
         }
         continue;

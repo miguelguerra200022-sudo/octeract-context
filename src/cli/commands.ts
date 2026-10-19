@@ -121,7 +121,7 @@ export async function runUI(targetDir: string = '.', port: number = 4444): Promi
 export async function runWatch(targetDir: string = '.'): Promise<void> {
   const root = path.resolve(targetDir);
   const watcher = new ShieldWatcher(root);
-  watcher.start();
+  void watcher.start();
 }
 
 export async function runSafeWrite(targetDir: string = '.', targetFile: string, proposedContent: string): Promise<void> {

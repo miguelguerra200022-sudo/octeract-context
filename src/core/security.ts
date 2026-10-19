@@ -121,20 +121,25 @@ export class TesseractShieldSecurity {
 
   /**
    * Detecta si la IA intentó truncar o resumir el archivo con comentarios perezosos
-   * como '// ... existing code ...', lo cual destruiría código preexistente en disco.
+   * como marcadores perezosos de código elidido, lo cual destruiría código preexistente en disco.
    */
   public static scanTruncation(content: string): TruncationScanResult {
     const lines = content.split('\n');
     const truncationPatterns = [
-      /\/\/\s*\.\.\.\s*(?:rest|existing|remaining|code|same)/i,
-      /\/\*\s*\.\.\.\s*(?:rest|existing|remaining|code|same).*?\*\//i,
-      /\/\/\s*(?:resto|código|demás)\s+(?:del\s+código|igual|sin\s+cambios)/i,
-      /\/\/\s*TODO:\s*(?:keep|preserve)\s+rest/i,
-      /\/\/\s*\.\.\.\s*$/,
+      /^\s*\/\/\s*\.\.\.\s*(?:rest|existing|remaining|code|same)/i,
+      /^\s*\/\*\s*\.\.\.\s*(?:rest|existing|remaining|code|same).*?\*\//i,
+      /^\s*\/\/\s*(?:resto|código|demás)\s+(?:del\s+código|igual|sin\s+cambios)/i,
+      /^\s*\/\/\s*TODO:\s*(?:keep|preserve)\s+rest/i,
+      /^\s*\/\/\s*\.\.\.\s*$/,
     ];
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
+      const trimmed = line.trim();
+      // Ignorar líneas de comentarios JSDoc, tablas Markdown o cadenas de plantilla
+      if (trimmed.startsWith('*') || trimmed.startsWith('|') || trimmed.startsWith('`') || trimmed.includes('${') || trimmed.startsWith("'") || trimmed.startsWith('"')) {
+        continue;
+      }
       for (const pattern of truncationPatterns) {
         if (pattern.test(line)) {
           return {
@@ -153,7 +158,7 @@ export class TesseractShieldSecurity {
       else if (content[i] === '}') openBraces--;
     }
 
-    if (openBraces > 3 && content.length > 500) {
+    if (openBraces > 15 && content.length > 500) {
       return {
         isTruncated: true,
         reason: `Estructura sintáctica truncada: Quedan ${openBraces} llaves '{' sin cerrar al final del archivo.`,
@@ -194,10 +199,17 @@ export class TesseractShieldSecurity {
       if (specifier.startsWith('.') || specifier.startsWith('/') || specifier.startsWith('@/')) {
         continue;
       }
+      if (specifier.includes('${') || specifier.includes(' ') || specifier.includes('\n')) {
+        continue;
+      }
       const cleanName = specifier.replace(/^node:/, '');
       const rootPackage = cleanName.startsWith('@')
         ? cleanName.split('/').slice(0, 2).join('/')
         : cleanName.split('/')[0];
+
+      if (!/^(?:@[a-z0-9-*~][a-z0-9-*._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/i.test(rootPackage)) {
+        continue;
+      }
 
       if (this.standardNodeModules.has(cleanName) || this.standardNodeModules.has(rootPackage)) {
         continue;

@@ -158,6 +158,9 @@ export class TopologicalAuditor {
 
       // CASO 1: IMPORT ROTO (El archivo no existe en el proyecto)
       if (!targetVertex) {
+        if (vertex.cell === CubicCell.Tests || vertex.id.includes('.test.') || vertex.id.includes('.spec.')) {
+          continue;
+        }
         let lineInfo = '';
         let lineNum = 1;
         const content = getFileContent();
@@ -412,7 +415,7 @@ export class TopologicalAuditor {
       const ext = path.extname(v.id).toLowerCase();
       const baseName = path.basename(v.id, ext).toLowerCase();
       const isEntrypoint = entrypointNames.some((ep) => baseName.includes(ep));
-      const isNonSource = nonSourceExtensions.includes(ext) || path.basename(v.id).startsWith('.');
+      const isNonSource = nonSourceExtensions.includes(ext) || path.basename(v.id).startsWith('.') || baseName === 'dockerfile' || baseName === 'license';
 
       if (v.dependents.length === 0 && v.dependencies.length === 0 && !isEntrypoint && !isNonSource) {
         fractures.push({
@@ -525,7 +528,10 @@ export class TopologicalAuditor {
     const genericEvents = new Set([
       'error', 'data', 'close', 'end', 'finish', 'drain', 'connect',
       'message', 'exit', 'open', 'change', 'click', 'keydown', 'keyup',
-      'focus', 'blur', 'input', 'ready'
+      'focus', 'blur', 'input', 'ready', 'line', 'sigint', 'sigterm',
+      'readable', 'pipe', 'unpipe', 'uncaughtexception', 'unhandledrejection', 'stateupdated',
+      'resize', 'contextmenu', 'mousedown', 'mouseup', 'mousemove', 'wheel',
+      'touchstart', 'touchmove', 'touchend', 'scroll', 'load', 'unload'
     ]);
 
     const candidateVertices = vertices.filter((v) => {
@@ -565,6 +571,10 @@ export class TopologicalAuditor {
       const lines = content.split('\n');
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
+        const trimmed = line.trim();
+        if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) {
+          continue;
+        }
 
         // Emisiones
         const emitMatches = line.matchAll(/(?:\.emit|\.fire|dispatch|trigger)\s*\(\s*['"`]([a-zA-Z0-9_\-:\.]{3,})['"`]/g);
@@ -932,7 +942,8 @@ export class TopologicalAuditor {
     idMap: Map<string, HyperVertex>,
     fractures: TopologicalFracture[]
   ): void {
-    const entrypointPatterns = ['index', 'main', 'app', 'cli', 'server', 'extension', 'workbench', 'bootstrap', 'entry'];
+    const entrypointPatterns = ['index', 'main', 'app', 'cli', 'server', 'extension', 'workbench', 'bootstrap', 'entry', 'benchmark'];
+    const CODE_EXTENSIONS = new Set(['.ts', '.js', '.tsx', '.jsx', '.py', '.rs', '.go', '.java', '.c', '.cpp', '.cs', '.rb', '.php']);
     const commonIgnoredExports = new Set([
       'default', 'run', 'init', 'start', 'stop', 'dispose', 'render', 'create', 'setup',
       'id', 'name', 'type', 'value', 'data', 'props', 'options', 'config', 'state', 'event'
@@ -946,19 +957,32 @@ export class TopologicalAuditor {
       if (v.cell === CubicCell.Tests) continue;
 
       const lower = v.id.toLowerCase();
-      if (lower.includes('node_modules') || lower.includes('dist') || lower.includes('.test.') || lower.includes('.spec.')) {
+      if (
+        lower.includes('node_modules') ||
+        lower.includes('dist') ||
+        lower.includes('.test.') ||
+        lower.includes('.spec.') ||
+        lower.includes('benchmark') ||
+        lower.includes('/examples/') ||
+        lower.includes('/scripts/') ||
+        lower.includes('/fixtures/')
+      ) {
         continue;
       }
 
       const ext = path.extname(v.id);
+      if (!CODE_EXTENSIONS.has(ext.toLowerCase())) {
+        continue;
+      }
       const baseName = path.basename(v.id, ext).toLowerCase();
-      if (entrypointPatterns.some((ep) => baseName === ep || baseName.startsWith(ep + '.'))) {
+      if (entrypointPatterns.some((ep) => baseName === ep || baseName.startsWith(ep + '.') || baseName.startsWith(ep + '_') || baseName.startsWith(ep + '-'))) {
         continue;
       }
 
       const exportedSymbols = v.symbols.filter(
         (s) =>
           (s.kind === 'function' || s.kind === 'class' || s.kind === 'interface' || s.kind === 'type' || s.kind === 'variable') &&
+          (s.isExported === true || (s.isExported === undefined && (!s.signature || s.signature.startsWith('export')))) &&
           s.name.length >= 4 &&
           !commonIgnoredExports.has(s.name)
       );
@@ -989,13 +1013,18 @@ export class TopologicalAuditor {
       // Si tiene dependientes, verificar si alguno consume el símbolo
       for (const sym of exportedSymbols) {
         if (detected >= MAX_DEAD_EXPORTS) break;
+        // Tipos e interfaces en módulos con dependientes son contratos públicos; no generan código en runtime
+        if ((sym.kind === 'interface' || sym.kind === 'type') && v.dependents.length > 0) {
+          continue;
+        }
+
         let isReferenced = false;
 
         for (const depId of v.dependents) {
           const depVertex = idMap.get(depId);
           if (depVertex) {
             const usesSymbol = depVertex.symbols.some(
-              (s) => s.dependencies.includes(sym.name) || s.name.includes(sym.name)
+              (s) => s.dependencies.includes(sym.name) || s.name.includes(sym.name) || (s.kind === 'import' && s.name === sym.name)
             );
             if (usesSymbol) {
               isReferenced = true;

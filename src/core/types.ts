@@ -34,6 +34,7 @@ export interface HyperSymbol {
   signature?: string;
   docstring?: string;
   dependencies: string[];
+  isExported?: boolean;
 }
 
 /** Vértice del hipercubo: representa un archivo o módulo con coordenadas 4D */

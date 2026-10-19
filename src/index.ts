@@ -179,3 +179,7 @@ export { BlastRadiusCalculator } from './core/blast.ts';
 export { TransactionalHealer } from './core/healing.ts';
 export { ShadowEngine } from './core/shadow.ts';
 export { MCPServer } from './mcp/server.ts';
+export { FlowTracer } from './core/flow.ts';
+export { eventBus } from './core/events.ts';
+export { ProjectIndexer } from './core/indexer.ts';
+
