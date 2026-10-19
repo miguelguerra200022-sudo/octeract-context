@@ -6,8 +6,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "tesseract-context": "./bin/tesseract-context.js",
-    "tesseract": "./bin/tesseract-context.js"
+    "tesseract-context": "bin/tesseract-context.js",
+    "tesseract": "bin/tesseract-context.js"
   },
   "scripts": {
     "start": "node --experimental-strip-types src/index.ts",

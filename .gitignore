@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .tesseract/
+credenciales/
 *.log
 .DS_Store
 *.tmp
