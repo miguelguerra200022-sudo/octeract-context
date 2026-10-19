@@ -1,7 +1,7 @@
 {
   "name": "tesseract-context",
-  "version": "1.1.0",
-  "description": "Fractal 4D Hypercube Context Engine and Universal MCP Server for AI Coding Agents",
+  "version": "2.0.0",
+  "description": "Toroidal 4-Torus (T^4) and Tesseractic Honeycomb ({4,3,3,4}) Context Engine and Universal MCP Server for AI Coding Agents",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -212,5 +212,6 @@ export { ProjectIndexer } from './core/indexer.ts';
 export { SarifExporter } from './core/sarif.ts';
 export { DifferentialShearAnalyzer } from './core/diff.ts';
 export { ASTSkeletonizer } from './core/skeleton.ts';
+export { TesseracticHoneycomb } from './core/honeycomb.ts';
 
 

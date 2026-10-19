@@ -615,6 +615,16 @@ export class TesseractDashboard {
       <div id="breadcrumbs"></div>
     </div>
 
+    <!-- Selector de Variedad Topológica -->
+    <div class="hud-card" style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-size: 11px; font-weight: 700; color: #8b949e;">VARIEDAD:</span>
+      <select id="topology-select" onchange="window.changeTopology && window.changeTopology(this.value)" style="background: rgba(0,0,0,0.6); color: #00e5ff; border: 1px solid rgba(0,229,255,0.4); border-radius: 8px; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer; outline: none;">
+        <option value="torus" selected>4-Toro (T⁴ Geodésica)</option>
+        <option value="honeycomb">Panal {4,3,3,4} Monorrepo</option>
+        <option value="bounded">Hipercubo Plano [0,1]⁴</option>
+      </select>
+    </div>
+
     <!-- Badge de Auditoría Topológica -->
     <div class="hud-card" id="hud-audit-badge" style="cursor: pointer; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255, 23, 68, 0.4);" onclick="openAuditModal()">
       <span id="audit-badge-icon" style="font-size: 14px;">🔬</span>
@@ -785,6 +795,26 @@ export class TesseractDashboard {
       canvas.width = width;
       canvas.height = height;
     });
+
+    // Estado de la Variedad Topológica (Torus, Honeycomb, Bounded)
+    window.currentTopologyMode = 'torus';
+    window.changeTopology = function(mode) {
+      window.currentTopologyMode = mode;
+      const banner = document.getElementById('healed-banner');
+      if (banner) {
+        banner.textContent = mode === 'torus' 
+          ? '🍩 VARIEDAD 4-TORO (T⁴) ACTIVA: Geodésicas periódicas sin efecto de borde'
+          : mode === 'honeycomb'
+          ? '🐝 PANAL TESERÁCTICO {4,3,3,4} ACTIVO: Embaldosado Z⁴ para Monorrepos'
+          : '📦 HIPERCUBO PLANO [0,1]⁴ ACTIVO';
+        banner.style.opacity = '1';
+        banner.style.transform = 'translateX(-50%) translateY(0)';
+        setTimeout(() => {
+          banner.style.opacity = '0';
+          banner.style.transform = 'translateX(-50%) translateY(-180%)';
+        }, 2800);
+      }
+    };
 
     // 16 Vértices del Teseracto
     const hyperVertices = [];

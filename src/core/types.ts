@@ -53,6 +53,8 @@ export interface HyperVertex {
   inDegree?: number;               // Grado de entrada en el grafo dirigido
   outDegree?: number;              // Grado de salida en el grafo dirigido
   lastModified: number;            // Marca de tiempo de última modificación
+  latticeVector?: LatticeVector;   // Coordenada Z^4 en el panal {4,3,3,4}
+  windingVector?: WindingVector;   // Número de vueltas homológico en T^4
 }
 
 /** Arista que conecta dos vértices a través de una relación topológica */
@@ -239,6 +241,8 @@ export interface AuditReport {
   fracturesByType: Record<FractureType, number>;
   fractures: TopologicalFracture[];
   status: 'PERFECT_SYMMETRY' | 'MINOR_FRACTURES' | 'CRITICAL_SHEAR';
+  architecturalLoops?: ArchitecturalLoop[];
+  topologyMode?: TopologyMode;
 }
 
 /** Resultado de una prueba de autocuración transaccional en memoria RAM */
@@ -270,4 +274,31 @@ export interface AutoHealResult {
   trial: HealTrialResult;
   committedToDisk: boolean;
   message: string;
+}
+
+/** Modo topológico de la variedad hiperdimensional */
+export type TopologyMode = 'bounded' | 'torus' | 'honeycomb';
+
+/** Coordenada de celda en el Panal Teseráctico {4,3,3,4} (espacio Z^4) */
+export type LatticeVector = [number, number, number, number];
+
+/** Vector de vueltas homológico en el 4-Toro (pi_1(T^4) ~= Z^4) */
+export type WindingVector = [number, number, number, number];
+
+/** Faceta cúbica 3D compartida entre dos teseractos adyacentes en el panal {4,3,3,4} */
+export interface FacetManifold {
+  facetId: string;
+  packageA: string;
+  packageB: string;
+  axis: Axis4D;
+  boundaryCoordinate: number;
+  sharedSymbols: string[];
+}
+
+/** Ciclo arquitectónico clasificado en el 4-Toro */
+export interface ArchitecturalLoop {
+  cycle: string[];
+  windingVector: WindingVector;
+  classification: 'CONTRACTIBLE_BUG' | 'VALID_ARCHITECTURAL_LOOP';
+  description?: string;
 }

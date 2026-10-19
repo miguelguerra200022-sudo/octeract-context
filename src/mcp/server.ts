@@ -18,6 +18,7 @@ import { eventBus } from '../core/events.ts';
 import { SarifExporter } from '../core/sarif.ts';
 import { ASTSkeletonizer } from '../core/skeleton.ts';
 import { DifferentialShearAnalyzer } from '../core/diff.ts';
+import { TesseracticHoneycomb } from '../core/honeycomb.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -728,6 +729,20 @@ export class MCPServer {
           },
         },
       },
+      {
+        name: 'tesseract_honeycomb_facets',
+        description:
+          'Inspecciona las facetas cúbicas 3D compartidas entre paquetes de un monorrepo en el Panal Teseráctico {4,3,3,4}. Permite auditar contratos de API inter-paquetes y dependencias cruzadas.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            packageName: {
+              type: 'string',
+              description: 'Filtrar por nombre de paquete específico (opcional)',
+            },
+          },
+        },
+      },
     ];
   }
 
@@ -1147,6 +1162,33 @@ export class MCPServer {
 
       case 'tesseract_hyper_stats': {
         return this.space.getHyperStats();
+      }
+
+      case 'tesseract_honeycomb_facets': {
+        const honeycomb = new TesseracticHoneycomb();
+        if (TesseracticHoneycomb.isMonorepo(this.rootDir)) {
+          const packagesDir = path.join(this.rootDir, 'packages');
+          if (fs.existsSync(packagesDir)) {
+            const pkgs = fs.readdirSync(packagesDir);
+            for (const p of pkgs) {
+              const pDir = path.join(packagesDir, p);
+              if (fs.statSync(pDir).isDirectory()) {
+                honeycomb.registerPackage(`packages/${p}`, pDir);
+              }
+            }
+          }
+        }
+        const facets = honeycomb.findSharedFacets();
+        const filtered = args.packageName
+          ? facets.filter(
+              (f) => f.packageA.includes(args.packageName) || f.packageB.includes(args.packageName)
+            )
+          : facets;
+        return {
+          totalFacets: filtered.length,
+          facets: filtered,
+          summary: `Panal {4,3,3,4}: ${filtered.length} faceta(s) cúbica(s) compartida(s) identificadas.`,
+        };
       }
 
       default:

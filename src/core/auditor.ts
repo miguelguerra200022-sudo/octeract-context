@@ -11,12 +11,53 @@ import {
   type TopologicalFracture,
   type AuditReport,
   type FractureType,
+  type WindingVector,
+  type ArchitecturalLoop,
 } from './types.ts';
 import { HypercubeSpace } from './hypercube.ts';
 import { TesseractShieldSecurity } from './security.ts';
 
 export class TopologicalAuditor {
   private targetCache = new Map<string, HyperVertex | null>();
+
+  /**
+   * Alias de conveniencia para auditar un espacio hiperdimensional
+   */
+  public auditSpace(space: HypercubeSpace, rootDir?: string): AuditReport {
+    return this.audit(space, rootDir);
+  }
+
+  /**
+   * Calcula el vector de vueltas homológico W en pi_1(T^4) ~= Z^4 para un ciclo cerrado
+   */
+  public static computeWindingVector(cycle: string[], space: HypercubeSpace): WindingVector {
+    const winding: WindingVector = [0, 0, 0, 0];
+    if (cycle.length < 2) return winding;
+
+    const vertices = space.getVertices();
+    const idMap = new Map<string, HyperVertex>();
+    for (const v of vertices) {
+      idMap.set(v.id.replace(/\\/g, '/'), v);
+    }
+
+    for (let i = 0; i < cycle.length - 1; i++) {
+      const fromId = cycle[i].replace(/\\/g, '/');
+      const toId = cycle[i + 1].replace(/\\/g, '/');
+      const vFrom = idMap.get(fromId);
+      const vTo = idMap.get(toId);
+
+      if (vFrom && vTo) {
+        for (let dim = 0; dim < 4; dim++) {
+          const delta = vTo.coordinate[dim] - vFrom.coordinate[dim];
+          const shortest = space.geodesicDelta(vFrom.coordinate[dim], vTo.coordinate[dim]);
+          const stepWinding = Math.round(delta - shortest);
+          winding[dim] += stepWinding;
+        }
+      }
+    }
+
+    return winding;
+  }
 
   /**
    * Ejecuta la auditoría estática completa del hipercubo
@@ -47,13 +88,15 @@ export class TopologicalAuditor {
       TRUNCATED_FILE: 0,
     };
 
+    const architecturalLoops: ArchitecturalLoop[] = [];
+
     // 1. Detección de Imports Rotos y Desajuste de Contratos
     for (const v of vertices) {
       this.auditVertexContracts(v, idMap, fractures, rootDir);
     }
 
-    // 2. Detección de Ciclos Topológicos (A -> B -> A o A -> B -> C -> A)
-    this.detectCircularDependencies(vertices, idMap, fractures);
+    // 2. Detección de Ciclos Topológicos y Clasificación Homológica en T^4
+    this.detectCircularDependencies(vertices, idMap, fractures, space, architecturalLoops);
 
     // 3. Detección de Ganglios Aislados / Código Muerto
     this.detectOrphanNodes(vertices, fractures);
@@ -116,6 +159,8 @@ export class TopologicalAuditor {
       fracturesByType,
       fractures,
       status,
+      architecturalLoops,
+      topologyMode: space.getTopologyMode(),
     };
   }
 
@@ -345,7 +390,9 @@ export class TopologicalAuditor {
   private detectCircularDependencies(
     vertices: HyperVertex[],
     idMap: Map<string, HyperVertex>,
-    fractures: TopologicalFracture[]
+    fractures: TopologicalFracture[],
+    space?: HypercubeSpace,
+    architecturalLoops?: ArchitecturalLoop[]
   ): void {
     const visited = new Set<string>();
     const recStack = new Set<string>();
@@ -375,18 +422,36 @@ export class TopologicalAuditor {
               const cycleKey = [...cycle].sort().join('->');
               if (!detectedCycles.has(cycleKey)) {
                 detectedCycles.add(cycleKey);
-                fractures.push({
-                  id: `fracture-cycle-${cycle[0]}-${cycle[1]}`,
-                  type: 'CIRCULAR_DEPENDENCY',
-                  severity: 'HIGH',
-                  source: cycle[0],
-                  target: cycle[1],
-                  cyclePath: cycle,
-                  description: `Dependencia circular tóxica detectada: ${cycle.join(' ➔ ')}. Provoca 'undefined is not a function' y bloqueos en bundler.`,
-                  rippleImpact: cycle.length,
-                  affectedDependents: cycle,
-                  healingStrategy: `Extraer tipos o interfaces comunes a un archivo compartido en la celda 'Types' para desacoplar el ciclo.`,
-                });
+
+                // Clasificación homológica en el 4-Toro (pi_1(T^4) ~= Z^4)
+                const winding = space ? TopologicalAuditor.computeWindingVector(cycle, space) : [0, 0, 0, 0];
+                const isContractible = winding.every((w) => w === 0);
+
+                if (isContractible) {
+                  // Ciclo tóxico local (contráctil, no cruza la variedad toroidal)
+                  fractures.push({
+                    id: `fracture-cycle-${cycle[0]}-${cycle[1]}`,
+                    type: 'CIRCULAR_DEPENDENCY',
+                    severity: 'HIGH',
+                    source: cycle[0],
+                    target: cycle[1],
+                    cyclePath: cycle,
+                    description: `Dependencia circular tóxica detectada (Ciclo plano contráctil W=[${winding.join(',')}]): ${cycle.join(' ➔ ')}. Provoca 'undefined is not a function' y bloqueos en bundler.`,
+                    rippleImpact: cycle.length,
+                    affectedDependents: cycle,
+                    healingStrategy: `Extraer tipos o interfaces comunes a un archivo compartido en la celda 'Types' para desacoplar el ciclo.`,
+                  });
+                } else {
+                  // Bucle arquitectónico global no contráctil válido
+                  if (architecturalLoops) {
+                    architecturalLoops.push({
+                      cycle,
+                      windingVector: winding,
+                      classification: 'VALID_ARCHITECTURAL_LOOP',
+                      description: `Bucle arquitectónico global no contráctil en T^4 con vector de vueltas W=[${winding.join(',')}]. Flujo intencional de eventos o estado.`,
+                    });
+                  }
+                }
               }
             }
           }

@@ -6,6 +6,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { HypercubeSpace } from './hypercube.ts';
+import { type TesseracticHoneycomb } from './honeycomb.ts';
 import {
   CubicCell,
   type BlastRadiusResult,
@@ -25,7 +26,8 @@ export class BlastRadiusCalculator {
     targetFile: string,
     targetSymbol?: string,
     maxHops: number = 30,
-    rootDir?: string
+    rootDir?: string,
+    honeycomb?: TesseracticHoneycomb
   ): BlastRadiusResult {
     const vertices = space.getVertices();
     const idMap = new Map<string, HyperVertex>();
@@ -284,6 +286,42 @@ export class BlastRadiusCalculator {
       }
 
       currentQueue = nextQueue;
+    }
+
+    // Propagación inter-teseráctica en el Panal {4,3,3,4}
+    if (honeycomb && rootVertex) {
+      const facets = honeycomb.findSharedFacets();
+      for (const facet of facets) {
+        const matchesTarget = rootVertex.id.includes(facet.packageA) || rootVertex.id.includes(facet.packageB);
+        if (matchesTarget) {
+          const isSymbolShared = !targetSymbol || facet.sharedSymbols.includes(targetSymbol);
+          if (isSymbolShared) {
+            const targetPkgName = rootVertex.id.includes(facet.packageA) ? facet.packageB : facet.packageA;
+            const targetPkg = honeycomb.getPackage(targetPkgName);
+            if (targetPkg) {
+              for (const v of targetPkg.space.getVertices()) {
+                const usesShared = v.dependencies.some(
+                  (d) => d.includes(facet.packageA) || d.includes(facet.packageB) || d.includes(rootVertex!.id)
+                );
+                if (usesShared) {
+                  totalStructuralDependents++;
+                  taintWaveTree.push({
+                    file: v.id,
+                    taintedSymbol: targetSymbol || 'facet_contract',
+                    hop: 1,
+                    cell: v.cell,
+                    causalParentFile: rootVertex.id,
+                    causalParentSymbol: targetSymbol,
+                    importerLineNumber: 1,
+                    importerLineSnippet: `Faceta ${facet.facetId} compartida en eje ${facet.axis}`,
+                    isTerminalSink: v.dependents.length === 0,
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
     }
 
     const uniqueAffectedFiles = new Set(taintWaveTree.map((n) => n.file));

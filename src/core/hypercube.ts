@@ -3,15 +3,72 @@
  * Rotaciones ortogonales en 6 planos, proyección de sombras y cortes dimensionales (Slices)
  */
 
-import { CubicCell, type Point4D, type RotationPlane, type HyperVertex, type HyperStats, type SliceRequest, type SliceResult } from './types.ts';
+import { CubicCell, type Point4D, type RotationPlane, type HyperVertex, type HyperStats, type SliceRequest, type SliceResult, type TopologyMode } from './types.ts';
 import { HexadecTree } from './hexadectree.ts';
 
 export class HypercubeSpace {
   public tree: HexadecTree;
   private vertices: Map<string, HyperVertex> = new Map();
+  private topologyMode: TopologyMode = 'torus';
 
   constructor(tree?: HexadecTree) {
     this.tree = tree || new HexadecTree();
+  }
+
+  /**
+   * Configura el modo topológico (torus, bounded, honeycomb)
+   */
+  public setTopologyMode(mode: TopologyMode): void {
+    this.topologyMode = mode;
+  }
+
+  /**
+   * Obtiene el modo topológico activo
+   */
+  public getTopologyMode(): TopologyMode {
+    return this.topologyMode;
+  }
+
+  /**
+   * Distancia euclidiana plana en espacio acotado [0, 1]^4
+   */
+  public euclideanDistance(p1: Point4D, p2: Point4D): number {
+    return HexadecTree.distance4D(p1, p2);
+  }
+
+  /**
+   * Distancia geodésica periódica en la variedad 4-Toro (T^4 = R^4 / Z^4)
+   * Elimina el efecto de borde y reduce el diámetro a la mitad
+   */
+  public toroidalDistance(p1: Point4D, p2: Point4D): number {
+    let sum = 0;
+    for (let i = 0; i < 4; i++) {
+      const delta = Math.abs(p1[i] - p2[i]);
+      const toroidalDelta = Math.min(delta, 1 - delta);
+      sum += toroidalDelta * toroidalDelta;
+    }
+    return Math.sqrt(sum);
+  }
+
+  /**
+   * Desplazamiento geodésico con signo más corto en S^1 ([-0.5, 0.5])
+   */
+  public geodesicDelta(a: number, b: number): number {
+    const direct = b - a;
+    if (direct > 0.5) return direct - 1.0;
+    if (direct < -0.5) return direct + 1.0;
+    return direct;
+  }
+
+  /**
+   * Distancia general según el modo topológico activo
+   */
+  public distance(p1: Point4D, p2: Point4D, mode?: TopologyMode): number {
+    const activeMode = mode || this.topologyMode;
+    if (activeMode === 'bounded') {
+      return this.euclideanDistance(p1, p2);
+    }
+    return this.toroidalDistance(p1, p2);
   }
 
   /**
