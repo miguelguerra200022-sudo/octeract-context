@@ -1578,6 +1578,40 @@ export class TesseractDashboard {
         if (rip.alpha <= 0) touchRipples.splice(i, 1);
       }
 
+      // 11. Ondas de Choque Taint Wave (Live Blast Radius Pulse Animation)
+      for (let i = taintPulses.length - 1; i >= 0; i--) {
+        const pulse = taintPulses[i];
+        pulse.progress += 0.04;
+        if (pulse.progress >= 1.0) {
+          taintPulses.splice(i, 1);
+          continue;
+        }
+
+        const p1 = pulse.fromNode._screen;
+        const p2 = pulse.toNode._screen;
+        if (!p1 || !p2) continue;
+
+        const curX = p1.x + (p2.x - p1.x) * pulse.progress;
+        const curY = p1.y + (p2.y - p1.y) * pulse.progress;
+
+        ctx.save();
+        ctx.fillStyle = pulse.color;
+        ctx.shadowColor = pulse.color;
+        ctx.shadowBlur = 14;
+        ctx.beginPath();
+        ctx.arc(curX, curY, 6 * (1 - pulse.progress * 0.4), 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = pulse.color;
+        ctx.lineWidth = 2.5;
+        ctx.globalAlpha = 0.8 * (1 - pulse.progress);
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(curX, curY);
+        ctx.stroke();
+        ctx.restore();
+      }
+
       requestAnimationFrame(render);
     }
     render();
@@ -1849,8 +1883,27 @@ export class TesseractDashboard {
       targetZoom = Math.max(zoom, Math.min(width, height) * 0.55);
     };
 
+    const taintPulses = [];
+    function triggerTaintWave(sourceNode) {
+      if (!sourceNode || !sourceNode._screen) return;
+      createTouchRipple(sourceNode._screen.x, sourceNode._screen.y, '#ff9100');
+      const connSet = new Set([...(sourceNode.dependents || []), ...(sourceNode.dependencies || [])]);
+      for (const fi of files) {
+        if (fi === sourceNode) continue;
+        if (connSet.has(fi.id) || connSet.has(fi.name) || connSet.has(fi.path)) {
+          taintPulses.push({
+            fromNode: sourceNode,
+            toNode: fi,
+            progress: 0,
+            color: sourceNode.dependents?.includes(fi.id) ? '#ff5252' : '#00e5ff',
+          });
+        }
+      }
+    }
+
     function openInspector(node) {
       selectedNode = node;
+      triggerTaintWave(node);
       document.getElementById('insp-name').textContent = node.name;
       document.getElementById('insp-hex').textContent = (node.hexCode || '0x0000') + ' • Celda: ' + node.cell;
       document.getElementById('insp-pills').innerHTML = 

@@ -275,7 +275,10 @@ Tesseract includes a standalone CLI suite for developers, CI/CD pipelines, and t
 | CLI Command | Usage Syntax | Core Capability | Token Cost |
 | :--- | :--- | :--- | :--- |
 | **`init`** | `tesseract init [dir]` | Autonomous zero-touch setup. Configures IDE rules, builds 4D map, and outputs health report. | **0 tokens** |
-| **`audit`** | `tesseract audit [dir]` | Deterministic static audit of broken imports, signature mismatches, cycles, and orphan sinks. | **0 tokens** |
+| **`audit`** | `tesseract audit [dir] [--sarif file]` | Deterministic static audit. Optionally exports OASIS SARIF 2.1.0 for GitHub Code Scanning. | **0 tokens** |
+| **`sarif`** | `tesseract sarif [dir] [output]` | Generates official OASIS SARIF 2.1.0 log for native GitHub Security tab and PR annotations. | **0 tokens** |
+| **`diff`** | `tesseract diff [dir] [baseBranch]` | **Differential 4D Shear Analysis:** Audits only git-modified files and downstream blast radius. | **0 tokens** |
+| **`hook`** | `tesseract hook install [dir]` | Installs autonomous Git pre-commit shield hook that blocks broken commits at 0 tokens. | **0 tokens** |
 | **`trial`** | `tesseract trial <dir> <file> "<code>"` | **Counterfactual in-RAM trial:** Tests proposed code in RAM, maps delta fractures, and triggers auto-rollback if regressions appear. | **0 tokens** |
 | **`autoheal`** | `tesseract autoheal <dir> <id> [--commit]` | **Autonomous Mini-Subagent:** Synthesizes backward-compatible patches, tests them in RAM, and commits only if safe. | **0 tokens** |
 | **`blast`** | `tesseract blast <dir> <file> [sym] [hops]` | Computes Infinite Taint Wave and blast radius with physical disk verification and terminal sinks. | **< 300 tokens** |
@@ -283,9 +286,9 @@ Tesseract includes a standalone CLI suite for developers, CI/CD pipelines, and t
 | **`flow`** | `tesseract flow <dir> "<query>"` | Geodesic architecture tracing in $\mathbb{R}^4$ from natural language to exact line numbers. | **< 500 tokens** |
 | **`hybrid-audit`** | `tesseract hybrid-audit [dir]` | Collaborative triage: pre-filters 99.9% of files in $\mathbb{R}^4$ and outputs critical semantic triage items for AI review. | **< 750 tokens** |
 | **`safe-write`** | `tesseract safe-write <dir> <file> "<code>"` | Modifies file on disk **only** if it passes the 5-layer 4D shield. | **0 tokens** |
-| **`slice`** | `tesseract slice [dir] [cell]` | Extracts surgical hyperdimensional slices bounded by strict token budgets. | **Budget-bounded** |
+| **`slice`** | `tesseract slice [dir] [cell] [sym] [budget] [mode]` | Extracts hyperdimensional slices. **Mode skeleton cuts 85% of tokens (SWE-bench style)**. | **Budget-bounded** |
 | **`mcp`** | `tesseract mcp [dir]` | Starts the standard JSON-RPC 2.0 Model Context Protocol server over stdio. | **N/A** |
-| **`ui`** | `tesseract ui [dir] [port]` | Launches the interactive touch 4D visual dashboard on `localhost:4444`. | **N/A** |
+| **`ui`** | `tesseract ui [dir] [port]` | Launches the interactive touch 4D visual dashboard with live Taint Wave animations on `localhost:4444`. | **N/A** |
 
 ---
 
@@ -298,12 +301,58 @@ When connected to Cursor, Claude Code, Windsurf, or VS Code, Tesseract equips ag
 | **`tesseract_trial_heal`** | `targetPath`, `proposedContent` | **Counterfactual RAM Sandbox:** Injects code into ephemeral RAM clone, evaluates delta health score, and guarantees auto-rollback if regressions $> 0$. |
 | **`tesseract_auto_heal`** | `fractureId`, `autoCommit` | **Autonomous Patch Synthesis:** Synthesizes adapter code, validates in RAM, and optionally commits to disk if verified regression-free. |
 | **`tesseract_blast_radius`**| `targetFile`, `targetSymbol`, `maxHops` | **Shockwave Analysis:** Traces Infinite Taint Wave with disk verification and terminal sinks before modifying code. |
+| **`tesseract_diff_shear`**  | `baseRef` | **Differential Git Shear:** Evaluates differential 4D shear and blast radius on git-modified files before commit. |
 | **`tesseract_safe_write`** | `targetPath`, `proposedContent` | **Active Physical Write Shield:** Enforces topological shear limit ($D_{\text{shear}} \le 0.10$), entropy checks, and contract consistency. Blocks unsafe writes. |
-| **`tesseract_slice`** | `cell`, `focusSymbol`, `tokenBudget` | **Surgical Retrieval:** Returns focused symbol slices across 8 orthogonal cells (`CoreLogic`, `Storage`, `UI`, `Security`, etc.) strictly within token budgets. |
+| **`tesseract_slice`** | `cell`, `focusSymbol`, `tokenBudget`, `mode` | **Surgical Retrieval:** Returns symbol slices. When `mode: "skeleton"`, strips inner bodies for **85% SWE-bench token savings**. |
 | **`tesseract_audit_health`** | `detail` | **Instant Health Audit:** Returns repository health score (0–100%), list of critical fractures, broken imports, and orphan islands at 0 tokens. |
 | **`tesseract_diagnose_fracture`** | `fractureId`, `targetPath` | **Universal 4-Pillar Diagnostic:** Returns Problem X-Ray, Hidden Domino Effect, Code Evidence (line + snippet), and Surgical Fix Proposal. |
 | **`tesseract_trace_flow`** | `query` | **Architectural Flow Tracing:** Resolves high-level architectural questions directly into precise file paths and line numbers. |
 | **`tesseract_hybrid_audit`**| `detail` | **Collaborative Triage:** Combines deterministic $\mathbb{R}^4$ filtering with semantic triage, identifying critical points needing AI decision-making. |
+
+---
+
+### 📦 Official MCP Resources & Guided Prompts
+
+Tesseract-Context fully implements the official Model Context Protocol (MCP) specification for **Resources** and **Prompts**:
+
+#### Live Virtual Resources (`resources/read`)
+- `tesseract://health`: Real-time JSON health score (0–100) and fracture inventory.
+- `tesseract://sarif`: Official OASIS SARIF 2.1.0 output for GitHub Security tab.
+- `tesseract://topology`: Summary of 4D hypercube coordinates, depth, and vertices.
+- `tesseract://cells`: Architectural distribution across all 8 cubic cells.
+- `tesseract://cell/{cellName}`: Filtered inventory of files and symbols in a specific cubic cell.
+
+#### Agent Prompts & Workflows (`prompts/get`)
+- **`tesseract-safe-refactor`**: Guided agent workflow instructing LLMs to trace blast radius, test counterfactual code in RAM with `trial`, and only commit via `safe-write`.
+- **`tesseract-audit-diagnostic`**: Formats the universal 4-pillar architectural diagnostic directly into user chat.
+
+---
+
+### 🛡️ GitHub Actions & Zero-Token CI/CD Code Scanning
+
+Add Tesseract-Context directly to your GitHub repository in `.github/workflows/tesseract-shield.yml` to get native pull request annotations and security alerts at **0 LLM tokens**:
+
+```yaml
+name: "Tesseract 4D Autonomous Shield & Code Scanning"
+on: [push, pull_request]
+
+jobs:
+  tesseract-shield:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '>=20'
+      - run: npx -y tesseract-context audit . --sarif tesseract-results.sarif
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: tesseract-results.sarif
+          category: tesseract-4d-hypercube
+```
 
 ---
 

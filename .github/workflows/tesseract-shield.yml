@@ -1,0 +1,38 @@
+name: "Tesseract 4D Autonomous Shield & Code Scanning"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 0 * * 1' # Auditoría semanal automatizada en R^4
+
+jobs:
+  tesseract-shield:
+    name: "Tesseract 4D Zero-Token Audit"
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '>=20'
+
+      - name: Run Tesseract Deterministic Audit & Export SARIF (0 Tokens)
+        run: |
+          npx -y tesseract-context audit . --sarif tesseract-results.sarif
+
+      - name: Upload SARIF to GitHub Code Scanning Alerts
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: tesseract-results.sarif
+          category: tesseract-4d-hypercube

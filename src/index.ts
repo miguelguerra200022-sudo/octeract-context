@@ -2,7 +2,7 @@
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
 
-import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal } from './cli/commands.ts';
+import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook } from './cli/commands.ts';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -55,8 +55,35 @@ async function main() {
       break;
     }
     case 'audit': {
-      const targetDir = args[1] || '.';
-      await runAudit(targetDir);
+      let targetDir = '.';
+      let sarifFile: string | undefined;
+      for (let i = 1; i < args.length; i++) {
+        if (args[i] === '--sarif') {
+          sarifFile = args[i + 1] && !args[i + 1].startsWith('-') ? args[i + 1] : 'tesseract-results.sarif';
+          i++;
+        } else if (!targetDir || targetDir === '.') {
+          targetDir = args[i];
+        }
+      }
+      await runAudit(targetDir, sarifFile);
+      break;
+    }
+    case 'sarif': {
+      const targetDir = args[1] && !args[1].startsWith('-') ? args[1] : '.';
+      const outputFile = args[2] || 'tesseract-results.sarif';
+      await runSarif(targetDir, outputFile);
+      break;
+    }
+    case 'diff': {
+      const targetDir = args[1] && !args[1].startsWith('-') ? args[1] : '.';
+      const baseRef = args[2] || 'HEAD';
+      await runDiff(targetDir, baseRef);
+      break;
+    }
+    case 'hook': {
+      const action = args[1] || 'install';
+      const targetDir = args[2] || '.';
+      await runHook(action, targetDir);
       break;
     }
     case 'flow': {
@@ -182,4 +209,8 @@ export { MCPServer } from './mcp/server.ts';
 export { FlowTracer } from './core/flow.ts';
 export { eventBus } from './core/events.ts';
 export { ProjectIndexer } from './core/indexer.ts';
+export { SarifExporter } from './core/sarif.ts';
+export { DifferentialShearAnalyzer } from './core/diff.ts';
+export { ASTSkeletonizer } from './core/skeleton.ts';
+
 

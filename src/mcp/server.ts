@@ -15,6 +15,9 @@ import { BlastRadiusCalculator } from '../core/blast.ts';
 import { TransactionalHealer } from '../core/healing.ts';
 import { CubicCell, type Axis4D, type RotationPlane } from '../core/types.ts';
 import { eventBus } from '../core/events.ts';
+import { SarifExporter } from '../core/sarif.ts';
+import { ASTSkeletonizer } from '../core/skeleton.ts';
+import { DifferentialShearAnalyzer } from '../core/diff.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -116,10 +119,11 @@ export class MCPServer {
             capabilities: {
               tools: {},
               resources: {},
+              prompts: {},
             },
             serverInfo: {
               name: 'tesseract-context',
-              version: '1.0.0',
+              version: '1.1.0',
             },
           },
         };
@@ -172,13 +176,23 @@ export class MCPServer {
           result: {
             resources: [
               {
+                uri: 'tesseract://health',
+                name: 'Informe de Salud Topológica y Fracturas 4D',
+                mimeType: 'application/json',
+              },
+              {
                 uri: 'tesseract://topology',
                 name: 'Resumen Topológico 4D',
                 mimeType: 'application/json',
               },
               {
                 uri: 'tesseract://cells',
-                name: 'Distribución de Celdas Cúbicas',
+                name: 'Distribución de Celdas Cúbicas 3D',
+                mimeType: 'application/json',
+              },
+              {
+                uri: 'tesseract://sarif',
+                name: 'Registro OASIS SARIF 2.1.0 para GitHub Code Scanning',
                 mimeType: 'application/json',
               },
               {
@@ -192,6 +206,29 @@ export class MCPServer {
 
       case 'resources/read': {
         const uri = params?.uri;
+        if (uri === 'tesseract://health') {
+          const auditor = new TopologicalAuditor();
+          const report = auditor.audit(this.space);
+          return {
+            jsonrpc: '2.0',
+            id,
+            result: {
+              contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(report, null, 2) }],
+            },
+          };
+        }
+        if (uri === 'tesseract://sarif') {
+          const auditor = new TopologicalAuditor();
+          const report = auditor.audit(this.space);
+          const sarif = SarifExporter.generateSarif(report, this.rootDir);
+          return {
+            jsonrpc: '2.0',
+            id,
+            result: {
+              contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(sarif, null, 2) }],
+            },
+          };
+        }
         if (uri === 'tesseract://topology') {
           const stats = this.space.getHyperStats();
           return {
@@ -199,6 +236,41 @@ export class MCPServer {
             id,
             result: {
               contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(stats, null, 2) }],
+            },
+          };
+        }
+        if (uri === 'tesseract://cells') {
+          const vertices = this.space.getVertices();
+          const distribution: Record<string, number> = {};
+          for (const v of vertices) {
+            distribution[v.cell] = (distribution[v.cell] || 0) + 1;
+          }
+          return {
+            jsonrpc: '2.0',
+            id,
+            result: {
+              contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(distribution, null, 2) }],
+            },
+          };
+        }
+        if (uri?.startsWith('tesseract://cell/')) {
+          const cellName = uri.replace('tesseract://cell/', '');
+          const vertices = this.space.getVertices().filter((v) => v.cell.toLowerCase() === cellName.toLowerCase());
+          return {
+            jsonrpc: '2.0',
+            id,
+            result: {
+              contents: [
+                {
+                  uri,
+                  mimeType: 'application/json',
+                  text: JSON.stringify(
+                    vertices.map((v) => ({ id: v.id, lines: v.lines, symbols: v.symbols.map((s) => s.name) })),
+                    null,
+                    2
+                  ),
+                },
+              ],
             },
           };
         }
@@ -217,6 +289,90 @@ export class MCPServer {
           jsonrpc: '2.0',
           id,
           error: { code: -32602, message: `Recurso no encontrado: ${uri}` },
+        };
+      }
+
+      case 'prompts/list':
+        return {
+          jsonrpc: '2.0',
+          id,
+          result: {
+            prompts: [
+              {
+                name: 'tesseract-safe-refactor',
+                description: 'Flujo guiado de refactorización segura con radio de explosión, ensayo en RAM y escritura bajo el escudo 4D.',
+                arguments: [
+                  {
+                    name: 'targetPath',
+                    description: 'Ruta relativa del archivo a refactorizar',
+                    required: true,
+                  },
+                  {
+                    name: 'goal',
+                    description: 'Objetivo de la refactorización',
+                    required: false,
+                  },
+                ],
+              },
+              {
+                name: 'tesseract-audit-diagnostic',
+                description: 'Diagnóstico integral de salud arquitectónica 4D para presentar al usuario con evidencia quirúrgica y plan de curación.',
+                arguments: [],
+              },
+            ],
+          },
+        };
+
+      case 'prompts/get': {
+        const promptName = params?.name;
+        const promptArgs = params?.arguments || {};
+
+        if (promptName === 'tesseract-safe-refactor') {
+          const target = promptArgs.targetPath || 'archivo_objetivo.ts';
+          const goal = promptArgs.goal || 'Optimizar y refactorizar';
+          return {
+            jsonrpc: '2.0',
+            id,
+            result: {
+              description: 'Flujo guiado de refactorización segura bajo el escudo 4D de Tesseract',
+              messages: [
+                {
+                  role: 'user',
+                  content: {
+                    type: 'text',
+                    text: `Por favor, ejecuta la siguiente refactorización de forma segura:\nObjetivo: ${goal}\nArchivo objetivo: ${target}\n\nREGLAS DE PROTECCIÓN OBLIGATORIAS:\n1. Invoca primero 'tesseract_blast_radius' para verificar qué módulos sufrirán el efecto dominó.\n2. Diseña el código y pruébalo en RAM con 'tesseract_trial_heal' verificando que la distancia de cizallamiento sea <= 0.10 y 0 regresiones.\n3. Aplica los cambios usando 'tesseract_safe_write'.`,
+                  },
+                },
+              ],
+            },
+          };
+        }
+
+        if (promptName === 'tesseract-audit-diagnostic') {
+          const auditor = new TopologicalAuditor();
+          const report = auditor.audit(this.space);
+          return {
+            jsonrpc: '2.0',
+            id,
+            result: {
+              description: 'Diagnóstico 4D de salud arquitectónica del repositorio',
+              messages: [
+                {
+                  role: 'user',
+                  content: {
+                    type: 'text',
+                    text: `Genera un informe de salud para el usuario con base en el estado del hipercubo:\nSalud actual: ${report.healthScore}/100 (${report.status})\nTotal de fracturas: ${report.totalFractures}\nArchivos auditados: ${report.totalFilesAudited}\nSigue los 4 pilares: Radiografía, Peligro Oculto, Evidencia en Código y Solución Quirúrgica.`,
+                  },
+                },
+              ],
+            },
+          };
+        }
+
+        return {
+          jsonrpc: '2.0',
+          id,
+          error: { code: -32602, message: `Prompt no encontrado: ${promptName}` },
         };
       }
 
@@ -260,6 +416,25 @@ export class MCPServer {
             tokenBudget: {
               type: 'number',
               description: 'Límite máximo estricto de tokens (por defecto 2500)',
+            },
+            mode: {
+              type: 'string',
+              enum: ['skeleton', 'full'],
+              description: 'Modo de corte: "skeleton" (por defecto, SWE-bench style: 85% de compresión omitiendo cuerpos internos) o "full"',
+            },
+          },
+        },
+      },
+      {
+        name: 'tesseract_diff_shear',
+        description:
+          'Calcula el cizallamiento topológico diferencial 4D de los archivos modificados en Git frente a una rama base (HEAD, main) antes de commitear.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            baseRef: {
+              type: 'string',
+              description: 'Referencia base de Git a comparar (por defecto "HEAD")',
             },
           },
         },
@@ -564,20 +739,36 @@ export class MCPServer {
 
     switch (name) {
       case 'tesseract_slice': {
+        const mode = args.mode || 'skeleton';
         const result = this.space.slice({
           cell: args.cell,
           focusSymbol: args.focusSymbol,
           centerHex: args.centerHex,
           tokenBudget: args.tokenBudget || 2500,
+          mode,
         });
 
         eventBus.emitEvent('query', {
           cell: args.cell || 'Global',
           tokenBudget: args.tokenBudget || 2500,
-          deliveredTokens: result.tokens,
+          deliveredTokens: result.totalTokens,
         });
 
+        if (mode === 'skeleton' && args.focusSymbol) {
+          const filePath = path.resolve(this.rootDir, args.focusSymbol);
+          if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+            const raw = fs.readFileSync(filePath, 'utf-8');
+            const skel = ASTSkeletonizer.skeletonize(raw, filePath);
+            return `${result.projectedCode}\n=== CÓDIGO ESQUELETIZADO SWE-BENCH (${skel.reductionPercentage}% AHORRO EN TOKENS) ===\n${skel.skeletonCode}`;
+          }
+        }
+
         return result.projectedCode;
+      }
+
+      case 'tesseract_diff_shear': {
+        const baseRef = args.baseRef || 'HEAD';
+        return DifferentialShearAnalyzer.analyzeDiff(this.rootDir, baseRef);
       }
 
       case 'tesseract_project_shadow': {

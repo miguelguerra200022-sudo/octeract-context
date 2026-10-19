@@ -6,3 +6,4 @@ credenciales/
 .DS_Store
 *.tmp
 tests/temp_*
+*.sarif

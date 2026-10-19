@@ -16,6 +16,8 @@ import { CubicCell } from '../core/types.ts';
 import { runUniversalInit } from './init.ts';
 import { TesseractDashboard } from '../ui/dashboard.ts';
 import { ShieldWatcher } from '../shield/watcher.ts';
+import { SarifExporter } from '../core/sarif.ts';
+import { DifferentialShearAnalyzer } from '../core/diff.ts';
 
 export async function runInit(targetDir: string = '.'): Promise<void> {
   await runUniversalInit(targetDir);
@@ -132,7 +134,7 @@ export async function runSafeWrite(targetDir: string = '.', targetFile: string, 
   console.log(JSON.stringify(res, null, 2));
 }
 
-export async function runAudit(targetDir: string = '.'): Promise<void> {
+export async function runAudit(targetDir: string = '.', sarifOutput?: string): Promise<void> {
   const root = path.resolve(targetDir);
   console.log(`\x1b[36m🔬 Ejecutando Auditoría Topológica Determinista sin IA (0 Tokens) en:\x1b[0m ${root}\n`);
 
@@ -172,6 +174,25 @@ export async function runAudit(targetDir: string = '.'): Promise<void> {
   } else {
     console.log(`\x1b[1;32m✔ Simetría perfecta. Ninguna fractura detectada en el repositorio.\x1b[0m\n`);
   }
+
+  if (sarifOutput) {
+    const sarifPath = path.resolve(root, sarifOutput);
+    SarifExporter.writeSarifToFile(report, sarifPath, root);
+    console.log(`\x1b[1;32m✔ Reporte OASIS SARIF 2.1.0 generado exitosamente en:\x1b[0m ${sarifPath}\n`);
+  }
+}
+
+export async function runSarif(targetDir: string = '.', outputFile: string = 'tesseract-results.sarif'): Promise<void> {
+  const root = path.resolve(targetDir);
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+  const report = indexer.auditRepository(root);
+  const sarifPath = path.resolve(root, outputFile);
+  SarifExporter.writeSarifToFile(report, sarifPath, root);
+  console.log(`\x1b[1;32m✔ Reporte OASIS SARIF 2.1.0 generado exitosamente en:\x1b[0m ${sarifPath}`);
+  console.log(`  Total alertas SARIF indexadas: ${report.fractures.length} (Salud: ${report.healthScore}/100)\n`);
 }
 
 export async function runFlow(targetDir: string = '.', query: string): Promise<void> {
@@ -286,6 +307,59 @@ export async function runAutoHeal(
   console.log(`\x1b[1mEscrito en disco:\x1b[0m ${result.committedToDisk ? 'SÍ' : 'NO (Solo simulación en RAM)'}`);
   console.log(`\n\x1b[36m${result.trial.richDossierForAI}\x1b[0m\n`);
 }
+
+export async function runDiff(targetDir: string = '.', baseRef: string = 'HEAD'): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[35m📐 Analizando Cizallamiento Diferencial 4D frente a '${baseRef}' en:\x1b[0m ${root}\n`);
+  const report = DifferentialShearAnalyzer.analyzeDiff(root, baseRef);
+
+  console.log(`========================================================================`);
+  console.log(`💎 \x1b[1mINFORME DIFERENCIAL DE CIZALLAMIENTO 4D (DELTA SHEAR)\x1b[0m`);
+  console.log(`========================================================================`);
+  console.log(`  ● Veredicto de Seguridad: ${report.isSafe ? '\x1b[1;32mSAFE_TO_COMMIT\x1b[0m' : '\x1b[1;31mBLOCKED_BY_DIFF_SHEAR\x1b[0m'}`);
+  console.log(`  ● Distancia Delta Shear:  \x1b[1m${report.deltaShearDistance}\x1b[0m (Umbral: 0.75)`);
+  console.log(`  ● Archivos Modificados:   \x1b[1m${report.changedFiles.length}\x1b[0m`);
+  console.log(`  ● Módulos Impactados:     \x1b[1m${report.impactedDependents.length}\x1b[0m`);
+  console.log(`  ● Fracturas Introducidas: \x1b[1m${report.introducedFractures.length}\x1b[0m`);
+  console.log(`========================================================================\n`);
+
+  if (report.changedFiles.length > 0) {
+    console.log(`\x1b[33mArchivos alterados en el árbol de trabajo:\x1b[0m`);
+    report.changedFiles.forEach((f) => console.log(`  - ${f}`));
+    console.log('');
+  }
+
+  if (report.introducedFractures.length > 0) {
+    console.log(`\x1b[31mFracturas activas generadas por estos cambios:\x1b[0m`);
+    for (const f of report.introducedFractures) {
+      console.log(`  [${f.type}] ${f.source}: ${f.description}`);
+    }
+    console.log('');
+  }
+
+  console.log(`\x1b[1mRecomendación:\x1b[0m ${report.recommendation}\n`);
+
+  if (!report.isSafe) {
+    process.exit(1);
+  }
+}
+
+export async function runHook(action: string = 'install', targetDir: string = '.'): Promise<void> {
+  const root = path.resolve(targetDir);
+  if (action === 'install') {
+    const res = DifferentialShearAnalyzer.installPreCommitHook(root);
+    if (res.success) {
+      console.log(`\x1b[1;32m✔ ${res.message}\x1b[0m`);
+      console.log(`  Ruta: ${res.hookPath}\n`);
+    } else {
+      console.error(`\x1b[1;31m✖ Error: ${res.message}\x1b[0m\n`);
+      process.exit(1);
+    }
+  } else {
+    console.log('Uso: tesseract hook install [directorio]');
+  }
+}
+
 
 
 

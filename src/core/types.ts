@@ -88,6 +88,7 @@ export interface SliceRequest {
   maxDistance?: number;            // Distancia máxima de vecindad
   axisFocus?: Axis4D;              // Eje prioritario de proyección
   tokenBudget?: number;            // Presupuesto estricto de tokens (default: 2000)
+  mode?: 'full' | 'skeleton';      // Modo de entrega: 'full' o 'skeleton' (SWE-bench 85% de compresión)
 }
 
 /** Resultado de un corte hiperdimensional quirúrgico */

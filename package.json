@@ -1,6 +1,6 @@
 {
   "name": "tesseract-context",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Fractal 4D Hypercube Context Engine and Universal MCP Server for AI Coding Agents",
   "type": "module",
   "main": "dist/index.js",
