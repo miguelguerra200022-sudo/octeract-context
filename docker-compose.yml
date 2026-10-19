@@ -1,0 +1,15 @@
+services:
+  tesseract-context:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tesseract-context
+    restart: unless-stopped
+    stdin_open: true # Requerido para transporte stdio MCP
+    tty: true
+    volumes:
+      # Monta tu código local en /workspace dentro del contenedor
+      - .:/workspace
+    environment:
+      - NODE_ENV=production
+      - TESSERACT_WORKSPACE=/workspace

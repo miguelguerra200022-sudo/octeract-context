@@ -1,0 +1,47 @@
+{
+  "name": "tesseract-context",
+  "version": "1.0.0",
+  "description": "Fractal 4D Hypercube Context Engine and Universal MCP Server for AI Coding Agents",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "tesseract-context": "./bin/tesseract-context.js"
+  },
+  "scripts": {
+    "start": "node --experimental-strip-types src/index.ts",
+    "build": "tsc",
+    "test": "node --experimental-strip-types --test tests/**/*.test.ts",
+    "mcp": "node --experimental-strip-types src/index.ts mcp",
+    "tui": "node --experimental-strip-types src/index.ts tui",
+    "index": "node --experimental-strip-types src/index.ts index"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "tesseract",
+    "hypercube",
+    "hexadec-tree",
+    "4d",
+    "ai-agents",
+    "vibe-coding",
+    "context-engine"
+  ],
+  "author": "Miguel Guerra <miguelguerra200022@gmail.com>",
+  "license": "BSL-1.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miguelguerra200022-sudo/tesseract-context.git"
+  },
+  "bugs": {
+    "url": "https://github.com/miguelguerra200022-sudo/tesseract-context/issues"
+  },
+  "homepage": "https://github.com/miguelguerra200022-sudo/tesseract-context#readme",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.tesseract/
+*.log
+.DS_Store
+*.tmp
+tests/temp_*
