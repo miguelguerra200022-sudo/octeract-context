@@ -162,6 +162,48 @@ export class SarifExporter {
       full: 'Módulo con exceso de ramificaciones que excede el radio de curvatura topológico permitido.',
       level: 'note',
     },
+    BIN_EXEC_FRACTURE: {
+      id: 'TESS-014',
+      name: 'BinExecutionTrap',
+      short: 'Error en ejecutable binario CLI (permisos git, shebang o CRLF)',
+      full: 'El script CLI carece de permisos 100755 en Git, no tiene shebang ejecutable o contiene saltos de línea Windows CRLF.',
+      level: 'error',
+    },
+    PACKAGING_EXPORT_FRACTURE: {
+      id: 'TESS-015',
+      name: 'PackagingExportTrap',
+      short: 'Error de contrato en exportación de paquetes (publint/attw)',
+      full: 'Archivos declarados en main, types o exports no existen, se pierden por gitignore o tienen orden de condiciones incorrecto.',
+      level: 'error',
+    },
+    CI_WORKFLOW_FRACTURE: {
+      id: 'TESS-016',
+      name: 'CIWorkflowTrap',
+      short: 'Dependencia circular o paso huérfano en workflow de CI',
+      full: 'El workflow de CI invoca npx sobre el propio paquete antes de publicarse o tiene pasos huérfanos de artefactos.',
+      level: 'error',
+    },
+    DEPENDENCY_LEAK_FRACTURE: {
+      id: 'TESS-017',
+      name: 'DependencyPartitionLeak',
+      short: 'Fuga de devDependencies a código de producción',
+      full: 'El código de producción importa dependencias que solo están listadas en devDependencies o usan protocolo workspace:* sin resolver.',
+      level: 'error',
+    },
+    CASE_SENSITIVITY_FRACTURE: {
+      id: 'TESS-018',
+      name: 'CaseSensitivityCollision',
+      short: 'Colisión de mayúsculas/minúsculas en sistema de archivos',
+      full: 'El import difiere en mayúsculas/minúsculas del archivo real en disco, lo que causará fallo catastrófico en Linux/Docker.',
+      level: 'error',
+    },
+    RELEASE_SYNC_FRACTURE: {
+      id: 'TESS-019',
+      name: 'ReleaseVersionDesync',
+      short: 'Desincronización de versión entre package.json y código',
+      full: 'La versión semver declarada en package.json no coincide con las versiones estáticas o cadenas de versión en el código.',
+      level: 'warning',
+    },
   };
 
   /**

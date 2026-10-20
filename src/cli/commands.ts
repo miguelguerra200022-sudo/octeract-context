@@ -18,6 +18,7 @@ import { TesseractDashboard } from '../ui/dashboard.ts';
 import { ShieldWatcher } from '../shield/watcher.ts';
 import { SarifExporter } from '../core/sarif.ts';
 import { DifferentialShearAnalyzer } from '../core/diff.ts';
+import { PreflightAuditor } from '../core/preflight.ts';
 import { EnterpriseLicenseManager } from '../enterprise/license.ts';
 import { SWECIEngine } from '../enterprise/swe-ci.ts';
 import { LSCEngine } from '../enterprise/lsc.ts';
@@ -160,6 +161,12 @@ export async function runAudit(targetDir: string = '.', sarifOutput?: string): P
   console.log(`    - Desajuste de Contratos:  \x1b[33m${report.fracturesByType.CONTRACT_MISMATCH || 0}\x1b[0m`);
   console.log(`    - Dependencias Cíclicas:   \x1b[35m${report.fracturesByType.CIRCULAR_DEPENDENCY || 0}\x1b[0m`);
   console.log(`    - Ganglios Aislados/Muertos:\x1b[36m${report.fracturesByType.ORPHAN_NODE || 0}\x1b[0m`);
+  console.log(`    - Fallas Binarios/Permisos:\x1b[31m${report.fracturesByType.BIN_EXEC_FRACTURE || 0}\x1b[0m`);
+  console.log(`    - Trampas de Empaquetado:   \x1b[33m${report.fracturesByType.PACKAGING_EXPORT_FRACTURE || 0}\x1b[0m`);
+  console.log(`    - Errores en CI/Workflows:  \x1b[35m${report.fracturesByType.CI_WORKFLOW_FRACTURE || 0}\x1b[0m`);
+  console.log(`    - Fuga de Dependencias:     \x1b[31m${report.fracturesByType.DEPENDENCY_LEAK_FRACTURE || 0}\x1b[0m`);
+  console.log(`    - Colisiones Mayús/Minús:   \x1b[31m${report.fracturesByType.CASE_SENSITIVITY_FRACTURE || 0}\x1b[0m`);
+  console.log(`    - Desync de Versiones:      \x1b[33m${report.fracturesByType.RELEASE_SYNC_FRACTURE || 0}\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m\n`);
 
   if (report.fractures.length > 0) {
@@ -448,3 +455,30 @@ export async function runMesh(action: string = 'audit'): Promise<void> {
   console.log(`========================================================================`);
   console.log(`Auditando contratos distribuidos entre repositorios independientes...\n`);
 }
+
+export async function runPreflight(targetDir: string = '.'): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\n\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🛡️  \x1b[1mTESSERACT PREFLIGHT & PACKAGING GUARD (EJE P / 5TA DIMENSIÓN)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`Auditando contratos de empaquetado, binarios CLI, permisos Git y CI/CD en:\n  \x1b[36m${root}\x1b[0m\n`);
+
+  const indexer = new ProjectIndexer();
+  indexer.loadIndex(root);
+  const vertices = indexer.getSpace().getVertices();
+
+  const auditor = new PreflightAuditor(root);
+  const fractures = auditor.auditAll(vertices);
+
+  if (fractures.length === 0) {
+    console.log(`\x1b[1;32m✔ PREFLIGHT APROBADO: Cero trampas de empaquetado, binarios con permisos 100755 válidos, workflows de CI desacoplados y dependencias perfectamente particionadas.\x1b[0m\n`);
+  } else {
+    console.log(`\x1b[1;31m✖ SE DETECTARON ${fractures.length} FRACTURAS DE PRE-VUELO CRÍTICAS:\x1b[0m\n`);
+    for (const f of fractures) {
+      console.log(`  [\x1b[1;31m${f.type}\x1b[0m] ${f.source}`);
+      console.log(`    • ${f.description}`);
+      console.log(`    • \x1b[32mSolución:\x1b[0m ${f.healingStrategy}\n`);
+    }
+  }
+}
+

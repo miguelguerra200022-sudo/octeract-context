@@ -204,7 +204,13 @@ export type FractureType =
   | 'BOUNDARY_VIOLATION'
   | 'HALLUCINATED_DEPENDENCY'
   | 'SECRET_LEAK'
-  | 'TRUNCATED_FILE';
+  | 'TRUNCATED_FILE'
+  | 'BIN_EXEC_FRACTURE'
+  | 'PACKAGING_EXPORT_FRACTURE'
+  | 'CI_WORKFLOW_FRACTURE'
+  | 'DEPENDENCY_LEAK_FRACTURE'
+  | 'CASE_SENSITIVITY_FRACTURE'
+  | 'RELEASE_SYNC_FRACTURE';
 
 /** Representación de una fractura topológica en el hipercubo */
 export interface TopologicalFracture {

@@ -4,7 +4,7 @@ import * as path from 'node:path';
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
 
-import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh } from './cli/commands.ts';
+import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight } from './cli/commands.ts';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -181,6 +181,11 @@ async function main() {
     case 'mesh': {
       const action = args[1] || 'audit';
       await runMesh(action);
+      break;
+    }
+    case 'preflight': {
+      const targetDir = args[1] || '.';
+      await runPreflight(targetDir);
       break;
     }
     case '--version':

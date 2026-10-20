@@ -17,6 +17,7 @@ import {
 import { HypercubeSpace } from './hypercube.ts';
 import { TesseractShieldSecurity } from './security.ts';
 import { DeepContractDiagnostic } from './diagnostic.ts';
+import { PreflightAuditor } from './preflight.ts';
 
 export class TopologicalAuditor {
   private targetCache = new Map<string, HyperVertex | null>();
@@ -87,6 +88,12 @@ export class TopologicalAuditor {
       HALLUCINATED_DEPENDENCY: 0,
       SECRET_LEAK: 0,
       TRUNCATED_FILE: 0,
+      BIN_EXEC_FRACTURE: 0,
+      PACKAGING_EXPORT_FRACTURE: 0,
+      CI_WORKFLOW_FRACTURE: 0,
+      DEPENDENCY_LEAK_FRACTURE: 0,
+      CASE_SENSITIVITY_FRACTURE: 0,
+      RELEASE_SYNC_FRACTURE: 0,
     };
 
     const architecturalLoops: ArchitecturalLoop[] = [];
@@ -122,6 +129,13 @@ export class TopologicalAuditor {
 
     // 10. Detección de Seguridad, Entropía de Shannon e Integridad
     this.detectSecurityAndIntegrity(vertices, fractures, rootDir);
+
+    // 11. Detección de Pre-vuelo, Empaquetado y Tuberías CI/CD (The 5th Dimension: Preflight Guard)
+    if (rootDir) {
+      const preflight = new PreflightAuditor(rootDir);
+      const preflightFractures = preflight.auditAll(vertices);
+      fractures.push(...preflightFractures);
+    }
 
     // Asignar parches autosintetizados retrocompatibles
     for (const f of fractures) {
