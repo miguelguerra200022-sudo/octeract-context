@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Tesseract Deterministic Audit & Export SARIF (0 Tokens)
         run: |
-          npx -y tesseract-context audit . --sarif tesseract-results.sarif
+          node bin/tesseract-context.js audit . --sarif tesseract-results.sarif
 
       - name: Upload SARIF to GitHub Code Scanning Alerts
         uses: github/codeql-action/upload-sarif@v3
