@@ -13,6 +13,7 @@ import { TypeScriptParser } from '../parsers/ts-parser.ts';
 import { PythonParser } from '../parsers/py-parser.ts';
 import { GenericParser } from '../parsers/generic-parser.ts';
 import { BinarySerializer } from './binary.ts';
+import { IncrementalCache } from './cache.ts';
 
 export interface IndexerOptions {
   rootDir: string;
@@ -26,6 +27,7 @@ export class ProjectIndexer {
   private auditor: TopologicalAuditor;
   private lastAuditReport?: AuditReport;
   private currentRootDir?: string;
+  private cache?: IncrementalCache;
   private defaultIgnore: string[] = [
     'node_modules',
     '.git',
@@ -205,6 +207,10 @@ export class ProjectIndexer {
     const fileList: string[] = [];
     this.walkDirectory(rootDir, rootDir, ignoreList, fileList, maxFiles);
 
+    if (!this.cache) {
+      this.cache = new IncrementalCache(rootDir);
+    }
+
     for (const relPath of fileList) {
       const fullPath = path.join(rootDir, relPath);
       let content = '';
@@ -248,6 +254,7 @@ export class ProjectIndexer {
         };
 
         this.space.addVertex(vertex);
+        this.cache?.record(fullPath);
       } catch (_e) {
         // Ignorar archivos que no se puedan leer como texto UTF-8
         continue;
@@ -423,6 +430,7 @@ export class ProjectIndexer {
     };
 
     fs.writeFileSync(indexPath, JSON.stringify(data, null, 2), 'utf-8');
+    this.cache?.save();
   }
 
   /**
