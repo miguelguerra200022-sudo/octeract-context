@@ -1,6 +1,6 @@
 {
   "name": "tesseract-context",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Tesseract v3.1 Enterprise Suite: 4D/5D Context Engine with Preflight Packaging Guard, Quantitative Portfolio Frontier (Triángulo Mágico), Ed25519 BSL-1.1 Licensing, SWE-CI, LSC Monorepo Engine, and Distributed Mesh",
   "type": "module",
   "main": "src/index.ts",

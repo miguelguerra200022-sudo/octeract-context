@@ -25,6 +25,7 @@ import { SWECIEngine } from '../enterprise/swe-ci.ts';
 import { LSCEngine } from '../enterprise/lsc.ts';
 import { DistributedMeshEngine } from '../enterprise/mesh.ts';
 import { TesseractPortfolioEngine } from '../enterprise/portfolio.ts';
+import { PreflightAuditor } from '../core/preflight.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -812,6 +813,20 @@ export class MCPServer {
           },
         },
       },
+      {
+        name: 'tesseract_preflight_audit',
+        description:
+          'Audita los contratos de empaquetado y distribución (Eje P / 5ta Dimensión): binarios CLI, permisos POSIX 100755, shebang Unix, CRLF, trampas de dist/ en gitignore, orden de condiciones de exportación, circular npx y fugas de devDependencies.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            workspacePath: {
+              type: 'string',
+              description: 'Ruta absoluta o relativa del directorio raíz del workspace a auditar',
+            },
+          },
+        },
+      },
     ];
   }
 
@@ -1333,6 +1348,20 @@ export class MCPServer {
           };
         }
         return evalResult;
+      }
+
+      case 'tesseract_preflight_audit': {
+        const targetDir = args?.workspacePath ? path.resolve(args.workspacePath) : this.rootDir;
+        const auditor = new PreflightAuditor(targetDir);
+        const vertices = this.space.getVertices();
+        const fractures = auditor.auditAll(vertices);
+        return {
+          workspace: targetDir,
+          passed: fractures.length === 0,
+          summary: fractures.length === 0 ? 'PREFLIGHT_PASSED' : 'PREFLIGHT_FAILURES_DETECTED',
+          fractureCount: fractures.length,
+          fractures,
+        };
       }
 
       default:
