@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url';
+import * as path from 'node:path';
 /**
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
@@ -158,7 +160,7 @@ async function main() {
     }
     case '--version':
     case '-v': {
-      console.log('Tesseract-Context v1.0.0 (Fractal 4D Hypercube Engine)');
+      console.log('Tesseract-Context v2.1.0 (GPU/CPU Hybrid Accelerated 4D Hypercube Context Engine)');
       break;
     }
     case 'help':
@@ -195,10 +197,17 @@ Comandos disponibles:
 }
 
 
-main().catch((err) => {
-  console.error('[TESSERACT FATAL ERROR]', err);
-  process.exit(1);
-});
+const isDirectRun = Boolean(process.argv[1] && (
+  fileURLToPath(import.meta.url) === path.resolve(process.argv[1]) ||
+  process.argv[1].endsWith("tesseract-context.js")
+));
+
+if (isDirectRun) {
+  main().catch((err) => {
+    console.error('[TESSERACT FATAL ERROR]', err);
+    process.exit(1);
+  });
+}
 
 export { HypercubeSpace } from './core/hypercube.ts';
 export { TopologicalAuditor } from './core/auditor.ts';

@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/tesseract-context"><img src="https://img.shields.io/npm/v/tesseract-context.svg?style=for-the-badge&color=CB3837&logo=npm" alt="npm version" /></a>
-  <a href="https://github.com/miguelguerra200022-sudo/tesseract-context/actions"><img src="https://img.shields.io/badge/tests-64%2F64%20passing-brightgreen.svg?style=for-the-badge" alt="Tests" /></a>
+  <a href="https://github.com/miguelguerra200022-sudo/tesseract-context/actions"><img src="https://img.shields.io/badge/tests-65%2F65%20passing-brightgreen.svg?style=for-the-badge" alt="Tests" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20.0.0-blue.svg?style=for-the-badge" alt="Node" /></a>
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-JSON--RPC%202.0-purple.svg?style=for-the-badge" alt="MCP" /></a>
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-BSL%201.1%20%2F%20Fair--Source-orange.svg?style=for-the-badge" alt="License" /></a>
