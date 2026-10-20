@@ -185,7 +185,7 @@ async function main() {
     }
     case '--version':
     case '-v': {
-      console.log('Tesseract-Context v3.0.0 (Enterprise Suite - 4D Hypercube Context Engine)');
+      console.log('Tesseract-Context v3.0.1 (Enterprise Suite - 4D Hypercube Context Engine)');
       break;
     }
     case 'help':
