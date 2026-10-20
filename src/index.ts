@@ -4,7 +4,7 @@ import * as path from 'node:path';
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
 
-import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight } from './cli/commands.ts';
+import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio } from './cli/commands.ts';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -186,6 +186,12 @@ async function main() {
     case 'preflight': {
       const targetDir = args[1] || '.';
       await runPreflight(targetDir);
+      break;
+    }
+    case 'portfolio': {
+      const targetDir = args[1] || '.';
+      const mode = args[2] === '--pro' ? 'pro' : 'vibe';
+      await runPortfolio(targetDir, mode);
       break;
     }
     case '--version':

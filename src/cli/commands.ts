@@ -23,6 +23,7 @@ import { EnterpriseLicenseManager } from '../enterprise/license.ts';
 import { SWECIEngine } from '../enterprise/swe-ci.ts';
 import { LSCEngine } from '../enterprise/lsc.ts';
 import { DistributedMeshEngine } from '../enterprise/mesh.ts';
+import { TesseractPortfolioEngine } from '../enterprise/portfolio.ts';
 
 export async function runInit(targetDir: string = '.'): Promise<void> {
   await runUniversalInit(targetDir);
@@ -481,4 +482,69 @@ export async function runPreflight(targetDir: string = '.'): Promise<void> {
     }
   }
 }
+
+export async function runPortfolio(targetDir: string = '.', mode: 'pro' | 'vibe' = 'vibe'): Promise<void> {
+  const root = path.resolve(targetDir);
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+
+  const vertices = indexer.getSpace().getVertices();
+  const auditReport = indexer.auditRepository(root);
+
+  const engine = new TesseractPortfolioEngine(root);
+  const evalResult = engine.evaluatePortfolio(vertices, auditReport);
+  const tri = evalResult.triangle;
+  const vibe = evalResult.vibeAdvice;
+
+  console.log(`\n\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`📈 \x1b[1mTESSERACT PORTFOLIO FRONTIER: EL TRIÁNGULO MÁGICO DE LA INVERSIÓN\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`  ● Activos de Software Evaluados: \x1b[1m${evalResult.totalAssets}\x1b[0m en ${root}\n`);
+
+  console.log(`\x1b[1;33m1. 📈 RENTABILIDAD (Yield & Token ROI):\x1b[0m`);
+  console.log(`   ● Token Alpha: \x1b[1;32m+${tri.rentabilidad.tokenAlphaPercent}%\x1b[0m de ahorro por Slicing 4D`);
+  console.log(`   ● Índice de Retorno de Velocidad: \x1b[1m${tri.rentabilidad.portfolioYieldIndex}/10\x1b[0m`);
+  console.log(`   ● Arrastre por Deuda Técnica: \x1b[31m${tri.rentabilidad.compoundingDragWeeklyTokens} tokens/semana\x1b[0m\n`);
+
+  console.log(`\x1b[1;36m2. 🛡️ SEGURIDAD (Riesgo & Invarianza 4D):\x1b[0m`);
+  console.log(`   ● Puntuación de Seguridad: \x1b[1;32m${tri.seguridad.safetyScore}/100\x1b[0m`);
+  console.log(`   ● Volatilidad Topológica Beta: \x1b[1m${tri.seguridad.portfolioBeta}\x1b[0m (acoplamiento sistémico)`);
+  console.log(`   ● Probabilidad de Ruina Catastrófica: \x1b[1;32m${(tri.seguridad.riskOfRuinProbability * 100).toFixed(1)}%\x1b[0m\n`);
+
+  console.log(`\x1b[1;32m3. 💧 LIQUIDEZ (Maleabilidad & Bloques LEGO Reutilizables):\x1b[0m`);
+  console.log(`   ● Ratio Global de Liquidez (CLR): \x1b[1m${tri.liquidez.globalLiquidityRatio} / 1.00\x1b[0m`);
+  console.log(`   ● Activos Modulares Monetizables: \x1b[1;32m${tri.liquidez.monetizableAssetsCount} módulos\x1b[0m listos para exportar\n`);
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`💡 \x1b[1mCONSEJOS DEL ASESOR PARA VIBE CODERS:\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`  ● Estado General: \x1b[1m${vibe.headline}\x1b[0m\n`);
+  console.log(`  🚀 \x1b[1;32mMEJOR JUGADA PARA HOY:\x1b[0m`);
+  console.log(`     ➔ Acción: \x1b[1m${vibe.bestMove.action}\x1b[0m`);
+  console.log(`     ➔ ¿Por qué?: ${vibe.bestMove.why}`);
+  console.log(`     ➔ Presupuesto sugerido (Kelly): \x1b[36m~${vibe.bestMove.expectedTokensNeeded} tokens\x1b[0m\n`);
+
+  console.log(`  ⚠️ \x1b[1;31mZONA DE PELIGRO (No tocar sin plan):\x1b[0m`);
+  console.log(`     ➔ Evitar: \x1b[1m${vibe.dangerZone.avoidAction}\x1b[0m`);
+  console.log(`     ➔ ¿Por qué?: ${vibe.dangerZone.why}\n`);
+
+  if (vibe.legoOpportunities.length > 0) {
+    console.log(`  💎 \x1b[1;34mOPORTUNIDADES DE PIEZAS LEGO (Reutilización):\x1b[0m`);
+    for (const opp of vibe.legoOpportunities.slice(0, 3)) {
+      console.log(`     • ${opp}`);
+    }
+    console.log('');
+  }
+
+  if (evalResult.topSharpeAssets.length > 0) {
+    console.log(`\x1b[1;33mTop Activos con Mayor Sharpe Ratio (Retorno / Riesgo):\x1b[0m`);
+    for (const a of evalResult.topSharpeAssets.slice(0, 5)) {
+      console.log(`  • \x1b[1m${a.file}\x1b[0m (Sharpe: \x1b[1;32m${a.sharpeRatio}\x1b[0m | Beta: ${a.topologicalBeta} | Kelly Batch: ${a.kellyBatchSizeLines} líneas) [${a.investmentAction}]`);
+    }
+    console.log('');
+  }
+}
+
 

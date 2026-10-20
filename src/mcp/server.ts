@@ -24,6 +24,7 @@ import { EnterpriseLicenseManager } from '../enterprise/license.ts';
 import { SWECIEngine } from '../enterprise/swe-ci.ts';
 import { LSCEngine } from '../enterprise/lsc.ts';
 import { DistributedMeshEngine } from '../enterprise/mesh.ts';
+import { TesseractPortfolioEngine } from '../enterprise/portfolio.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -797,6 +798,20 @@ export class MCPServer {
           properties: {},
         },
       },
+      {
+        name: 'tesseract_portfolio_advisor',
+        description:
+          'Consulta el Asesor de Inversión del Triángulo Mágico (Rentabilidad, Seguridad, Liquidez) para Vibe Coders e ingenieros. Proporciona el Sharpe Ratio de los archivos, el tamaño de lote seguro de Kelly para no romper la app, y las mejores jugadas para pedirle a la IA hoy.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            detail: {
+              type: 'boolean',
+              description: 'Incluir desglose cuantitativo completo (Sharpe Ratio, Beta, Kelly batch size)',
+            },
+          },
+        },
+      },
     ];
   }
 
@@ -1300,6 +1315,24 @@ export class MCPServer {
       case 'tesseract_license_info': {
         const manager = new EnterpriseLicenseManager();
         return manager.getLicenseStatus(this.rootDir);
+      }
+
+      case 'tesseract_portfolio_advisor': {
+        const engine = new TesseractPortfolioEngine(this.rootDir);
+        const vertices = this.space.getVertices();
+        const audit = this.indexer.getAuditReport() || this.indexer.auditRepository(this.rootDir);
+        const evalResult = engine.evaluatePortfolio(vertices, audit);
+        if (!args?.detail) {
+          return {
+            headline: evalResult.vibeAdvice.headline,
+            healthMood: evalResult.vibeAdvice.healthMood,
+            bestMove: evalResult.vibeAdvice.bestMove,
+            dangerZone: evalResult.vibeAdvice.dangerZone,
+            legoOpportunities: evalResult.vibeAdvice.legoOpportunities,
+            magicTriangle: evalResult.triangle,
+          };
+        }
+        return evalResult;
       }
 
       default:
