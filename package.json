@@ -1,6 +1,6 @@
 {
   "name": "tesseract-context",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Tesseract v3.0 Enterprise Suite: 4D Hypercube Context Engine with Ed25519 BSL-1.1 Licensing, SWE-CI Zero-Regression Healer, LSC Monorepo Engine, and Distributed Mesh for Microservices",
   "type": "module",
   "main": "src/index.ts",
