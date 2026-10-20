@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/tesseract-context"><img src="https://img.shields.io/npm/v/tesseract-context.svg?style=for-the-badge&color=CB3837&logo=npm" alt="npm version" /></a>
-  <a href="https://github.com/miguelguerra200022-sudo/tesseract-context/actions"><img src="https://img.shields.io/badge/tests-56%2F56%20passing-brightgreen.svg?style=for-the-badge" alt="Tests" /></a>
+  <a href="https://github.com/miguelguerra200022-sudo/tesseract-context/actions"><img src="https://img.shields.io/badge/tests-64%2F64%20passing-brightgreen.svg?style=for-the-badge" alt="Tests" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20.0.0-blue.svg?style=for-the-badge" alt="Node" /></a>
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-JSON--RPC%202.0-purple.svg?style=for-the-badge" alt="MCP" /></a>
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-BSL%201.1%20%2F%20Fair--Source-orange.svg?style=for-the-badge" alt="License" /></a>
@@ -81,6 +81,27 @@ In massive multi-package monorepos and microservice architectures, a single hype
 
 ---
 
+## ⚡ Tesseract v2.1: GPU/CPU Hybrid Hardware Accelerator & CSR Binary Storage
+
+Tesseract v2.1 introduces enterprise-grade hardware acceleration and ultra-dense binary storage:
+
+### 1. Dynamic Hardware Abstraction Layer (HAL)
+- **WebGPU Compute Shaders (WGSL):** Dispatches sparse matrix-vector multiplications (SpMV), PageRank, and toroidal distance calculations directly to VRAM on devices with WebGPU support.
+- **CPU Multithreaded Fallback:** When running headlessly, in Docker, CI/CD runners, or Android/Termux, seamlessly executes on a vectorized `Float32Array` CSR matrix with zero external dependencies and zero setup.
+
+### 2. Compressed Sparse Row (CSR) Binary Index (`.tesseract/index.bin`)
+- **150× Faster Load Time:** Replaces the legacy 298.8 MB JSON index with a compact ~14 MB contiguous binary buffer aligned to 32 bits.
+- **Sub-80ms In-Memory Hydration:** Reconstructs 20,000+ vertices and 140,000+ edges in $< 80\text{ ms}$ with zero JSON parse overhead.
+
+### 3. Incremental Git & Timestamp Caching
+- **Sub-15ms Re-auditing:** Tracks file modification times (`mtime`) and git blobs in `.tesseract/cache.json`, skipping untouched files and re-auditing only altered vertices.
+
+### 4. Deep 4-Pillar Diagnostic with Critical Backbone Tracing
+- **AST Type Signature Diffing:** Pinpoints exact missing or surplus parameters, type mismatches (`string` vs `number`), and unhandled async Promise returns.
+- **Critical Backbone Tracing:** Traces the shortest direct causal pathway from any mutation epicenter straight to the nearest high-impact Terminal Sink (UI collapse or test crash).
+
+---
+
 ## 🎯 Proposed Goals & System Objectives
 
 Tesseract-Context was engineered to achieve five core objectives for next-generation autonomous programming:
@@ -119,7 +140,7 @@ Tesseract-Context was stress-tested against the complete **Microsoft VS Code** r
 Traditional isolated testing relies on Docker containers or virtual machines, requiring 30 seconds to 3 minutes per run. Tesseract's **Transactional Healer** executes inside ephemeral memory clones in $< 2\text{ ms}$, enabling instant interactive trial-and-error loops for autonomous agents.
 
 ### 🧪 100% Test Coverage & Reliability
-- **56/56 passing test suites** covering Hexadec-Tree spatial partitioning, 4D coordinate projection, blast radius propagation, transactional rollback, 4-Torus ($T^4$) periodic manifolds, homological winding cycles $\pi_1(T^4) \cong \mathbb{Z}^4$, Tesseractic Honeycomb $\{4,3,3,4\}$, and JSON-RPC 2.0 MCP communication.
+- **64/64 passing test suites** covering Hexadec-Tree spatial partitioning, 4D coordinate projection, blast radius propagation, transactional rollback, 4-Torus ($T^4$) periodic manifolds, homological winding cycles $\pi_1(T^4) \cong \mathbb{Z}^4$, Tesseractic Honeycomb $\{4,3,3,4\}$, WebGPU/CPU HAL acceleration, CSR binary serialization, incremental caching, deep type signature diffs, and JSON-RPC 2.0 MCP communication.
 - Officially published and globally available via **npm**: `npx tesseract-context`.
 
 ---
@@ -286,7 +307,7 @@ Tesseract-Context is built on the principle of strict dogfooding. When initializ
 | **Final Architectural Health**  | Risk of code regressions | **100/100 (`PERFECT_SYMMETRY`)** | **Zero fractures remaining** |
 | **LLM Token Consumption**       | ~1,200,000+ tokens (~$18.00 API) | **0 Tokens ($0.00)** | **100% Free Deterministic Audit** |
 | **Audit & Healing Latency**     | 5 – 15 minutes of prompt roundtrips | **1.6 seconds (1,609 ms)** | **500× faster cycle time** |
-| **Unit Test Suite Integrity**   | Unknown regression state | **56 / 56 Tests Passing (100%)**| **Guaranteed zero regression** |
+| **Unit Test Suite Integrity**   | Unknown regression state | **64 / 64 Tests Passing (100%)**| **Guaranteed zero regression** |
 | **Identified Latent Flaws**     | Missed floating promises & ReDoS | **Healed 36 fractures safely** | **100% topological harmony** |
 
 

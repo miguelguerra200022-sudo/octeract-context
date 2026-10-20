@@ -213,5 +213,9 @@ export { SarifExporter } from './core/sarif.ts';
 export { DifferentialShearAnalyzer } from './core/diff.ts';
 export { ASTSkeletonizer } from './core/skeleton.ts';
 export { TesseracticHoneycomb } from './core/honeycomb.ts';
+export { type HardwareAccelerator, getHardwareAccelerator, CpuMultithreadBackend, WebGPUComputeBackend } from './core/accelerator.ts';
+export { BinarySerializer } from './core/binary.ts';
+export { IncrementalCache } from './core/cache.ts';
+export { DeepContractDiagnostic } from './core/diagnostic.ts';
 
 
