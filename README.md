@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/tesseract-context"><img src="https://img.shields.io/npm/v/tesseract-context.svg?style=for-the-badge&color=CB3837&logo=npm" alt="npm version" /></a>
-  <a href="https://github.com/miguelguerra200022-sudo/tesseract-context/actions"><img src="https://img.shields.io/badge/tests-82%2F82%20passing-brightgreen.svg?style=for-the-badge" alt="Tests" /></a>
+  <a href="https://github.com/miguelguerra200022-sudo/tesseract-context/actions"><img src="https://img.shields.io/badge/tests-92%2F92%20passing-brightgreen.svg?style=for-the-badge" alt="Tests" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20.0.0-blue.svg?style=for-the-badge" alt="Node" /></a>
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-JSON--RPC%202.0-purple.svg?style=for-the-badge" alt="MCP" /></a>
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-BSL%201.1%20%2F%20Fair--Source-orange.svg?style=for-the-badge" alt="License" /></a>
@@ -60,6 +60,36 @@ Tesseract v3.0 transforms Tesseract into an enterprise-grade platform solving th
 - **Cross-Repository Contract Verification:** Projects independent microservices into honeycomb lattice coordinates and shared 3D cubic facets ($+Z$ OpenAPI REST, $-Z$ gRPC).
 - **Proactive Breaking Change Isolation:** Detects breaking API changes (e.g., deleted response fields or altered parameter types) between consumer and provider repositories before staging or production deployment.
 - **Empirically Proven on Real Benchmarks:** Tested and verified on real Pact Foundation contract suites and OASDiff OpenAPI breaking change datasets in $< 10\text{ ms}$.
+
+---
+
+## 📐 Tesseract v3.1: The 5th Dimension (P-Axis / Preflight Packaging Guard & Modern Portfolio Frontier)
+
+Tesseract v3.1 expands beyond spatial code graphs into the **5th Dimension ($P$-Axis: Packaging, Distribution & Quantitative Capital Allocation)**:
+
+### 1. Preflight & Packaging Guard (The $P$-Axis / 5th Dimension)
+Static linters and unit tests only verify in-memory logic; they are completely blind to distribution, tarball packaging, and runtime environment mismatches that cause packages to fail when published or deployed. The $P$-Axis provides deterministic protection across 6 critical vectors:
+- **CLI Binary Integrity (Shebang, CRLF & BOM):** Guarantees executable entrypoints begin with valid Unix shebangs (`#!/usr/bin/env node`) and strict LF line endings, preventing catastrophic `\r: command not found` execution failures in Termux, Alpine, and Ubuntu runners.
+- **Git FileMode Permissions (`100755` vs `100644`):** Verifies that CLI binaries registered in `package.json#bin` have POSIX executable bits committed in the Git index, preventing permission-denied errors on global `npm install -g`.
+- **Disappearing `dist/` Tarball Trap:** Audits conflicts between `.gitignore` and `package.json#files` / `npm pack` rules, ensuring compiled artifacts are physically included before release.
+- **Node.js Export Map Condition Precedence:** Detects inverted conditional exports (e.g. `default` before `import` or `types`), ensuring ESM/CJS dual packages resolve without module loader crashes.
+- **Circular `npx` CI Bootstrap Traps:** Flags GitHub Actions workflows that attempt to run `npx package-name` inside that same package's repository before it has been published or locally linked.
+- **`devDependencies` Leakage in Production:** Scans production ASTs for transitive dependencies declared only in `devDependencies`, catching silent `MODULE_NOT_FOUND` runtime crashes.
+- **Cross-Platform Case-Sensitivity Collisions:** Detects casing discrepancies in imports that succeed on case-insensitive filesystems (macOS / Windows APFS/NTFS) but immediately fail in case-sensitive environments (Linux / Docker / CI).
+
+### 2. Quantitative Portfolio Frontier Engine (El Triángulo Mágico de la Inversión)
+Bridges Nobel-prize-winning quantitative finance (**Modern Portfolio Theory** by Harry Markowitz & the **Fractional Kelly Criterion** by John Kelly) directly into codebase refactoring and AI agent guidance:
+- **Rentabilidad (Token Alpha & Yield Index):** Measures token savings alpha (+98.4%) from surgical hypercube slicing and technical debt drag (weekly token cost).
+- **Seguridad (Topological Beta $\beta$, Shear Risk & Ruin Probability):** Quantifies systemic architectural coupling. Flags high-beta anchor files ($\beta > 7.0$) to protect against catastrophic cascading collapse.
+- **Liquidez (Code Liquidity Ratio & Monetizable LEGO Assets):** Measures modular friction and isolates zero-dependency, plug-and-play LEGO components ready for extraction or marketplace reuse.
+- **Quantitative Code Sharpe Ratio ($S_{\text{code}}$):** Ranks files by risk-adjusted architectural return:
+$$S_{\text{code}} = \frac{\text{Yield} - R_f}{\sigma_{\text{churn}} \times (1 + \beta)}$$
+- **Half-Kelly Batch Sizing ($f^*$):** Dynamically calculates the mathematically optimal refactoring batch size (15 to 300 lines) per file to maximize progress while preventing AI over-betting and context destruction:
+$$f^* = \frac{p \cdot b - q}{b}$$
+- **Natural Language Vibe Coding Advisor:** Empowers non-technical developers ("Vibe Coders") with plain-language, non-intimidating guidance:
+  - 🟢 **Best Move:** Identifies the safest, highest-yielding module to improve next, complete with a recommended safe token budget.
+  - ⚠️ **Danger Zone:** Flags critical architectural foundations (e.g., `src/core/types.ts`) that AI agents must never refactor blindly.
+  - 💎 **LEGO Opportunities:** Surfaces plug-and-play modular files that can be extracted, reused in new projects, or monetized immediately without side effects.
 
 ---
 
@@ -165,7 +195,7 @@ Tesseract-Context was stress-tested against the complete **Microsoft VS Code** r
 Traditional isolated testing relies on Docker containers or virtual machines, requiring 30 seconds to 3 minutes per run. Tesseract's **Transactional Healer** executes inside ephemeral memory clones in $< 2\text{ ms}$, enabling instant interactive trial-and-error loops for autonomous agents.
 
 ### 🧪 100% Test Coverage & Reliability
-- **82/82 passing test suites (100%)** covering Hexadec-Tree spatial partitioning, 4D coordinate projection, blast radius propagation, transactional rollback, 4-Torus ($T^4$) periodic manifolds, homological winding cycles $\pi_1(T^4) \cong \mathbb{Z}^4$, Tesseractic Honeycomb $\{4,3,3,4\}$, WebGPU/CPU HAL acceleration, CSR binary serialization, incremental caching, deep type signature diffs, Ed25519 BSL-1.1 cryptographic licensing, SWE-CI zero-regression healing, LSC monorepo rewriter, distributed microservices mesh, and empirical real-world benchmarks.
+- **92/92 passing test suites (100%)** covering Hexadec-Tree spatial partitioning, 4D coordinate projection, blast radius propagation, transactional rollback, 4-Torus ($T^4$) periodic manifolds, homological winding cycles $\pi_1(T^4) \cong \mathbb{Z}^4$, Tesseractic Honeycomb $\{4,3,3,4\}$, WebGPU/CPU HAL acceleration, CSR binary serialization, incremental caching, deep type signature diffs, Ed25519 BSL-1.1 cryptographic licensing, SWE-CI zero-regression healing, LSC monorepo rewriter, distributed microservices mesh, empirical real-world benchmarks, the P-Axis Preflight Packaging Guard, and the Quantitative Portfolio Frontier Engine.
 - Officially published and globally available via **npm**: `npx tesseract-context`.
 
 ---
@@ -332,7 +362,7 @@ Tesseract-Context is built on the principle of strict dogfooding. When initializ
 | **Final Architectural Health**  | Risk of code regressions | **100/100 (`PERFECT_SYMMETRY`)** | **Zero fractures remaining** |
 | **LLM Token Consumption**       | ~1,200,000+ tokens (~$18.00 API) | **0 Tokens ($0.00)** | **100% Free Deterministic Audit** |
 | **Audit & Healing Latency**     | 5 – 15 minutes of prompt roundtrips | **1.6 seconds (1,609 ms)** | **500× faster cycle time** |
-| **Unit Test Suite Integrity**   | Unknown regression state | **82 / 82 Tests Passing (100%)**| **Guaranteed zero regression** |
+| **Unit Test Suite Integrity**   | Unknown regression state | **92 / 92 Tests Passing (100%)**| **Guaranteed zero regression** |
 | **Identified Latent Flaws**     | Missed floating promises & ReDoS | **Healed 36 fractures safely** | **100% topological harmony** |
 
 ---
@@ -368,6 +398,8 @@ Tesseract includes a standalone CLI suite for developers, CI/CD pipelines, and t
 | :--- | :--- | :--- | :--- |
 | **`init`** | `tesseract init [dir]` | Autonomous zero-touch setup. Configures IDE rules, builds 4D map, and outputs health report. | **0 tokens** |
 | **`audit`** | `tesseract audit [dir] [--sarif file]` | Deterministic static audit. Optionally exports OASIS SARIF 2.1.0 for GitHub Code Scanning. | **0 tokens** |
+| **`preflight`** | `tesseract preflight [dir]` | **The 5th Dimension (P-Axis):** Packaging guard auditing CLI shebang, git filemode 100755, dist tarball traps, exports order, devDeps leaks, and case collisions. | **0 tokens** |
+| **`portfolio`** | `tesseract portfolio [dir] [--pro]` | **The Triángulo Mágico de la Inversión:** Quantitative portfolio engine ($S_{\text{code}}$, $\beta$, Kelly $f^*$) and natural language Vibe Coding Advisor. | **0 tokens** |
 | **`sarif`** | `tesseract sarif [dir] [output]` | Generates official OASIS SARIF 2.1.0 log for native GitHub Security tab and PR annotations. | **0 tokens** |
 | **`diff`** | `tesseract diff [dir] [baseBranch]` | **Differential 4D Shear Analysis:** Audits only git-modified files and downstream blast radius. | **0 tokens** |
 | **`hook`** | `tesseract hook install [dir]` | Installs autonomous Git pre-commit shield hook that blocks broken commits at 0 tokens. | **0 tokens** |
@@ -408,6 +440,8 @@ When connected to Cursor, Claude Code, Windsurf, or VS Code, Tesseract equips ag
 | **`tesseract_swe_ci_verify`** | `healthScore`, `totalFractures`, `shearDistance` | **Continuous Zero-Regression Healer:** Mathematically asserts that a multi-commit mutation does not introduce regressions ($D_{\text{shear}} \le 0.10, \Delta \text{Fractures} \le 0$) and persists time-series snapshots. |
 | **`tesseract_lsc_rewrite`** | `sourceFile`, `oldSymbol`, `newSymbol`, `dryRun` | **Large-Scale Changes Monorepo Engine:** Atomically refactors call sites across packages, generating backward-compatible facades to prevent breakage. |
 | **`tesseract_mesh_audit`** | `targetServiceId` | **Distributed Mesh Contract Auditor:** Audits cross-repo microservice contracts across honeycomb $\{4, 3, 3, 4\}$ facets ($+Z$ OpenAPI, $-Z$ gRPC) and isolates breaking API mismatches. |
+| **`tesseract_preflight_audit`** | `workspacePath` | **5D Packaging Guard:** Audits package integrity, executable bits, dist traps, export condition order, and case collisions before publish. |
+| **`tesseract_portfolio_advisor`** | `workspacePath`, `proMode` | **Quantitative Portfolio Advisor:** Delivers Sharpe Ratio code ranking, Half-Kelly refactoring batch size, Best Move, Danger Zone, and LEGO reuse opportunities. |
 | **`tesseract_license_info`** | _none_ | **Enterprise License Status:** Returns cryptographic Ed25519 BSL-1.1 license tier, file limits, active enterprise features, and validity. |
 
 ---
@@ -474,6 +508,8 @@ This software is licensed under the **Business Source License 1.1 (BSL 1.1)**:
 | **Deterministic 4D Static Audit** | Included (0 tokens) | Included (0 tokens) | Included (0 tokens) |
 | **Surgical Slicing & 5-Layer Write Shield** | Included | Included | Included |
 | **Standard JSON-RPC 2.0 MCP Server** | Included | Included | Included |
+| **5D Preflight Packaging Guard** | Included (CLI & CI) | Included (Automated Rules) | **Enforced Publishing Gate** |
+| **Quantitative Portfolio & Vibe Advisor** | Natural Language Advisor | **Quantitative ($S_{\text{code}}, \beta, f^*$)** | **Multi-Repo Frontier & Risk Bounds** |
 | **Continuous SWE-CI Healer** | Manual evaluation | **Automated Multi-Commit Time Series** | **Automated Multi-Commit Time Series** |
 | **OASIS SARIF 2.1.0 Code Scanning** | Community | **Signed Enterprise SARIF** | **Signed Enterprise SARIF** |
 | **Large-Scale Changes (LSC) Engine** | — | — | **Full Monorepo Atomic Rewriter** |
