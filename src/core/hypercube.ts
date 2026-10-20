@@ -87,6 +87,13 @@ export class HypercubeSpace {
   }
 
   /**
+   * Obtiene un vértice por ID
+   */
+  public getVertex(id: string): HyperVertex | undefined {
+    return this.vertices.get(id);
+  }
+
+  /**
    * Obtiene todos los vértices
    */
   public getVertices(): HyperVertex[] {

@@ -12,6 +12,7 @@ import type { LanguageParser } from '../parsers/base.ts';
 import { TypeScriptParser } from '../parsers/ts-parser.ts';
 import { PythonParser } from '../parsers/py-parser.ts';
 import { GenericParser } from '../parsers/generic-parser.ts';
+import { BinarySerializer } from './binary.ts';
 
 export interface IndexerOptions {
   rootDir: string;
@@ -392,7 +393,7 @@ export class ProjectIndexer {
   }
 
   /**
-   * Guarda el índice en caché (.tesseract/index.json)
+   * Guarda el índice en caché (.tesseract/index.bin y .tesseract/index.json)
    */
   public saveIndex(rootDir: string): void {
     const tesseractDir = path.join(rootDir, '.tesseract');
@@ -400,11 +401,21 @@ export class ProjectIndexer {
       fs.mkdirSync(tesseractDir, { recursive: true });
     }
 
+    // 1. Guardar en formato binario CSR de alta densidad (< 100ms)
+    try {
+      const binPath = path.join(tesseractDir, 'index.bin');
+      const binBuffer = BinarySerializer.serialize(this.space);
+      fs.writeFileSync(binPath, binBuffer);
+    } catch (_binErr) {
+      // Si falla serialización binaria, continúa a JSON
+    }
+
+    // 2. Guardar también en formato JSON para compatibilidad retroactiva e inspección humana
     const indexPath = path.join(tesseractDir, 'index.json');
     const vertices = this.space.getVertices();
 
     const data = {
-      version: '1.0.0',
+      version: '2.1.0',
       timestamp: Date.now(),
       totalFiles: vertices.length,
       vertices,
@@ -415,14 +426,35 @@ export class ProjectIndexer {
   }
 
   /**
-   * Carga el índice desde caché si existe
+   * Carga el índice desde caché (prioriza index.bin sobre index.json)
    */
   public loadIndex(rootDir: string): boolean {
-    const indexPath = path.join(rootDir, '.tesseract', 'index.json');
-    if (!fs.existsSync(indexPath)) return false;
+    const tesseractDir = path.join(rootDir, '.tesseract');
+    const binPath = path.join(tesseractDir, 'index.bin');
+    const jsonPath = path.join(tesseractDir, 'index.json');
+
+    // 1. Intento primario: Carga binaria ultrarrápida (< 80ms)
+    if (fs.existsSync(binPath)) {
+      try {
+        const binBuffer = fs.readFileSync(binPath);
+        const restoredSpace = BinarySerializer.deserialize(binBuffer);
+        const vertices = restoredSpace.getVertices();
+        for (const v of vertices) {
+          this.space.addVertex(v);
+        }
+        this.currentRootDir = rootDir;
+        this.syncModifiedFiles(rootDir);
+        return true;
+      } catch (_binReadErr) {
+        // Fallback a JSON si el archivo binario estuviera dañado
+      }
+    }
+
+    // 2. Fallback secundario: Carga desde index.json
+    if (!fs.existsSync(jsonPath)) return false;
 
     try {
-      const raw = fs.readFileSync(indexPath, 'utf-8');
+      const raw = fs.readFileSync(jsonPath, 'utf-8');
       const data = JSON.parse(raw);
       if (Array.isArray(data.vertices)) {
         for (const v of data.vertices) {
