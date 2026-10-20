@@ -16,6 +16,7 @@ import {
 } from './types.ts';
 import { HypercubeSpace } from './hypercube.ts';
 import { TesseractShieldSecurity } from './security.ts';
+import { DeepContractDiagnostic } from './diagnostic.ts';
 
 export class TopologicalAuditor {
   private targetCache = new Map<string, HyperVertex | null>();

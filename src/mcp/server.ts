@@ -19,6 +19,7 @@ import { SarifExporter } from '../core/sarif.ts';
 import { ASTSkeletonizer } from '../core/skeleton.ts';
 import { DifferentialShearAnalyzer } from '../core/diff.ts';
 import { TesseracticHoneycomb } from '../core/honeycomb.ts';
+import { DeepContractDiagnostic } from '../core/diagnostic.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -969,6 +970,11 @@ export class MCPServer {
             entropyScore: f.entropyScore,
             synthesizedPatch: f.synthesizedPatch || TopologicalAuditor.synthesizePatch(f),
             callSiteMicroSlice: microSlice,
+            criticalBackbone: DeepContractDiagnostic.traceCriticalBackbone(f.source, this.space),
+            signatureDiff:
+              f.importerLine && microSlice
+                ? DeepContractDiagnostic.diffSignatures(microSlice, f.importerLine)
+                : undefined,
           };
         });
 
