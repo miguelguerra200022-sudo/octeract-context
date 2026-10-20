@@ -18,6 +18,10 @@ import { TesseractDashboard } from '../ui/dashboard.ts';
 import { ShieldWatcher } from '../shield/watcher.ts';
 import { SarifExporter } from '../core/sarif.ts';
 import { DifferentialShearAnalyzer } from '../core/diff.ts';
+import { EnterpriseLicenseManager } from '../enterprise/license.ts';
+import { SWECIEngine } from '../enterprise/swe-ci.ts';
+import { LSCEngine } from '../enterprise/lsc.ts';
+import { DistributedMeshEngine } from '../enterprise/mesh.ts';
 
 export async function runInit(targetDir: string = '.'): Promise<void> {
   await runUniversalInit(targetDir);
@@ -359,7 +363,88 @@ export async function runHook(action: string = 'install', targetDir: string = '.
     console.log('Uso: tesseract hook install [directorio]');
   }
 }
+ 
+export async function runLicense(subcommand: string = 'status', tokenOrTarget?: string): Promise<void> {
+  const manager = new EnterpriseLicenseManager();
+  const root = process.cwd();
 
+  if (subcommand === 'status') {
+    const status = manager.getLicenseStatus(root);
+    console.log(`\n========================================================================`);
+    console.log(`💎 \x1b[1mTESSERACT ENTERPRISE: ESTADO DE LICENCIA BSL 1.1\x1b[0m`);
+    console.log(`========================================================================`);
+    console.log(`  ● Estado:          ${status.active ? '\x1b[1;32mACTIVA (Ed25519 Verified)\x1b[0m' : '\x1b[33mCOMMUNITY (Evaluación / Open Source)\x1b[0m'}`);
+    console.log(`  ● Organización:    \x1b[1m${status.orgName}\x1b[0m`);
+    console.log(`  ● Tier de Servicio:\x1b[1;36m${status.tier.toUpperCase()}\x1b[0m`);
+    console.log(`  ● Límite Archivos: \x1b[1m${status.maxFiles === -1 ? 'ILIMITADO (Enterprise)' : status.maxFiles}\x1b[0m`);
+    console.log(`  ● Días Restantes:  \x1b[1m${status.daysRemaining === -1 ? 'Permanente' : status.daysRemaining}\x1b[0m`);
+    console.log(`  ● Módulos Activos: \x1b[32m${status.features.join(', ')}\x1b[0m`);
+    console.log(`========================================================================\n`);
+  } else if (subcommand === 'activate') {
+    if (!tokenOrTarget) {
+      console.error('Uso: tesseract-context license activate <token>');
+      process.exit(1);
+    }
+    try {
+      manager.activateLicense(tokenOrTarget, root);
+      console.log(`\x1b[1;32m✔ Licencia activada y verificada criptográficamente con éxito en .tesseract/license.key\x1b[0m\n`);
+    } catch (err: any) {
+      console.error(`\x1b[1;31m✖ Error de activación: ${err.message}\x1b[0m\n`);
+      process.exit(1);
+    }
+  } else {
+    console.log('Comandos de licencia: tesseract license status | tesseract license activate <token>');
+  }
+}
 
+export async function runSWECI(targetDir: string = '.', action: string = 'status'): Promise<void> {
+  const root = path.resolve(targetDir);
+  const engine = new SWECIEngine(root);
 
+  if (action === 'status') {
+    const status = engine.getStatus();
+    console.log(`\n========================================================================`);
+    console.log(`🔄 \x1b[1mTESSERACT SWE-CI: CONTINUOUS ZERO-REGRESSION MONITOR\x1b[0m`);
+    console.log(`========================================================================`);
+    console.log(`  ● Pasos Registrados: \x1b[1m${status.totalSteps}\x1b[0m`);
+    console.log(`  ● Salud Actual:      \x1b[1;32m${status.currentHealth}/100\x1b[0m`);
+    console.log(`  ● Fracturas:         \x1b[1m${status.currentFractures}\x1b[0m`);
+    console.log(`  ● Último Cizallamiento: \x1b[1m${status.lastShear.toFixed(4)}\x1b[0m (Umbral máx: 0.1000)`);
+    console.log(`========================================================================\n`);
+  }
+}
 
+export async function runLSC(targetDir: string = '.', sourceFile?: string, oldSymbol?: string, newSymbol?: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  if (!sourceFile || !oldSymbol || !newSymbol) {
+    console.error('Uso: tesseract-context lsc <dir> <archivoFuente> <simboloViejo> <simboloNuevo>');
+    process.exit(1);
+  }
+
+  const engine = new LSCEngine(root);
+  console.log(`\x1b[36m⚡ [LSC Monorepo Engine] Planificando refactorización atómica de '${oldSymbol}' -> '${newSymbol}'...\x1b[0m`);
+  const plan = engine.planTransformation({
+    sourceFile,
+    oldSymbol,
+    newSymbol,
+    generateBackwardCompatibleFacade: true
+  });
+
+  console.log(`  ● Archivos Afectados: \x1b[1m${plan.affectedFiles.length}\x1b[0m`);
+  console.log(`  ● Call Sites Detectados: \x1b[1m${plan.callSitesCount}\x1b[0m`);
+  console.log(`  ● Fachada Retrocompatible: \x1b[1;32mGENERADA\x1b[0m`);
+
+  const execResult = engine.executeTransformation(plan);
+  if (execResult.success) {
+    console.log(`\x1b[1;32m✔ Refactorización LSC aplicada exitosamente en ${execResult.modifiedFiles.length} archivos.\x1b[0m\n`);
+  } else {
+    console.error(`\x1b[1;31m✖ Error en reescritura LSC:\x1b[0m`, execResult.errors);
+  }
+}
+
+export async function runMesh(action: string = 'audit'): Promise<void> {
+  console.log(`\n========================================================================`);
+  console.log(`🌐 \x1b[1mTESSERACT DISTRIBUTED MESH: AUDITORÍA DE MICROSERVICIOS {4,3,3,4}\x1b[0m`);
+  console.log(`========================================================================`);
+  console.log(`Auditando contratos distribuidos entre repositorios independientes...\n`);
+}

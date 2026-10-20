@@ -4,7 +4,7 @@ import * as path from 'node:path';
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
 
-import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook } from './cli/commands.ts';
+import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh } from './cli/commands.ts';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -158,9 +158,34 @@ async function main() {
       await runTUI(targetDir);
       break;
     }
+    case 'license': {
+      const subcommand = args[1] || 'status';
+      const token = args[2];
+      await runLicense(subcommand, token);
+      break;
+    }
+    case 'swe-ci': {
+      const targetDir = args[1] || '.';
+      const action = args[2] || 'status';
+      await runSWECI(targetDir, action);
+      break;
+    }
+    case 'lsc': {
+      const targetDir = args[1] || '.';
+      const sourceFile = args[2];
+      const oldSymbol = args[3];
+      const newSymbol = args[4];
+      await runLSC(targetDir, sourceFile, oldSymbol, newSymbol);
+      break;
+    }
+    case 'mesh': {
+      const action = args[1] || 'audit';
+      await runMesh(action);
+      break;
+    }
     case '--version':
     case '-v': {
-      console.log('Tesseract-Context v2.1.0 (GPU/CPU Hybrid Accelerated 4D Hypercube Context Engine)');
+      console.log('Tesseract-Context v3.0.0 (Enterprise Suite - 4D Hypercube Context Engine)');
       break;
     }
     case 'help':
@@ -226,5 +251,9 @@ export { type HardwareAccelerator, getHardwareAccelerator, CpuMultithreadBackend
 export { BinarySerializer } from './core/binary.ts';
 export { IncrementalCache } from './core/cache.ts';
 export { DeepContractDiagnostic } from './core/diagnostic.ts';
+export { EnterpriseLicenseManager } from './enterprise/license.ts';
+export { SWECIEngine } from './enterprise/swe-ci.ts';
+export { LSCEngine } from './enterprise/lsc.ts';
+export { DistributedMeshEngine } from './enterprise/mesh.ts';
 
 

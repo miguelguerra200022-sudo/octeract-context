@@ -40,6 +40,7 @@ export class ProjectIndexer {
     '.vscode',
     '.idea',
     'coverage',
+    'fixtures',
   ];
 
   constructor(space?: HypercubeSpace) {

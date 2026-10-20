@@ -20,6 +20,10 @@ import { ASTSkeletonizer } from '../core/skeleton.ts';
 import { DifferentialShearAnalyzer } from '../core/diff.ts';
 import { TesseracticHoneycomb } from '../core/honeycomb.ts';
 import { DeepContractDiagnostic } from '../core/diagnostic.ts';
+import { EnterpriseLicenseManager } from '../enterprise/license.ts';
+import { SWECIEngine } from '../enterprise/swe-ci.ts';
+import { LSCEngine } from '../enterprise/lsc.ts';
+import { DistributedMeshEngine } from '../enterprise/mesh.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -744,6 +748,55 @@ export class MCPServer {
           },
         },
       },
+      {
+        name: 'tesseract_swe_ci_verify',
+        description:
+          'Valida que una mutación o commit cumpla con la garantía matemática de cero regresiones multi-commit (D_shear <= 0.10 y Delta Fracturas <= 0).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            healthScore: { type: 'number', description: 'Puntuación de salud topológica (0-100)' },
+            totalFractures: { type: 'number', description: 'Total de fracturas detectadas' },
+            shearDistance: { type: 'number', description: 'Distancia geodésica de cizallamiento D_shear' },
+          },
+          required: ['healthScore', 'totalFractures', 'shearDistance'],
+        },
+      },
+      {
+        name: 'tesseract_lsc_rewrite',
+        description:
+          'Ejecuta una reescritura semántica a gran escala (LSC) en un monorrepo, migrando un símbolo a través de todos los paquetes y generando fachadas retrocompatibles automáticas.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            sourceFile: { type: 'string', description: 'Ruta relativa del archivo donde se define el símbolo' },
+            oldSymbol: { type: 'string', description: 'Nombre del símbolo original a refactorizar' },
+            newSymbol: { type: 'string', description: 'Nombre del nuevo símbolo modernizado' },
+            dryRun: { type: 'boolean', description: 'Simular la reescritura sin escribir en disco' },
+          },
+          required: ['sourceFile', 'oldSymbol', 'newSymbol'],
+        },
+      },
+      {
+        name: 'tesseract_mesh_audit',
+        description:
+          'Audita contratos de red distribuidos en el Panal {4,3,3,4} entre microservicios (OpenAPI en faceta +Z, gRPC en faceta -Z), detectando roturas cruzadas entre el consumidor y el proveedor.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetServiceId: { type: 'string', description: 'ID de microservicio a auditar específicamente (opcional)' },
+          },
+        },
+      },
+      {
+        name: 'tesseract_license_info',
+        description:
+          'Consulta el estado de la licencia empresarial BSL 1.1 / Ed25519 (Tier, organización, límites de archivos y características activas).',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+        },
+      },
     ];
   }
 
@@ -1195,6 +1248,58 @@ export class MCPServer {
           facets: filtered,
           summary: `Panal {4,3,3,4}: ${filtered.length} faceta(s) cúbica(s) compartida(s) identificadas.`,
         };
+      }
+
+      case 'tesseract_swe_ci_verify': {
+        const engine = new SWECIEngine(this.rootDir);
+        const evalResult = engine.evaluateStep({
+          healthScore: args.healthScore,
+          totalFractures: args.totalFractures,
+          shearDistance: args.shearDistance,
+        });
+        if (evalResult.approved) {
+          engine.recordSnapshot({
+            stepIndex: engine.getStatus().totalSteps,
+            timestamp: Date.now(),
+            healthScore: args.healthScore,
+            totalFractures: args.totalFractures,
+            shearDistance: args.shearDistance,
+            contractFingerprints: {},
+          });
+        }
+        return evalResult;
+      }
+
+      case 'tesseract_lsc_rewrite': {
+        const engine = new LSCEngine(this.rootDir);
+        const plan = engine.planTransformation({
+          sourceFile: args.sourceFile,
+          oldSymbol: args.oldSymbol,
+          newSymbol: args.newSymbol,
+          generateBackwardCompatibleFacade: true,
+        });
+        const execResult = engine.executeTransformation(plan, { dryRun: Boolean(args.dryRun) });
+        const verification = engine.verifySemanticPreservation(plan);
+        return {
+          planSummary: {
+            affectedFiles: plan.affectedFiles.length,
+            callSitesCount: plan.callSitesCount,
+            facadeGenerated: plan.facadeGenerated,
+          },
+          execution: execResult,
+          semanticVerification: verification,
+        };
+      }
+
+      case 'tesseract_mesh_audit': {
+        const mesh = new DistributedMeshEngine();
+        const audit = mesh.auditMeshContracts();
+        return audit;
+      }
+
+      case 'tesseract_license_info': {
+        const manager = new EnterpriseLicenseManager();
+        return manager.getLicenseStatus(this.rootDir);
       }
 
       default:

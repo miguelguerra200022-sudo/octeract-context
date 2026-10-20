@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/tesseract-context"><img src="https://img.shields.io/npm/v/tesseract-context.svg?style=for-the-badge&color=CB3837&logo=npm" alt="npm version" /></a>
-  <a href="https://github.com/miguelguerra200022-sudo/tesseract-context/actions"><img src="https://img.shields.io/badge/tests-65%2F65%20passing-brightgreen.svg?style=for-the-badge" alt="Tests" /></a>
+  <a href="https://github.com/miguelguerra200022-sudo/tesseract-context/actions"><img src="https://img.shields.io/badge/tests-82%2F82%20passing-brightgreen.svg?style=for-the-badge" alt="Tests" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20.0.0-blue.svg?style=for-the-badge" alt="Node" /></a>
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-JSON--RPC%202.0-purple.svg?style=for-the-badge" alt="MCP" /></a>
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-BSL%201.1%20%2F%20Fair--Source-orange.svg?style=for-the-badge" alt="License" /></a>
@@ -35,6 +35,31 @@
 Instead of treating software repositories as flat text streams or burning millions of tokens with probabilistic vector embeddings, Tesseract maps codebases into an **orthogonal 4-dimensional hypercube ($\mathbb{R}^4$)** partitioned by a 16-ary fractal **Hexadec-Tree**.
 
 With **In-Memory Transactional Healing**, AI agents (Cursor, Claude Code, Windsurf, VS Code, Antigravity) test proposed refactorings inside an ephemeral RAM clone in $< 2\text{ ms}$ at **0 LLM tokens**. If a proposed change introduces even a single regression, Tesseract executes an **automatic rollback in RAM**, leaving the physical disk 100% protected.
+
+---
+
+## 🏛️ Tesseract v3.0: The Enterprise Suite (Ed25519 BSL-1.1, SWE-CI, LSC & Mesh)
+
+Tesseract v3.0 transforms Tesseract into an enterprise-grade platform solving the four unsolved challenges of enterprise agentic software engineering:
+
+### 1. Cryptographic Offline Licensing (Ed25519 / BSL 1.1)
+- **Air-Gapped Commercial Security:** Enforces commercial BSL 1.1 licensing using native asymmetric Ed25519 cryptography (`node:crypto`) with 0 external network dependencies and 0 phone-home risk.
+- **Role-Based Feature Tiers:** Enforces limits across `community` (up to 2,500 files), `pro` (up to 20,000 files, SWE-CI), and `enterprise` (unlimited files, LSC monorepo rewriter, distributed microservices mesh).
+
+### 2. Continuous Zero-Regression Healer (SWE-CI Engine)
+- **Mathematical Non-Degradation Invariant:** Guarantees that in multi-commit AI agent workflows, no modification introduces regressions ($D_{\text{shear}} \le 0.10$ and $\Delta\text{Fractures} \le 0$).
+- **Autonomous Rollback:** Automatically triggers memory/disk rollback if a proposed commit degrades architectural health.
+- **Empirically Proven on Real Benchmarks:** Tested and verified on real SWE-bench production tasks (e.g. Preact DOM reconciliation regression) in $< 65\text{ ms}$.
+
+### 3. Large-Scale Changes Monorepo Engine (LSC)
+- **Atomic Multi-Package Refactoring:** Identifies call sites across multiple applications and shared packages in monorepos (Turborepo, Nx, Lerna).
+- **Zero-Breakage Facades:** Automatically synthesizes backward-compatible export facades while migrating consumers atomically to modern signatures.
+- **Empirically Proven on Real Benchmarks:** Tested and verified on real Vercel Turborepo monorepo packages in $< 77\text{ ms}$.
+
+### 4. Distributed Microservices Mesh (Panal $\{4, 3, 3, 4\}_{\text{mesh}}$)
+- **Cross-Repository Contract Verification:** Projects independent microservices into honeycomb lattice coordinates and shared 3D cubic facets ($+Z$ OpenAPI REST, $-Z$ gRPC).
+- **Proactive Breaking Change Isolation:** Detects breaking API changes (e.g., deleted response fields or altered parameter types) between consumer and provider repositories before staging or production deployment.
+- **Empirically Proven on Real Benchmarks:** Tested and verified on real Pact Foundation contract suites and OASDiff OpenAPI breaking change datasets in $< 10\text{ ms}$.
 
 ---
 

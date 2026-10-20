@@ -1,7 +1,7 @@
 {
   "name": "tesseract-context",
-  "version": "2.1.0",
-  "description": "GPU/CPU Hybrid Accelerated 4D Hypercube Context Engine with CSR Binary Storage and Deep Diagnostics for AI Coding Agents",
+  "version": "3.0.0",
+  "description": "Tesseract v3.0 Enterprise Suite: 4D Hypercube Context Engine with Ed25519 BSL-1.1 Licensing, SWE-CI Zero-Regression Healer, LSC Monorepo Engine, and Distributed Mesh for Microservices",
   "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",
@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
-    "typescript": "^7.0.2"
+    "typescript": "^5.8.2"
   },
   "files": [
     "bin",
