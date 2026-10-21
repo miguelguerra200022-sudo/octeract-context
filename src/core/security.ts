@@ -45,7 +45,7 @@ export class TesseractShieldSecurity {
     'module', 'net', 'os', 'path', 'path/posix', 'path/win32', 'perf_hooks',
     'process', 'punycode', 'querystring', 'readline', 'repl', 'stream',
     'stream/consumers', 'stream/promises', 'stream/web', 'string_decoder',
-    'timers', 'timers/promises', 'tls', 'trace_events', 'tty', 'url', 'util',
+    'test', 'timers', 'timers/promises', 'tls', 'trace_events', 'tty', 'url', 'util',
     'util/types', 'v8', 'vm', 'wasi', 'worker_threads', 'zlib'
   ]);
 

@@ -4,7 +4,7 @@ import * as path from 'node:path';
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
 
-import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats, runGrep, runOrchestrate, runFunSearch, runDeductive, runAlphaDev, runPairformer } from './cli/commands.ts';
+import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats, runGrep, runOrchestrate, runFunSearch, runDeductive, runAlphaDev, runPairformer, runProgramSlice, runReproduce, runSpeculativePatch, runMcts } from './cli/commands.ts';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -352,6 +352,50 @@ async function main() {
       await runPairformer(targetDir);
       break;
     }
+    case 'program-slice':
+    case 'slice-program': {
+      const targetDir = args[1] || '.';
+      const filePath = args[2];
+      const variable = args[3];
+      const direction = args[4] === 'forward' ? 'forward' : 'backward';
+      if (!filePath) {
+        console.error('Uso: octeract program-slice <dir> <archivo> [variable] [backward|forward]');
+        process.exit(1);
+      }
+      await runProgramSlice(targetDir, filePath, { variable, direction });
+      break;
+    }
+    case 'reproduce': {
+      const targetDir = args[1] || '.';
+      const fractureId = args[2];
+      await runReproduce(targetDir, fractureId);
+      break;
+    }
+    case 'patch-ast':
+    case 'patch-speculative': {
+      const targetDir = args[1] || '.';
+      const filePath = args[2];
+      const className = args[3];
+      const methodName = args[4];
+      const patchCode = args[5] || '';
+      if (!filePath || !patchCode) {
+        console.error('Uso: octeract patch-ast <dir> <archivo> <clase> <metodo> <codigoParche>');
+        process.exit(1);
+      }
+      await runSpeculativePatch(targetDir, filePath, { className, methodName, patchCode });
+      break;
+    }
+    case 'mcts': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      const candidateCode = args[3] || 'export function fix() { return true; }';
+      if (!targetFile) {
+        console.error('Uso: octeract mcts <dir> <archivoObjetivo> [codigoCandidato]');
+        process.exit(1);
+      }
+      await runMcts(targetDir, targetFile, candidateCode);
+      break;
+    }
     case 'octeract':
     case '8d': {
       const targetDir = args[1] || '.';
@@ -360,7 +404,7 @@ async function main() {
     }
     case '--version':
     case '-v': {
-      console.log('Octeract-Context v4.1.1 (8D Universal Suite - E8 Riemannian Torus T^8 Context Engine)');
+      console.log('Octeract-Context v4.2.0 (8D Universal Suite - E8 Riemannian Torus T^8 Context Engine)');
       break;
     }
     case 'help':
@@ -452,6 +496,10 @@ export { TesseractDashboard, OcteractDashboard } from './ui/dashboard.ts';
 export { TesseractTUI, OcteractTUI } from './cli/tui.ts';
 export { OcteractOrchestratorEngine } from './core/orchestrator.ts';
 export * from './deepmind/index.ts';
+export { OcteractProgramSlicer } from './core/slicer.ts';
+export { OcteractReproducer } from './core/reproducer.ts';
+export { OcteractSpeculativePatcher } from './core/patcher.ts';
+export { OcteractTreeSearch } from './core/mcts.ts';
 
 
 

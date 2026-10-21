@@ -44,6 +44,10 @@ import {
   OcteractPairformer,
   OcteractStepVerifier,
 } from '../deepmind/index.ts';
+import { OcteractProgramSlicer } from '../core/slicer.ts';
+import { OcteractReproducer } from '../core/reproducer.ts';
+import { OcteractSpeculativePatcher } from '../core/patcher.ts';
+import { OcteractTreeSearch } from '../core/mcts.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -149,7 +153,7 @@ export class MCPServer {
             },
             serverInfo: {
               name: 'octeract-context',
-              version: '4.1.1',
+              version: '4.2.0',
             },
           },
         };
@@ -1272,6 +1276,77 @@ export class MCPServer {
           },
         },
       },
+      {
+        name: 'octeract_program_slice',
+        description:
+          'Calcula el slice semántico de código (algoritmo de Weiser) aislando únicamente las líneas que afectan a una variable o función (> 90% ahorro de tokens).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta del archivo a cortar' },
+            targetVariable: { type: 'string', description: 'Variable objetivo del criterio de corte' },
+            targetSymbol: { type: 'string', description: 'Símbolo o método de clase a cortar' },
+            direction: { type: 'string', enum: ['backward', 'forward'], description: 'Dirección del corte (backward por defecto)' },
+          },
+          required: ['targetPath'],
+        },
+      },
+      {
+        name: 'octeract_synthesize_reproducer',
+        description:
+          'Genera automáticamente un script de test ESM mínimo y ejecutable para reproducir y aislar una fractura o fallo arquitectónico en ROJO.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            fractureId: { type: 'string', description: 'ID de la fractura a reproducir' },
+            targetFile: { type: 'string', description: 'Archivo donde reside el fallo' },
+            targetSymbol: { type: 'string', description: 'Símbolo afectado' },
+            description: { type: 'string', description: 'Descripción del comportamiento esperado' },
+          },
+        },
+      },
+      {
+        name: 'octeract_speculative_patch',
+        description:
+          'Realiza un injerto sintáctico quirúrgico en el AST (AST grafting) preservando comentarios, formato y código adyacente sin errores de diff.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta del archivo a modificar' },
+            className: { type: 'string', description: 'Nombre de la clase que contiene el método' },
+            methodName: { type: 'string', description: 'Nombre del método a sustituir' },
+            functionName: { type: 'string', description: 'Nombre de la función independiente a sustituir' },
+            patchCode: { type: 'string', description: 'Código nuevo del método o función' },
+          },
+          required: ['targetPath', 'patchCode'],
+        },
+      },
+      {
+        name: 'octeract_mcts_refactor',
+        description:
+          'Ejecuta búsqueda Monte Carlo en RAM con UCT para explorar múltiples ramas de refactorización simultáneamente y elegir la ruta matemáticamente óptima.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Archivo objetivo a refactorizar' },
+            candidatePatches: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  code: { type: 'string' },
+                  expectedDelta: { type: 'number' },
+                },
+                required: ['id', 'code'],
+              },
+              description: 'Lista de variantes o parches candidatos a explorar',
+            },
+            maxIterations: { type: 'number', description: 'Número máximo de iteraciones MCTS (default 20)' },
+          },
+          required: ['targetPath', 'candidatePatches'],
+        },
+      },
     ];
 
     const aliases = tools.map((t) => ({
@@ -2038,6 +2113,94 @@ export class MCPServer {
           violationsCount: report.violations.length,
           violations: report.violations.slice(0, 5),
           topCriticalPairs: report.topCriticalPairs.slice(0, 10),
+        };
+      }
+
+      case 'octeract_program_slice': {
+        const filePath = args.targetPath;
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(this.rootDir, filePath);
+        if (!fs.existsSync(resolvedPath)) {
+          throw new Error(`Archivo '${resolvedPath}' no existe.`);
+        }
+        const code = fs.readFileSync(resolvedPath, 'utf-8');
+        const slicer = new OcteractProgramSlicer();
+        const res = slicer.computeSlice(code, {
+          targetVariable: args.targetVariable,
+          targetSymbol: args.targetSymbol,
+          direction: args.direction || 'backward',
+        });
+        return {
+          filePath,
+          direction: res.direction,
+          tokenReductionPercent: res.tokenReductionPercent,
+          linesRetainedCount: res.linesRetained.length,
+          totalLinesOriginal: res.totalLinesOriginal,
+          slicedCode: res.slicedCode,
+        };
+      }
+
+      case 'octeract_synthesize_reproducer': {
+        const auditor = new TopologicalAuditor();
+        const auditReport = auditor.auditSpace(this.space);
+        let targetFracture = auditReport.fractures[0];
+        if (args?.fractureId) {
+          const found = auditReport.fractures.find((f) => f.id === args.fractureId);
+          if (found) targetFracture = found;
+        }
+
+        const reproducer = new OcteractReproducer();
+        const script = reproducer.synthesizeReproducer({
+          id: targetFracture?.id || args?.fractureId || 'CUSTOM_FRACTURE',
+          sourceFile: targetFracture?.sourceFile || args?.targetFile || 'src/index.ts',
+          targetSymbol: targetFracture?.affectedSymbols?.[0] || args?.targetSymbol || 'main',
+          description: targetFracture?.description || args?.description || 'Aserción de contrato',
+        });
+        return {
+          fractureId: script.fractureId,
+          targetFile: script.targetFile,
+          targetSymbol: script.targetSymbol,
+          reproducerCode: script.reproducerCode,
+          rationale: script.rationale,
+        };
+      }
+
+      case 'octeract_speculative_patch': {
+        const filePath = args.targetPath;
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(this.rootDir, filePath);
+        if (!fs.existsSync(resolvedPath)) {
+          throw new Error(`Archivo '${resolvedPath}' no existe.`);
+        }
+        const code = fs.readFileSync(resolvedPath, 'utf-8');
+        const patcher = new OcteractSpeculativePatcher();
+        let res: any;
+        if (args.className && args.methodName) {
+          res = patcher.graftMethod(code, args.className, args.methodName, args.patchCode);
+        } else if (args.functionName) {
+          res = patcher.graftFunction(code, args.functionName, args.patchCode);
+        } else {
+          throw new Error('Debe especificar "className" y "methodName", o "functionName".');
+        }
+        return {
+          success: res.success,
+          diff: res.diff,
+          linesReplaced: res.linesReplaced,
+          error: res.error,
+          patchedCodeSnippet: res.patchedCode.slice(0, 500),
+        };
+      }
+
+      case 'octeract_mcts_refactor': {
+        const mcts = new OcteractTreeSearch(this.space);
+        const res = await mcts.search({
+          targetFile: args.targetPath,
+          candidatePatches: args.candidatePatches,
+          maxIterations: args.maxIterations || 20,
+        });
+        return {
+          totalIterations: res.totalIterations,
+          treeSize: res.treeSize,
+          executionTimeMs: res.executionTimeMs,
+          bestTrajectory: res.bestTrajectory,
         };
       }
 

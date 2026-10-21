@@ -38,6 +38,10 @@ import {
   OcteractAlphaDevOptimizer,
   OcteractPairformer,
 } from '../deepmind/index.ts';
+import { OcteractProgramSlicer } from '../core/slicer.ts';
+import { OcteractReproducer } from '../core/reproducer.ts';
+import { OcteractSpeculativePatcher } from '../core/patcher.ts';
+import { OcteractTreeSearch } from '../core/mcts.ts';
 
 export async function runInit(targetDir: string = '.'): Promise<void> {
   await runUniversalInit(targetDir);
@@ -1004,6 +1008,158 @@ export async function runPairformer(targetDir: string = '.'): Promise<void> {
     console.log('');
   }
 }
+
+export async function runProgramSlice(
+  targetDir: string = '.',
+  filePath: string,
+  options: { variable?: string; symbol?: string; direction?: 'backward' | 'forward' } = {}
+): Promise<void> {
+  const root = path.resolve(targetDir);
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[1;31m✖ Error: Archivo '${fullPath}' no existe.\x1b[0m\n`);
+    return;
+  }
+
+  console.log(`\x1b[1;36m========================================================================\x1b[0m`);
+  console.log(`🔪 \x1b[1mOCTERACT PROGRAM SLICER: ALGORITMO DE WEISER (REDUCCIÓN > 90%)\x1b[0m`);
+  console.log(`\x1b[1;36m========================================================================\x1b[0m`);
+
+  const code = fs.readFileSync(fullPath, 'utf-8');
+  const slicer = new OcteractProgramSlicer();
+  const res = slicer.computeSlice(code, {
+    targetVariable: options.variable,
+    targetSymbol: options.symbol,
+    direction: options.direction || 'backward',
+  });
+
+  console.log(`  ● Archivo: \x1b[1m${filePath}\x1b[0m | Dirección: \x1b[35m${res.direction.toUpperCase()}\x1b[0m`);
+  console.log(`  ● Líneas Conservadas: \x1b[1;32m${res.linesRetained.length} / ${res.totalLinesOriginal}\x1b[0m | Ahorro de Tokens: \x1b[1;32m${res.tokenReductionPercent}%\x1b[0m\n`);
+  console.log(`\x1b[90m--- [SLICE SEMÁNTICO PURO] ---\x1b[0m\n`);
+  console.log(res.slicedCode);
+  console.log(`\n\x1b[90m-------------------------------\x1b[0m\n`);
+}
+
+export async function runReproduce(targetDir: string = '.', fractureId?: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🧪 \x1b[1mOCTERACT AUTONOMOUS REPRODUCER: AISLAMIENTO TDD EN RAM\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+
+  const auditor = new TopologicalAuditor();
+  const auditReport = auditor.auditSpace(indexer.getSpace());
+
+  let targetFracture = auditReport.fractures[0];
+  if (fractureId) {
+    const found = auditReport.fractures.find((f) => f.id === fractureId);
+    if (found) targetFracture = found;
+  }
+
+  const reproducer = new OcteractReproducer();
+  if (!targetFracture) {
+    console.log(`  ● Repositorio en \x1b[1;32mPERFECT_SYMMETRY\x1b[0m. Generando reproducer genérico de contrato...`);
+    const genericScript = reproducer.synthesizeReproducer({
+      id: 'SMOKE_VERIFICATION',
+      sourceFile: 'src/index.ts',
+      targetSymbol: 'runAudit',
+      description: 'Verificación de simetría de export principal',
+    });
+    console.log(`\n\x1b[33mScript de Reproducción Sintetizado:\x1b[0m\n${genericScript.reproducerCode}\n`);
+    return;
+  }
+
+  const script = reproducer.synthesizeReproducer({
+    id: targetFracture.id,
+    sourceFile: targetFracture.sourceFile,
+    targetSymbol: targetFracture.affectedSymbols?.[0] || 'unknown',
+    description: targetFracture.description,
+  });
+
+  console.log(`  ● Fractura Detectada: \x1b[1;31m${targetFracture.id}\x1b[0m (${targetFracture.sourceFile})`);
+  console.log(`  ● Razón: ${script.rationale}\n`);
+  console.log(`\x1b[33mScript de Reproducción Sintetizado (Ejecutable ESM):\x1b[0m\n`);
+  console.log(script.reproducerCode);
+  console.log('');
+}
+
+export async function runSpeculativePatch(
+  targetDir: string = '.',
+  filePath: string,
+  options: { className?: string; methodName?: string; functionName?: string; patchCode: string }
+): Promise<void> {
+  const root = path.resolve(targetDir);
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[1;31m✖ Error: Archivo '${fullPath}' no existe.\x1b[0m\n`);
+    return;
+  }
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🩹 \x1b[1mOCTERACT SPECULATIVE PATCHER: INJERTO QUIRÚRGICO EN EL AST\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const code = fs.readFileSync(fullPath, 'utf-8');
+  const patcher = new OcteractSpeculativePatcher();
+
+  let res: any;
+  if (options.className && options.methodName) {
+    res = patcher.graftMethod(code, options.className, options.methodName, options.patchCode);
+  } else if (options.functionName) {
+    res = patcher.graftFunction(code, options.functionName, options.patchCode);
+  } else {
+    console.error('✖ Error: Debe especificar --class y --method, o --function.');
+    return;
+  }
+
+  if (!res.success) {
+    console.error(`\x1b[1;31m✖ Error al injertar parche AST: ${res.error}\x1b[0m\n`);
+    return;
+  }
+
+  console.log(`  ● Archivo: \x1b[1m${filePath}\x1b[0m | Rango Sustituido: \x1b[36mLineas ${res.linesReplaced[0]}-${res.linesReplaced[1]}\x1b[0m`);
+  console.log(`\x1b[33mDiff Quirúrgico:\x1b[0m\n`);
+  console.log(res.diff);
+  console.log('');
+}
+
+export async function runMcts(
+  targetDir: string = '.',
+  targetFile: string,
+  candidateCode: string
+): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🌲 \x1b[1mOCTERACT MCTS: TEST-TIME COMPUTE SCALING EN RAM (UCT)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+
+  const mcts = new OcteractTreeSearch(indexer.getSpace());
+  const res = await mcts.search({
+    targetFile,
+    candidatePatches: [
+      { id: 'candidate_user_patch', code: candidateCode },
+      { id: 'candidate_safe_stub', code: 'export function stub() { return true; }' },
+    ],
+    maxIterations: 20,
+  });
+
+  console.log(`  ● Iteraciones MCTS: \x1b[1m${res.totalIterations}\x1b[0m | Tamaño del Árbol: \x1b[36m${res.treeSize}\x1b[0m (${res.executionTimeMs} ms)`);
+  if (res.bestTrajectory.length > 0) {
+    const top = res.bestTrajectory[0];
+    console.log(`  ● Mejor Rama Seleccionada: \x1b[1;32m${top.patchId}\x1b[0m`);
+    console.log(`  ● Recompensa Topológica: \x1b[1;32m${top.rewardScore}\x1b[0m | Cizallamiento: \x1b[33m${top.shearDistance}\x1b[0m | Visitas: \x1b[35m${top.visits}\x1b[0m\n`);
+  }
+}
+
 
 
 

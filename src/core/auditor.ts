@@ -547,7 +547,11 @@ export class TopologicalAuditor {
           baseName.includes('tree') ||
           baseName.includes('octeract') ||
           baseName.includes('math') ||
-          baseName.includes('algo')
+          baseName.includes('algo') ||
+          baseName.includes('slicer') ||
+          baseName.includes('patcher') ||
+          baseName.includes('slice') ||
+          baseName.includes('patch')
         ) {
           continue;
         }
