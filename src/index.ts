@@ -405,7 +405,7 @@ async function main() {
     }
     case '--version':
     case '-v': {
-      console.log('Octeract-Context v4.2.0 (8D Universal Suite - E8 Riemannian Torus T^8 Context Engine)');
+      console.log('Octeract-Context v4.2.1 (8D Universal Suite - E8 Riemannian Torus T^8 Context Engine)');
       break;
     }
     case 'help':

@@ -1,6 +1,6 @@
 {
   "name": "octeract-context",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "description": "Octeract v4.2 Supreme Frontier Suite: 8-Dimensional Context Engine, Google DeepMind Neuro-Symbolic Suite (FunSearch, AlphaGeometry, AlphaDev, Pairformer, PRM), Weiser Program Slicing, Autonomous Test Reproducer, Speculative AST Patcher, MCTS Refactoring Engine, Supreme Agent Orchestrator, E8 Riemannian Torus (T^8), and Zero-Token Topological Shield",
   "type": "module",
   "main": "src/index.ts",
