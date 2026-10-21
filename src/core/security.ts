@@ -37,6 +37,7 @@ export interface SandboxExecutionResult {
 }
 
 export class TesseractShieldSecurity {
+
   private static standardNodeModules = new Set([
     'assert', 'async_hooks', 'buffer', 'child_process', 'cluster', 'console',
     'constants', 'crypto', 'dgram', 'diagnostics_channel', 'dns', 'domain',
@@ -302,3 +303,7 @@ export class TesseractShieldSecurity {
     }
   }
 }
+
+export const OcteractShieldSecurity = TesseractShieldSecurity;
+export type OcteractShieldSecurity = TesseractShieldSecurity;
+

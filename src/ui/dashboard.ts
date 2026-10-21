@@ -2078,3 +2078,7 @@ export class TesseractDashboard {
 </html>`;
   }
 }
+
+export const OcteractDashboard = TesseractDashboard;
+export type OcteractDashboard = TesseractDashboard;
+

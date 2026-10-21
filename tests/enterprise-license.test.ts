@@ -42,8 +42,9 @@ test('EnterpriseLicenseManager: Rechaza token manipulado o con firma forjada', (
 
   const token = EnterpriseLicenseManager.issueToken(payload, privateKey);
   const parts = token.split('.');
-  // Manipular un caracter de la firma
-  const tamperedToken = `${parts[0]}.${parts[1].slice(0, -2)}AA`;
+  // Manipular garantizadamente la firma
+  const tamperedSig = parts[1][0] === 'X' ? 'Y' + parts[1].slice(1) : 'X' + parts[1].slice(1);
+  const tamperedToken = `${parts[0]}.${tamperedSig}`;
 
   const manager = new EnterpriseLicenseManager(publicKey);
   const result = manager.verifyToken(tamperedToken);

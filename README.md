@@ -1,20 +1,20 @@
 <p align="center">
-  <img src="assets/banner.jpg" alt="Tesseract-Context 4D Banner" width="100%" />
+  <img src="assets/banner.jpg" alt="Octeract-Context 8D Banner" width="100%" />
 </p>
 
 <p align="center">
-  <img src="assets/logo.jpg" alt="Tesseract Logo" width="140" height="140" style="border-radius: 50%;" />
+  <img src="assets/logo.jpg" alt="Octeract Logo" width="140" height="140" style="border-radius: 50%;" />
 </p>
 
-<h1 align="center">💎 TESSERACT-OCTERACT (8D)</h1>
+<h1 align="center">💎 OCTERACT-CONTEXT (8D)</h1>
 
 <p align="center">
   <strong>The 8-Dimensional Context Engine ($E_8$ Riemannian Torus $T^8$) & Autonomous Refactoring Shield for AI Coding Agents</strong>
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/tesseract-context"><img src="https://img.shields.io/npm/v/tesseract-context.svg?style=for-the-badge&color=CB3837&logo=npm" alt="npm version" /></a>
-  <a href="https://github.com/miguelguerra200022-sudo/tesseract-context/actions"><img src="https://img.shields.io/badge/tests-110%2F110%20passing-brightgreen.svg?style=for-the-badge" alt="Tests" /></a>
+  <a href="https://www.npmjs.com/package/octeract-context"><img src="https://img.shields.io/npm/v/octeract-context.svg?style=for-the-badge&color=CB3837&logo=npm" alt="npm version" /></a>
+  <a href="https://github.com/miguelguerra200022-sudo/octeract-context/actions"><img src="https://img.shields.io/badge/tests-110%2F110%20passing-brightgreen.svg?style=for-the-badge" alt="Tests" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20.0.0-blue.svg?style=for-the-badge" alt="Node" /></a>
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-JSON--RPC%202.0-purple.svg?style=for-the-badge" alt="MCP" /></a>
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-BSL%201.1%20%2F%20Fair--Source-orange.svg?style=for-the-badge" alt="License" /></a>
@@ -23,18 +23,26 @@
 
 <p align="center">
   <strong>Instant 1-Command Onboarding:</strong><br />
-  <code>npx tesseract-context init</code>
+  <code>npx octeract-context init</code>
+</p>
+
+<p align="center">
+  <img src="assets/architecture.jpg" alt="Octeract 8D Architecture Infographic" width="100%" />
 </p>
 
 ---
 
 ## ⚡ Executive Summary
 
-**Tesseract-Context** solves the single most destructive bottleneck in modern autonomous software development: the **"Hydra Bug Loop"** — the phenomenon where an AI coding agent attempts to fix a bug or implement a feature, blindly modifies code, and inadvertently creates 2 to 5 silent regressions across distant modules.
+**Octeract-Context** (formerly *Tesseract-Context*) solves the single most destructive bottleneck in modern autonomous software development: the **"Hydra Bug Loop"** — the phenomenon where an AI coding agent attempts to fix a bug or implement a feature, blindly modifies code, and inadvertently creates 2 to 5 silent regressions across distant modules.
 
-Instead of treating software repositories as flat text streams or burning millions of tokens with probabilistic vector embeddings, Tesseract maps codebases into an **orthogonal 4-dimensional hypercube ($\mathbb{R}^4$)** partitioned by a 16-ary fractal **Hexadec-Tree**.
+Instead of treating software repositories as flat text streams or burning millions of tokens with probabilistic vector embeddings, Octeract maps codebases into an **orthogonal 8-dimensional Riemannian Torus ($T^8 = \mathbb{R}^8 / \mathbb{Z}^8$)** structured upon the **$E_8$ Gosset Lattice** and partitioned by a 256-ary fractal **Octeract-Tree** ($O(1)$ hardware byte indexing).
 
-With **In-Memory Transactional Healing**, AI agents (Cursor, Claude Code, Windsurf, VS Code, Antigravity) test proposed refactorings inside an ephemeral RAM clone in $< 2\text{ ms}$ at **0 LLM tokens**. If a proposed change introduces even a single regression, Tesseract executes an **automatic rollback in RAM**, leaving the physical disk 100% protected.
+With **In-Memory Transactional Healing**, AI agents (Cursor, Claude Code, Windsurf, VS Code, Antigravity) test proposed refactorings inside an ephemeral RAM clone in $< 2\text{ ms}$ at **0 LLM tokens**. If a proposed change introduces even a single regression, Octeract executes an **automatic rollback in RAM**, leaving the physical disk 100% protected.
+
+> [!NOTE]
+> **Complete Dual Backward Compatibility:** All existing tools and configurations using `tesseract_*` or `tesseract-context` continue to work without modification via transparent aliasing and normalization.
+
 
 ---
 
@@ -257,14 +265,14 @@ Tesseract-Context was stress-tested against the complete **Microsoft VS Code** r
 Traditional isolated testing relies on Docker containers or virtual machines, requiring 30 seconds to 3 minutes per run. Tesseract's **Transactional Healer** executes inside ephemeral memory clones in $< 2\text{ ms}$, enabling instant interactive trial-and-error loops for autonomous agents.
 
 ### 🧪 100% Test Coverage & Reliability
-- **92/92 passing test suites (100%)** covering Hexadec-Tree spatial partitioning, 4D coordinate projection, blast radius propagation, transactional rollback, 4-Torus ($T^4$) periodic manifolds, homological winding cycles $\pi_1(T^4) \cong \mathbb{Z}^4$, Tesseractic Honeycomb $\{4,3,3,4\}$, WebGPU/CPU HAL acceleration, CSR binary serialization, incremental caching, deep type signature diffs, Ed25519 BSL-1.1 cryptographic licensing, SWE-CI zero-regression healing, LSC monorepo rewriter, distributed microservices mesh, empirical real-world benchmarks, the P-Axis Preflight Packaging Guard, and the Quantitative Portfolio Frontier Engine.
-- Officially published and globally available via **npm**: `npx tesseract-context`.
+- **110/110 passing test suites (100%)** covering Octeract-Tree 256-ary spatial partitioning, 8D coordinate projection, blast radius propagation, transactional rollback, 8-Torus ($T^8$) and 4-Torus ($T^4$) periodic manifolds, homological winding cycles $\pi_1(T^4) \cong \mathbb{Z}^4$, Tesseractic Honeycomb $\{4,3,3,4\}$, WebGPU/CPU HAL acceleration, CSR binary serialization, incremental caching, deep type signature diffs, Ed25519 BSL-1.1 cryptographic licensing, SWE-CI zero-regression healing, LSC monorepo rewriter, distributed microservices mesh, empirical real-world benchmarks, the P-Axis Preflight Packaging Guard, the Quantitative Portfolio Frontier Engine, Big-O Asymptotic Complexity (Phi), Judea Pearl Causal SCM (Psi), and Async Event Loop Flow (Omega).
+- Officially published and globally available via **npm**: `npx octeract-context` (with `tesseract-context` alias).
 
 ---
 
 ## 🔄 Real-World Agent Lifecycle: How It Works
 
-Here is the exact step-by-step workflow of how an AI agent (Cursor, Claude Code, Windsurf) interacts with Tesseract-Context during a development session:
+Here is the exact step-by-step workflow of how an AI agent (Cursor, Claude Code, Windsurf) interacts with Octeract-Context during a development session:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -275,14 +283,14 @@ Here is the exact step-by-step workflow of how an AI agent (Cursor, Claude Code,
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ 1. SURGICAL CONTEXT RETRIEVAL (Token Conservation: < 500 tokens)            │
-│ Agent calls: tesseract_slice(cell: "Security", symbol: "AuthService")        │
+│ Agent calls: octeract_slice(cell: "Security", symbol: "AuthService")         │
 │ ➔ Retrieves ONLY relevant symbols and call signatures. No raw file dumps.    │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ 2. SHOCKWAVE PRE-FLIGHT CHECK (Impact Analysis)                             │
-│ Agent calls: tesseract_blast_radius(targetFile: "auth.ts")                  │
+│ Agent calls: octeract_blast_radius(targetFile: "auth.ts")                   │
 │ ➔ Traces Infinite Taint Wave across all downstream consumers.                │
 │ ➔ Identifies 14 dependent services and their exact line numbers.            │
 └──────────────────────────────────────┬──────────────────────────────────────┘
@@ -290,8 +298,8 @@ Here is the exact step-by-step workflow of how an AI agent (Cursor, Claude Code,
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ 3. IN-MEMORY TRIAL HEALING (Ephemeral RAM Sandbox: < 2 ms, 0 Tokens)        │
-│ Agent calls: tesseract_trial_heal(targetPath: "auth.ts", proposedCode: ...) │
-│ ➔ Injects code into RAM clone of 4D Hypercube.                               │
+│ Agent calls: octeract_trial_heal(targetPath: "auth.ts", proposedCode: ...)  │
+│ ➔ Injects code into RAM clone of 8D Hypercube.                               │
 │ ➔ Runs instant delta audit across all 14 callers.                            │
 │                                                                             │
 │ [REGRESSIONS DETECTED? (e.g. Broken method signature)]                      │
@@ -305,8 +313,8 @@ Here is the exact step-by-step workflow of how an AI agent (Cursor, Claude Code,
                                        │
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ 4. ACTIVE 5-LAYER WRITE SHIELD                                              │
-│ Agent calls: tesseract_safe_write(targetPath: "auth.ts", content: ...)      │
+│ 4. ACTIVE 8D WRITE SHIELD & EXOSKELETON                                     │
+│ Agent calls: octeract_safe_write(targetPath: "auth.ts", content: ...)       │
 │ ➔ Passes shear distance (≤ 0.10) & Shannon entropy gates.                   │
 │ ➔ Physical file written SAFELY to disk. System integrity guaranteed.        │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -320,28 +328,28 @@ Here is the exact step-by-step workflow of how an AI agent (Cursor, Claude Code,
 You do not need to manually configure files or clone this repository. In the root of your project, run:
 
 ```bash
-npx tesseract-context init
+npx octeract-context init
 ```
 
 This single command will automatically:
-1. Detect your codebase architecture and index all files into the 4D Hypercube.
-2. Run an instant **0-token static audit** and generate `.tesseract/HEALTH_REPORT.md`.
+1. Detect your codebase architecture and index all files into the 8D Octeract Hypercube.
+2. Run an instant **0-token static audit** and generate `.octeract/HEALTH_REPORT.md` (and `.tesseract/HEALTH_REPORT.md`).
 3. Configure your IDEs with `.mcp.json`, `.cursorrules`, and `AGENTS.md`.
 
 ---
 
 ### 2. Multi-IDE Configuration
 
-If you prefer configuring your IDE manually, add Tesseract to your client configuration:
+If you prefer configuring your IDE manually, add Octeract to your client configuration:
 
 #### Cursor IDE
 Add to `.cursor/mcp.json` (or `.mcp.json` in your workspace):
 ```json
 {
   "mcpServers": {
-    "tesseract-context": {
+    "octeract-context": {
       "command": "npx",
-      "args": ["-y", "tesseract-context", "mcp"]
+      "args": ["-y", "octeract-context", "mcp"]
     }
   }
 }
@@ -352,9 +360,9 @@ Add to `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "tesseract-context": {
+    "octeract-context": {
       "command": "npx",
-      "args": ["-y", "tesseract-context", "mcp"]
+      "args": ["-y", "octeract-context", "mcp"]
     }
   }
 }
@@ -365,9 +373,9 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 ```json
 {
   "mcpServers": {
-    "tesseract-context": {
+    "octeract-context": {
       "command": "npx",
-      "args": ["-y", "tesseract-context", "mcp"]
+      "args": ["-y", "octeract-context", "mcp"]
     }
   }
 }
@@ -378,9 +386,9 @@ Add to `.vscode/mcp.json`:
 ```json
 {
   "mcpServers": {
-    "tesseract-context": {
+    "octeract-context": {
       "command": "npx",
-      "args": ["-y", "tesseract-context", "mcp"]
+      "args": ["-y", "octeract-context", "mcp"]
     }
   }
 }
@@ -391,8 +399,8 @@ Add to `.vscode/mcp.json`:
 ### 3. Local Development & Testing
 If you wish to contribute or run locally from source:
 ```bash
-git clone https://github.com/miguelguerra200022-sudo/tesseract-context.git
-cd tesseract-context
+git clone https://github.com/miguelguerra200022-sudo/octeract-context.git
+cd octeract-context
 npm install
 npm test
 ```
@@ -454,90 +462,102 @@ Tesseract v3.0 Enterprise was verified against official, un-mocked production co
 
 ### 💻 CLI Command Reference
 
-Tesseract includes a standalone CLI suite for developers, CI/CD pipelines, and terminal workflows:
+Octeract includes a standalone CLI suite for developers, CI/CD pipelines, and terminal workflows (both `octeract` and `tesseract` binary aliases are supported):
 
 | CLI Command | Usage Syntax | Core Capability | Token Cost |
 | :--- | :--- | :--- | :--- |
-| **`init`** | `tesseract init [dir]` | Autonomous zero-touch setup. Configures IDE rules, builds 4D map, and outputs health report. | **0 tokens** |
-| **`audit`** | `tesseract audit [dir] [--sarif file]` | Deterministic static audit. Optionally exports OASIS SARIF 2.1.0 for GitHub Code Scanning. | **0 tokens** |
-| **`preflight`** | `tesseract preflight [dir]` | **The 5th Dimension (P-Axis):** Packaging guard auditing CLI shebang, git filemode 100755, dist tarball traps, exports order, devDeps leaks, and case collisions. | **0 tokens** |
-| **`portfolio`** | `tesseract portfolio [dir] [--pro]` | **The Triángulo Mágico de la Inversión:** Quantitative portfolio engine ($S_{\text{code}}$, $\beta$, Kelly $f^*$) and natural language Vibe Coding Advisor. | **0 tokens** |
-| **`sarif`** | `tesseract sarif [dir] [output]` | Generates official OASIS SARIF 2.1.0 log for native GitHub Security tab and PR annotations. | **0 tokens** |
-| **`diff`** | `tesseract diff [dir] [baseBranch]` | **Differential 4D Shear Analysis:** Audits only git-modified files and downstream blast radius. | **0 tokens** |
-| **`hook`** | `tesseract hook install [dir]` | Installs autonomous Git pre-commit shield hook that blocks broken commits at 0 tokens. | **0 tokens** |
-| **`trial`** | `tesseract trial <dir> <file> "<code>"` | **Counterfactual in-RAM trial:** Tests proposed code in RAM, maps delta fractures, and triggers auto-rollback if regressions appear. | **0 tokens** |
-| **`autoheal`** | `tesseract autoheal <dir> <id> [--commit]` | **Autonomous Mini-Subagent:** Synthesizes backward-compatible patches, tests them in RAM, and commits only if safe. | **0 tokens** |
-| **`blast`** | `tesseract blast <dir> <file> [sym] [hops]` | Computes Infinite Taint Wave and blast radius with physical disk verification and terminal sinks. | **< 300 tokens** |
-| **`patch`** | `tesseract patch <dir> <file> [sym]` | Synthesizes zero-touch retrocompatible stubs or interface adapters. | **0 tokens** |
-| **`flow`** | `tesseract flow <dir> "<query>"` | Geodesic architecture tracing in $\mathbb{R}^4$ from natural language to exact line numbers. | **< 500 tokens** |
-| **`hybrid-audit`** | `tesseract hybrid-audit [dir]` | Collaborative triage: pre-filters 99.9% of files in $\mathbb{R}^4$ and outputs critical semantic triage items for AI review. | **< 750 tokens** |
-| **`safe-write`** | `tesseract safe-write <dir> <file> "<code>"` | Modifies file on disk **only** if it passes the 5-layer 4D shield. | **0 tokens** |
-| **`slice`** | `tesseract slice [dir] [cell] [sym] [budget] [mode]` | Extracts hyperdimensional slices. **Mode skeleton cuts 85% of tokens (SWE-bench style)**. | **Budget-bounded** |
-| **`mcp`** | `tesseract mcp [dir]` | Starts the standard JSON-RPC 2.0 Model Context Protocol server over stdio. | **N/A** |
-| **`ui`** | `tesseract ui [dir] [port]` | Launches the interactive touch 4D visual dashboard with live Taint Wave animations on `localhost:4444`. | **N/A** |
-| **`license`** | `tesseract license [status \| activate <token>]` | **Cryptographic License Guard:** Manages offline Ed25519 BSL 1.1 licenses, checking tier status, features, and file limits. | **0 tokens** |
-| **`swe-ci`** | `tesseract swe-ci [dir] [status]` | **Continuous Zero-Regression Healer:** Tracks multi-commit history, asserting $D_{\text{shear}} \le 0.10$ and $\Delta\text{Fractures} \le 0$. | **0 tokens** |
-| **`lsc`** | `tesseract lsc <dir> <file> <oldSym> <newSym>` | **Large-Scale Changes Monorepo Engine:** Atomically updates all call sites across packages with backward-compatible facades. | **0 tokens** |
-| **`mesh`** | `tesseract mesh [audit]` | **Distributed Microservices Mesh:** Audits cross-repo contract compatibility on shared 3D cubic facets ($+Z$ OpenAPI, $-Z$ gRPC). | **0 tokens** |
+| **`init`** | `octeract init [dir]` | Autonomous zero-touch setup. Configures IDE rules, builds 8D map, and outputs health report. | **0 tokens** |
+| **`audit`** | `octeract audit [dir] [--sarif file]` | Deterministic static audit. Optionally exports OASIS SARIF 2.1.0 for GitHub Code Scanning. | **0 tokens** |
+| **`octeract` / `8d`** | `octeract 8d [dir]` | **8D Hypercube Metrics:** Inspects 8-Torus $T^8$, $E_8$ sphere packing density, and coordinate distribution. | **0 tokens** |
+| **`asymptotic`** | `octeract asymptotic [dir] <file>` | **Static Big-O Guard (Φ-Axis):** Detects quadratic loops $O(N^2)$ and computational degradation. | **0 tokens** |
+| **`causal`** | `octeract causal [dir] <file> [patch]` | **Judea Pearl SCM (Ψ-Axis):** Evaluates interventions via do-calculus and Back-Door Criterion. | **0 tokens** |
+| **`async-audit`** | `octeract omega [dir] <file>` | **Event Loop Dynamics (Ω-Axis):** Audits unhandled promises, floating calls, and microtask races. | **0 tokens** |
+| **`preflight`** | `octeract preflight [dir]` | **The 5th Dimension (P-Axis):** Packaging guard auditing CLI shebang, git filemode 100755, dist tarball traps, exports order, devDeps leaks, and case collisions. | **0 tokens** |
+| **`portfolio`** | `octeract portfolio [dir] [--pro]` | **The Triángulo Mágico de la Inversión:** Quantitative portfolio engine ($S_{\text{code}}$, $\beta$, Kelly $f^*$) and natural language Vibe Coding Advisor. | **0 tokens** |
+| **`sarif`** | `octeract sarif [dir] [output]` | Generates official OASIS SARIF 2.1.0 log for native GitHub Security tab and PR annotations. | **0 tokens** |
+| **`diff`** | `octeract diff [dir] [baseBranch]` | **Differential 8D Shear Analysis:** Audits only git-modified files and downstream blast radius. | **0 tokens** |
+| **`hook`** | `octeract hook install [dir]` | Installs autonomous Git pre-commit shield hook that blocks broken commits at 0 tokens. | **0 tokens** |
+| **`trial`** | `octeract trial <dir> <file> "<code>"` | **Counterfactual in-RAM trial:** Tests proposed code in RAM, maps delta fractures, and triggers auto-rollback if regressions appear. | **0 tokens** |
+| **`autoheal`** | `octeract autoheal <dir> <id> [--commit]` | **Autonomous Mini-Subagent:** Synthesizes backward-compatible patches, tests them in RAM, and commits only if safe. | **0 tokens** |
+| **`blast`** | `octeract blast <dir> <file> [sym] [hops]` | Computes Infinite Taint Wave and blast radius with physical disk verification and terminal sinks. | **< 300 tokens** |
+| **`patch`** | `octeract patch <dir> <file> [sym]` | Synthesizes zero-touch retrocompatible stubs or interface adapters. | **0 tokens** |
+| **`flow`** | `octeract flow <dir> "<query>"` | Geodesic architecture tracing in $T^8$ / $\mathbb{R}^8$ from natural language to exact line numbers. | **< 500 tokens** |
+| **`hybrid-audit`** | `octeract hybrid-audit [dir]` | Collaborative triage: pre-filters 99.9% of files in $T^8$ and outputs critical semantic triage items for AI review. | **< 750 tokens** |
+| **`safe-write`** | `octeract safe-write <dir> <file> "<code>"` | Modifies file on disk **only** if it passes the 8D write shield. | **0 tokens** |
+| **`slice`** | `octeract slice [dir] [cell] [sym] [budget] [mode]` | Extracts hyperdimensional slices. **Mode skeleton cuts 85% of tokens (SWE-bench style)**. | **Budget-bounded** |
+| **`mcp`** | `octeract mcp [dir]` | Starts the standard JSON-RPC 2.0 Model Context Protocol server over stdio. | **N/A** |
+| **`ui`** | `octeract ui [dir] [port]` | Launches the interactive touch 8D visual dashboard with live Taint Wave animations on `localhost:4444`. | **N/A** |
+| **`license`** | `octeract license [status \| activate <token>]` | **Cryptographic License Guard:** Manages offline Ed25519 BSL 1.1 licenses, checking tier status, features, and file limits. | **0 tokens** |
+| **`swe-ci`** | `octeract swe-ci [dir] [status]` | **Continuous Zero-Regression Healer:** Tracks multi-commit history, asserting $D_{\text{shear}} \le 0.10$ and $\Delta\text{Fractures} \le 0$. | **0 tokens** |
+| **`lsc`** | `octeract lsc <dir> <file> <oldSym> <newSym>` | **Large-Scale Changes Monorepo Engine:** Atomically updates all call sites across packages with backward-compatible facades. | **0 tokens** |
+| **`mesh`** | `octeract mesh [audit]` | **Distributed Microservices Mesh:** Audits cross-repo contract compatibility on shared 3D cubic facets ($+Z$ OpenAPI, $-Z$ gRPC). | **0 tokens** |
+| **`swarm`** | `octeract swarm [dir] [plan.json]` | **8D Voronoi Swarm Coordinator:** Detects multi-agent semantic collisions and deadlocks. | **0 tokens** |
+| **`mutate`** | `octeract mutate [dir] <file>` | **AST Mutation Fuzzer:** Tests assertions against synthetic RAM mutations. | **0 tokens** |
+| **`transmute`** | `octeract transmute [dir] <file> <sym> <sig>` | **Atomic Transmuter:** Generates synchronized multi-file migration recipes. | **0 tokens** |
 
 ---
 
 ### 🔌 Native Model Context Protocol (MCP) Tools
 
-When connected to Cursor, Claude Code, Windsurf, or VS Code, Tesseract equips agents with these native tools:
+When connected to Cursor, Claude Code, Windsurf, or VS Code, Octeract equips agents with these native tools (all `octeract_*` tools accept legacy `tesseract_*` invocations seamlessly):
 
 | MCP Tool Name | Required / Optional Parameters | Agent Capability & Safety Guarantee |
 | :--- | :--- | :--- |
-| **`tesseract_trial_heal`** | `targetPath`, `proposedContent` | **Counterfactual RAM Sandbox:** Injects code into ephemeral RAM clone, evaluates delta health score, and guarantees auto-rollback if regressions $> 0$. |
-| **`tesseract_auto_heal`** | `fractureId`, `autoCommit` | **Autonomous Patch Synthesis:** Synthesizes adapter code, validates in RAM, and optionally commits to disk if verified regression-free. |
-| **`tesseract_blast_radius`**| `targetFile`, `targetSymbol`, `maxHops` | **Shockwave Analysis:** Traces Infinite Taint Wave with disk verification and terminal sinks before modifying code. |
-| **`tesseract_diff_shear`**  | `baseRef` | **Differential Git Shear:** Evaluates differential 4D shear and blast radius on git-modified files before commit. |
-| **`tesseract_safe_write`** | `targetPath`, `proposedContent` | **Active Physical Write Shield:** Enforces topological shear limit ($D_{\text{shear}} \le 0.10$), entropy checks, and contract consistency. Blocks unsafe writes. |
-| **`tesseract_slice`** | `cell`, `focusSymbol`, `tokenBudget`, `mode` | **Surgical Retrieval:** Returns symbol slices. When `mode: "skeleton"`, strips inner bodies for **85% SWE-bench token savings**. |
-| **`tesseract_audit_health`** | `detail` | **Instant Health Audit:** Returns repository health score (0–100%), list of critical fractures, broken imports, and orphan islands at 0 tokens. |
-| **`tesseract_diagnose_fracture`** | `fractureId`, `targetPath` | **Universal 4-Pillar Diagnostic:** Returns Problem X-Ray, Hidden Domino Effect, Code Evidence (line + snippet), and Surgical Fix Proposal. |
-| **`tesseract_trace_flow`** | `query` | **Architectural Flow Tracing:** Resolves high-level architectural questions directly into precise file paths and line numbers with $T^4$ geodesic routing. |
-| **`tesseract_hybrid_audit`**| `detail` | **Collaborative Triage:** Combines deterministic $\mathbb{R}^4$ filtering with semantic triage, identifying critical points needing AI decision-making. |
-| **`tesseract_honeycomb_facets`**| `workspacePath`, `targetPackage` | **Tesseractic Honeycomb Facets:** Discovers and maps shared 3D cubic facet boundaries between adjacent packages in monorepos or multi-service architectures. |
-| **`tesseract_swe_ci_verify`** | `healthScore`, `totalFractures`, `shearDistance` | **Continuous Zero-Regression Healer:** Mathematically asserts that a multi-commit mutation does not introduce regressions ($D_{\text{shear}} \le 0.10, \Delta \text{Fractures} \le 0$) and persists time-series snapshots. |
-| **`tesseract_lsc_rewrite`** | `sourceFile`, `oldSymbol`, `newSymbol`, `dryRun` | **Large-Scale Changes Monorepo Engine:** Atomically refactors call sites across packages, generating backward-compatible facades to prevent breakage. |
-| **`tesseract_mesh_audit`** | `targetServiceId` | **Distributed Mesh Contract Auditor:** Audits cross-repo microservice contracts across honeycomb $\{4, 3, 3, 4\}$ facets ($+Z$ OpenAPI, $-Z$ gRPC) and isolates breaking API mismatches. |
-| **`tesseract_preflight_audit`** | `workspacePath` | **5D Packaging Guard:** Audits package integrity, executable bits, dist traps, export condition order, and case collisions before publish. |
-| **`tesseract_portfolio_advisor`** | `workspacePath`, `proMode` | **Quantitative Portfolio Advisor:** Delivers Sharpe Ratio code ranking, Half-Kelly refactoring batch size, Best Move, Danger Zone, and LEGO reuse opportunities. |
-| **`tesseract_license_info`** | _none_ | **Enterprise License Status:** Returns cryptographic Ed25519 BSL-1.1 license tier, file limits, active enterprise features, and validity. |
-| **`tesseract_swarm_coordinate`** | `agents` (array) | **4D Swarm Coordinator:** Partitions codebase into Voronoi zones, detects semantic merge conflicts, traces deadlocks, and synthesizes synchronization facades. |
-| **`tesseract_mutation_fuzz`** | `targetFile`, `testFile` | **AST Mutation Fuzzing:** Injects in-RAM AST mutants to measure test resilience, unmasks hollow/tautological AI test suites, and flags brittle tests. |
-| **`tesseract_atomic_transmute`** | `targetFile`, `oldSymbol`, `newSignature` | **Closed-Subgraph Atomic Transmuter:** Computes topological transitive closure $\mathcal{G}^*$, generates synchronized multi-file patch recipes, and prevents partial commits. |
+| **`octeract_trial_heal`** | `targetPath`, `proposedContent` | **Counterfactual RAM Sandbox:** Injects code into ephemeral RAM clone, evaluates delta health score, and guarantees auto-rollback if regressions $> 0$. |
+| **`octeract_auto_heal`** | `fractureId`, `autoCommit` | **Autonomous Patch Synthesis:** Synthesizes adapter code, validates in RAM, and optionally commits to disk if verified regression-free. |
+| **`octeract_blast_radius`**| `targetFile`, `targetSymbol`, `maxHops` | **Shockwave Analysis:** Traces Infinite Taint Wave with disk verification and terminal sinks before modifying code. |
+| **`octeract_diff_shear`**  | `baseRef` | **Differential Git Shear:** Evaluates differential 8D shear and blast radius on git-modified files before commit. |
+| **`octeract_safe_write`** | `targetPath`, `proposedContent` | **Active Physical Write Shield:** Enforces topological shear limit ($D_{\text{shear}} \le 0.10$), entropy checks, and contract consistency. Blocks unsafe writes. |
+| **`octeract_slice`** | `cell`, `focusSymbol`, `tokenBudget`, `mode` | **Surgical Retrieval:** Returns symbol slices. When `mode: "skeleton"`, strips inner bodies for **85% SWE-bench token savings**. |
+| **`octeract_audit_health`** | `detail` | **Instant Health Audit:** Returns repository health score (0–100%), list of critical fractures, broken imports, and orphan islands at 0 tokens. |
+| **`octeract_diagnose_fracture`** | `fractureId`, `targetPath` | **Universal 4-Pillar Diagnostic:** Returns Problem X-Ray, Hidden Domino Effect, Code Evidence (line + snippet), and Surgical Fix Proposal. |
+| **`octeract_trace_flow`** | `query` | **Architectural Flow Tracing:** Resolves high-level architectural questions directly into precise file paths and line numbers with $T^8$ geodesic routing. |
+| **`octeract_hybrid_audit`**| `detail` | **Collaborative Triage:** Combines deterministic $T^8$ filtering with semantic triage, identifying critical points needing AI decision-making. |
+| **`octeract_honeycomb_facets`**| `workspacePath`, `targetPackage` | **Tesseractic Honeycomb Facets:** Discovers and maps shared 3D cubic facet boundaries between adjacent packages in monorepos or multi-service architectures. |
+| **`octeract_swe_ci_verify`** | `healthScore`, `totalFractures`, `shearDistance` | **Continuous Zero-Regression Healer:** Mathematically asserts that a multi-commit mutation does not introduce regressions ($D_{\text{shear}} \le 0.10, \Delta \text{Fractures} \le 0$). |
+| **`octeract_lsc_rewrite`** | `sourceFile`, `oldSymbol`, `newSymbol`, `dryRun` | **Large-Scale Changes Monorepo Engine:** Atomically refactors call sites across packages, generating backward-compatible facades to prevent breakage. |
+| **`octeract_mesh_audit`** | `targetServiceId` | **Distributed Mesh Contract Auditor:** Audits cross-repo microservice contracts across honeycomb $\{4, 3, 3, 4\}$ facets ($+Z$ OpenAPI, $-Z$ gRPC) and isolates breaking API mismatches. |
+| **`octeract_preflight_audit`** | `workspacePath` | **5D Packaging Guard:** Audits package integrity, executable bits, dist traps, export condition order, and case collisions before publish. |
+| **`octeract_portfolio_advisor`** | `workspacePath`, `proMode` | **Quantitative Portfolio Advisor:** Delivers Sharpe Ratio code ranking, Half-Kelly refactoring batch size, Best Move, Danger Zone, and LEGO reuse opportunities. |
+| **`octeract_license_info`** | _none_ | **Enterprise License Status:** Returns cryptographic Ed25519 BSL-1.1 license tier, file limits, active enterprise features, and validity. |
+| **`octeract_swarm_coordinate`** | `agents` (array) | **8D Swarm Coordinator:** Partitions codebase into Voronoi zones, detects semantic merge conflicts, traces deadlocks, and synthesizes synchronization facades. |
+| **`octeract_mutation_fuzz`** | `targetFile`, `testFile` | **AST Mutation Fuzzing:** Injects in-RAM AST mutants to measure test resilience, unmasks hollow/tautological AI test suites, and flags brittle tests. |
+| **`octeract_atomic_transmute`** | `targetFile`, `oldSymbol`, `newSignature` | **Closed-Subgraph Atomic Transmuter:** Computes topological transitive closure $\mathcal{G}^*$, generates synchronized multi-file patch recipes, and prevents partial commits. |
+| **`octeract_asymptotic_analyze`** | `targetPath`, `proposedContent` | **Big-O Asymptotic Complexity Guard (Φ):** Detects algorithmic regressions from $O(1)/O(N)$ to quadratic $O(N^2)$ inside tight loops. |
+| **`octeract_causal_infer`** | `targetPath`, `proposedContent` | **Judea Pearl Causal SCM (Ψ):** Evaluates interventions via do-calculus to eliminate symptomatic maskings and enforce root invariants. |
+| **`octeract_async_audit`** | `targetPath` | **Event Loop Dynamics Guard (Ω):** Detects floating promises, missing awaits, and race conditions. |
+| **`octeract_8d_stats`** | _none_ | **8D Hypercube Overview:** Returns octeract tree metrics, Viazovska $E_8$ density, and multi-axis coordinates. |
 
 ---
 
 ### 📦 Official MCP Resources & Guided Prompts
 
-Tesseract-Context fully implements the official Model Context Protocol (MCP) specification for **Resources** and **Prompts**:
+Octeract-Context fully implements the official Model Context Protocol (MCP) specification for **Resources** and **Prompts** (with full backward compatibility for `tesseract://` and `tesseract-*`):
 
 #### Live Virtual Resources (`resources/read`)
-- `tesseract://health`: Real-time JSON health score (0–100) and fracture inventory.
-- `tesseract://sarif`: Official OASIS SARIF 2.1.0 output for GitHub Security tab.
-- `tesseract://topology`: Summary of 4D hypercube coordinates, depth, and vertices.
-- `tesseract://cells`: Architectural distribution across all 8 cubic cells.
-- `tesseract://cell/{cellName}`: Filtered inventory of files and symbols in a specific cubic cell.
+- `octeract://health` (or `tesseract://health`): Real-time JSON health score (0–100) and fracture inventory.
+- `octeract://sarif` (or `tesseract://sarif`): Official OASIS SARIF 2.1.0 output for GitHub Security tab.
+- `octeract://topology` (or `tesseract://topology`): Summary of 8D hypercube coordinates, depth, and vertices.
+- `octeract://cells` (or `tesseract://cells`): Architectural distribution across all 8 functional cells.
+- `octeract://cell/{cellName}`: Filtered inventory of files and symbols in a specific functional cell.
 
 #### Agent Prompts & Workflows (`prompts/get`)
-- **`tesseract-safe-refactor`**: Guided agent workflow instructing LLMs to trace blast radius, test counterfactual code in RAM with `trial`, and only commit via `safe-write`.
-- **`tesseract-audit-diagnostic`**: Formats the universal 4-pillar architectural diagnostic directly into user chat.
+- **`octeract-safe-refactor`** (or `tesseract-safe-refactor`): Guided agent workflow instructing LLMs to trace blast radius, test counterfactual code in RAM with `trial`, and only commit via `safe-write`.
+- **`octeract-audit-diagnostic`** (or `tesseract-audit-diagnostic`): Formats the universal 4-pillar architectural diagnostic directly into user chat.
+- **`octeract-8d-audit`**: Complete 8-dimensional architectural audit summary across all topological, Big-O, causal, and event loop axes.
 
 ---
 
 ### 🛡️ GitHub Actions & Zero-Token CI/CD Code Scanning
 
-Add Tesseract-Context directly to your GitHub repository in `.github/workflows/tesseract-shield.yml` to get native pull request annotations and security alerts at **0 LLM tokens**:
+Add Octeract-Context directly to your GitHub repository in `.github/workflows/octeract-shield.yml` to get native pull request annotations and security alerts at **0 LLM tokens**:
 
 ```yaml
-name: "Tesseract 4D Autonomous Shield & Code Scanning"
+name: "Octeract 8D Autonomous Shield & Code Scanning"
 on: [push, pull_request]
 
 jobs:
-  tesseract-shield:
+  octeract-shield:
     runs-on: ubuntu-latest
     permissions:
       security-events: write
@@ -546,12 +566,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '>=20'
-      - run: npx -y tesseract-context audit . --sarif tesseract-results.sarif
+      - run: npx -y octeract-context audit . --sarif octeract-results.sarif
       - uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: tesseract-results.sarif
-          category: tesseract-4d-hypercube
+          sarif_file: octeract-results.sarif
+          category: octeract-8d-hypercube
 ```
 
 ---
@@ -560,8 +580,8 @@ jobs:
 
 This software is licensed under the **Business Source License 1.1 (BSL 1.1)**:
 
-- **Free for Non-Production & Development:** You are free to use, test, modify, and integrate Tesseract-Context for personal development, educational, research, and non-commercial evaluation purposes.
-- **Commercial Production License Required:** Deploying Tesseract-Context within commercial production environments, offering it as a paid cloud service (SaaS), or embedding it into commercial enterprise developer platforms requires a commercial license agreement.
+- **Free for Non-Production & Development:** You are free to use, test, modify, and integrate Octeract-Context for personal development, educational, research, and non-commercial evaluation purposes.
+- **Commercial Production License Required:** Deploying Octeract-Context within commercial production environments, offering it as a paid cloud service (SaaS), or embedding it into commercial enterprise developer platforms requires a commercial license agreement.
 - **Future Open Source Guarantee:** This work automatically converts to the **Apache License, Version 2.0** on October 19, 2029.
 
 ### 🏢 Licensing Tiers & Feature Matrix

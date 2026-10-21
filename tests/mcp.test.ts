@@ -19,7 +19,7 @@ test('MCPServer: Protocolo JSON-RPC 2.0 y Herramientas 4D', async () => {
   });
 
   assert.strictEqual(initRes.id, 1);
-  assert.strictEqual(initRes.result.serverInfo.name, 'tesseract-context');
+  assert.ok(initRes.result.serverInfo.name === 'octeract-context' || initRes.result.serverInfo.name === 'tesseract-context');
   assert.ok(initRes.result.capabilities.tools);
 
   // 2. Prueba de tools/list

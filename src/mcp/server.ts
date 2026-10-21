@@ -1,5 +1,5 @@
 /**
- * TESSERACT-CONTEXT: Servidor Oficial de Protocolo MCP (Model Context Protocol)
+ * OCTERACT-CONTEXT: Servidor Oficial de Protocolo MCP (Model Context Protocol)
  * Compatible con Cursor, Claude Code, Windsurf, Copilot, Antigravity, Aider y ChatGPT
  */
 
@@ -61,19 +61,19 @@ export class MCPServer {
 
     const loaded = this.indexer.loadIndex(this.rootDir);
     if (!loaded) {
-      console.error('[TESSERACT-MCP] Indexando repositorio por primera vez...');
+      console.error('[OCTERACT-MCP] Indexando repositorio por primera vez...');
       this.indexer.indexDirectory({ rootDir: this.rootDir });
       this.indexer.saveIndex(this.rootDir);
     }
     this.isInitialized = true;
-    console.error(`[TESSERACT-MCP] Listo. ${this.space.getVertices().length} vértices en memoria hiperdimensional.`);
+    console.error(`[OCTERACT-MCP] Listo. ${this.space.getVertices().length} vértices en memoria hiperdimensional.`);
 
     // Auto-Auditoría Inmediata al instalar/iniciar el MCP en cualquier proyecto
     try {
       const initialAudit = this.indexer.auditRepository(this.rootDir);
-      console.error(`[TESSERACT-MCP] Auto-Auditoría Determinista Inicial: Salud ${initialAudit.healthScore}/100 | ${initialAudit.totalFractures} Fracturas detectadas en 0 tokens.`);
+      console.error(`[OCTERACT-MCP] Auto-Auditoría Determinista Inicial: Salud ${initialAudit.healthScore}/100 | ${initialAudit.totalFractures} Fracturas detectadas en 0 tokens.`);
     } catch (err: any) {
-      console.error('[TESSERACT-MCP] Auto-Auditoría inicial diferida:', err?.message);
+      console.error('[OCTERACT-MCP] Auto-Auditoría inicial diferida:', err?.message);
     }
   }
 
@@ -98,7 +98,7 @@ export class MCPServer {
           process.stdout.write(JSON.stringify(response) + '\n');
         }
       } catch (err: any) {
-        console.error('[TESSERACT-MCP ERROR]', err);
+        console.error('[OCTERACT-MCP ERROR]', err);
         const errorResponse = {
           jsonrpc: '2.0',
           id: null,
@@ -111,7 +111,7 @@ export class MCPServer {
       }
     });
 
-    console.error('[TESSERACT-MCP] Servidor stdio iniciado.');
+    console.error('[OCTERACT-MCP] Servidor stdio iniciado.');
   }
 
   /**
@@ -138,7 +138,7 @@ export class MCPServer {
               prompts: {},
             },
             serverInfo: {
-              name: 'tesseract-context',
+              name: 'octeract-context',
               version: '4.0.0',
             },
           },
@@ -192,33 +192,63 @@ export class MCPServer {
           result: {
             resources: [
               {
+                uri: 'octeract://health',
+                name: 'Informe de Salud Topológica y Fracturas 8D',
+                mimeType: 'application/json',
+              },
+              {
                 uri: 'tesseract://health',
-                name: 'Informe de Salud Topológica y Fracturas 4D',
+                name: 'Informe de Salud Topológica (Alias)',
+                mimeType: 'application/json',
+              },
+              {
+                uri: 'octeract://topology',
+                name: 'Resumen Topológico 8D',
                 mimeType: 'application/json',
               },
               {
                 uri: 'tesseract://topology',
-                name: 'Resumen Topológico 4D',
+                name: 'Resumen Topológico (Alias)',
                 mimeType: 'application/json',
               },
               {
-                uri: 'tesseract://cells',
+                uri: 'octeract://cells',
                 name: 'Distribución de Celdas Cúbicas 3D',
                 mimeType: 'application/json',
               },
               {
-                uri: 'tesseract://sarif',
+                uri: 'tesseract://cells',
+                name: 'Distribución de Celdas Cúbicas (Alias)',
+                mimeType: 'application/json',
+              },
+              {
+                uri: 'octeract://sarif',
                 name: 'Registro OASIS SARIF 2.1.0 para GitHub Code Scanning',
                 mimeType: 'application/json',
               },
               {
+                uri: 'tesseract://sarif',
+                name: 'Registro OASIS SARIF (Alias)',
+                mimeType: 'application/json',
+              },
+              {
+                uri: 'octeract://audit-triage',
+                name: 'Triage de Auditoría Híbrida (Octeract + IA)',
+                mimeType: 'application/json',
+              },
+              {
                 uri: 'tesseract://audit-triage',
-                name: 'Triage de Auditoría Híbrida (Tesseract + IA)',
+                name: 'Triage de Auditoría Híbrida (Alias)',
+                mimeType: 'application/json',
+              },
+              {
+                uri: 'octeract://stats',
+                name: 'Métricas del Hiperespacio 8D (Octeract Tree y Variedad Toroidal T^8)',
                 mimeType: 'application/json',
               },
               {
                 uri: 'tesseract://octeract',
-                name: 'Métricas del Hiperespacio 8D (Octeract Tree y Variedad Toroidal T^8)',
+                name: 'Métricas del Hiperespacio 8D (Alias)',
                 mimeType: 'application/json',
               },
             ],
@@ -226,19 +256,21 @@ export class MCPServer {
         };
 
       case 'resources/read': {
-        const uri = params?.uri;
-        if (uri === 'tesseract://health') {
+        const rawUri = params?.uri || '';
+        const uri = rawUri.replace(/^tesseract:\/\//, 'octeract://');
+
+        if (uri === 'octeract://health') {
           const auditor = new TopologicalAuditor();
           const report = auditor.audit(this.space);
           return {
             jsonrpc: '2.0',
             id,
             result: {
-              contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(report, null, 2) }],
+              contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(report, null, 2) }],
             },
           };
         }
-        if (uri === 'tesseract://sarif') {
+        if (uri === 'octeract://sarif') {
           const auditor = new TopologicalAuditor();
           const report = auditor.audit(this.space);
           const sarif = SarifExporter.generateSarif(report, this.rootDir);
@@ -246,21 +278,21 @@ export class MCPServer {
             jsonrpc: '2.0',
             id,
             result: {
-              contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(sarif, null, 2) }],
+              contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(sarif, null, 2) }],
             },
           };
         }
-        if (uri === 'tesseract://topology') {
+        if (uri === 'octeract://topology') {
           const stats = this.space.getHyperStats();
           return {
             jsonrpc: '2.0',
             id,
             result: {
-              contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(stats, null, 2) }],
+              contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(stats, null, 2) }],
             },
           };
         }
-        if (uri === 'tesseract://cells') {
+        if (uri === 'octeract://cells') {
           const vertices = this.space.getVertices();
           const distribution: Record<string, number> = {};
           for (const v of vertices) {
@@ -270,12 +302,12 @@ export class MCPServer {
             jsonrpc: '2.0',
             id,
             result: {
-              contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(distribution, null, 2) }],
+              contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(distribution, null, 2) }],
             },
           };
         }
-        if (uri?.startsWith('tesseract://cell/')) {
-          const cellName = uri.replace('tesseract://cell/', '');
+        if (uri?.startsWith('octeract://cell/')) {
+          const cellName = uri.replace('octeract://cell/', '');
           const vertices = this.space.getVertices().filter((v) => v.cell.toLowerCase() === cellName.toLowerCase());
           return {
             jsonrpc: '2.0',
@@ -283,7 +315,7 @@ export class MCPServer {
             result: {
               contents: [
                 {
-                  uri,
+                  uri: rawUri,
                   mimeType: 'application/json',
                   text: JSON.stringify(
                     vertices.map((v) => ({ id: v.id, lines: v.lines, symbols: v.symbols.map((s) => s.name) })),
@@ -295,31 +327,31 @@ export class MCPServer {
             },
           };
         }
-        if (uri === 'tesseract://audit-triage') {
+        if (uri === 'octeract://audit-triage') {
           const auditor = new TopologicalAuditor();
           const triage = auditor.getHybridAuditTriage(this.space, this.rootDir);
           return {
             jsonrpc: '2.0',
             id,
             result: {
-              contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(triage, null, 2) }],
+              contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(triage, null, 2) }],
             },
           };
         }
-        if (uri === 'tesseract://octeract') {
+        if (uri === 'octeract://stats' || uri === 'octeract://octeract') {
           const stats = this.space.getOcteractStats();
           return {
             jsonrpc: '2.0',
             id,
             result: {
-              contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(stats, null, 2) }],
+              contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(stats, null, 2) }],
             },
           };
         }
         return {
           jsonrpc: '2.0',
           id,
-          error: { code: -32602, message: `Recurso no encontrado: ${uri}` },
+          error: { code: -32602, message: `Recurso no encontrado: ${rawUri}` },
         };
       }
 
@@ -330,8 +362,8 @@ export class MCPServer {
           result: {
             prompts: [
               {
-                name: 'tesseract-safe-refactor',
-                description: 'Flujo guiado de refactorización segura con radio de explosión, ensayo en RAM y escritura bajo el escudo 4D.',
+                name: 'octeract-safe-refactor',
+                description: 'Flujo guiado de refactorización segura con radio de explosión, ensayo en RAM y escritura bajo el escudo 8D.',
                 arguments: [
                   {
                     name: 'targetPath',
@@ -346,12 +378,33 @@ export class MCPServer {
                 ],
               },
               {
-                name: 'tesseract-audit-diagnostic',
-                description: 'Diagnóstico integral de salud arquitectónica 4D para presentar al usuario con evidencia quirúrgica y plan de curación.',
+                name: 'tesseract-safe-refactor',
+                description: 'Flujo guiado de refactorización segura (Alias de compatibilidad)',
+                arguments: [
+                  {
+                    name: 'targetPath',
+                    description: 'Ruta relativa del archivo a refactorizar',
+                    required: true,
+                  },
+                  {
+                    name: 'goal',
+                    description: 'Objetivo de la refactorización',
+                    required: false,
+                  },
+                ],
+              },
+              {
+                name: 'octeract-audit-diagnostic',
+                description: 'Diagnóstico integral de salud arquitectónica 8D para presentar al usuario con evidencia quirúrgica y plan de curación.',
                 arguments: [],
               },
               {
-                name: 'tesseract-octeract-8d-audit',
+                name: 'tesseract-audit-diagnostic',
+                description: 'Diagnóstico integral de salud arquitectónica (Alias de compatibilidad)',
+                arguments: [],
+              },
+              {
+                name: 'octeract-8d-audit',
                 description: 'Diagnóstico universal octodimensional 8D (Topología, Big-O Phi, Pearl Causal Psi, Async Omega, Packaging Xi) en el toroide T^8.',
                 arguments: [],
               },
@@ -360,23 +413,30 @@ export class MCPServer {
         };
 
       case 'prompts/get': {
-        const promptName = params?.name;
+        const rawPromptName = params?.name || '';
+        const promptName = rawPromptName.replace(/^tesseract-/, 'octeract-');
         const promptArgs = params?.arguments || {};
 
-        if (promptName === 'tesseract-safe-refactor') {
+        if (promptName === 'octeract-safe-refactor') {
           const target = promptArgs.targetPath || 'archivo_objetivo.ts';
           const goal = promptArgs.goal || 'Optimizar y refactorizar';
+          const isTesseract = rawPromptName.startsWith('tesseract-');
+          const blastTool = isTesseract ? 'tesseract_blast_radius' : 'octeract_blast_radius';
+          const healTool = isTesseract ? 'tesseract_trial_heal' : 'octeract_trial_heal';
+          const writeTool = isTesseract ? 'tesseract_safe_write' : 'octeract_safe_write';
           return {
             jsonrpc: '2.0',
             id,
             result: {
-              description: 'Flujo guiado de refactorización segura bajo el escudo 4D de Tesseract',
+              description: isTesseract
+                ? 'Flujo guiado de refactorización segura bajo el escudo de Tesseract'
+                : 'Flujo guiado de refactorización segura bajo el escudo 8D de Octeract',
               messages: [
                 {
                   role: 'user',
                   content: {
                     type: 'text',
-                    text: `Por favor, ejecuta la siguiente refactorización de forma segura:\nObjetivo: ${goal}\nArchivo objetivo: ${target}\n\nREGLAS DE PROTECCIÓN OBLIGATORIAS:\n1. Invoca primero 'tesseract_blast_radius' para verificar qué módulos sufrirán el efecto dominó.\n2. Diseña el código y pruébalo en RAM con 'tesseract_trial_heal' verificando que la distancia de cizallamiento sea <= 0.10 y 0 regresiones.\n3. Aplica los cambios usando 'tesseract_safe_write'.`,
+                    text: `Por favor, ejecuta la siguiente refactorización de forma segura:\nObjetivo: ${goal}\nArchivo objetivo: ${target}\n\nREGLAS DE PROTECCIÓN OBLIGATORIAS:\n1. Invoca primero '${blastTool}' para verificar qué módulos sufrirán el efecto dominó.\n2. Diseña el código y pruébalo en RAM con '${healTool}' verificando que la distancia de cizallamiento sea <= 0.10 y 0 regresiones.\n3. Aplica los cambios usando '${writeTool}'.`,
                   },
                 },
               ],
@@ -384,20 +444,20 @@ export class MCPServer {
           };
         }
 
-        if (promptName === 'tesseract-audit-diagnostic') {
+        if (promptName === 'octeract-audit-diagnostic') {
           const auditor = new TopologicalAuditor();
           const report = auditor.audit(this.space);
           return {
             jsonrpc: '2.0',
             id,
             result: {
-              description: 'Diagnóstico 4D de salud arquitectónica del repositorio',
+              description: 'Diagnóstico 8D de salud arquitectónica del repositorio',
               messages: [
                 {
                   role: 'user',
                   content: {
                     type: 'text',
-                    text: `Genera un informe de salud para el usuario con base en el estado del hipercubo:\nSalud actual: ${report.healthScore}/100 (${report.status})\nTotal de fracturas: ${report.totalFractures}\nArchivos auditados: ${report.totalFilesAudited}\nSigue los 4 pilares: Radiografía, Peligro Oculto, Evidencia en Código y Solución Quirúrgica.`,
+                    text: `Genera un informe de salud para el usuario con base en el estado del hipercubo 8D:\nSalud actual: ${report.healthScore}/100 (${report.status})\nTotal de fracturas: ${report.totalFractures}\nArchivos auditados: ${report.totalFilesAudited}\nSigue los 4 pilares: Radiografía, Peligro Oculto, Evidencia en Código y Solución Quirúrgica.`,
                   },
                 },
               ],
@@ -405,7 +465,7 @@ export class MCPServer {
           };
         }
 
-        if (promptName === 'tesseract-octeract-8d-audit') {
+        if (promptName === 'octeract-8d-audit') {
           const auditor = new TopologicalAuditor();
           const report = auditor.audit(this.space);
           const octStats = this.space.getOcteractStats();
@@ -419,7 +479,7 @@ export class MCPServer {
                   role: 'user',
                   content: {
                     type: 'text',
-                    text: `Genera un informe integral del Octeracto 8D:\nSalud: ${report.healthScore}/100\nTotal vértices 8D: ${octStats.totalVertices}\nNodos en árbol 256-ario: ${octStats.treeNodes}\nProfundidad máxima 8D: ${octStats.maxDepth}\nDensidad de empaquetamiento E8: ${octStats.packingDensity}\nDimensiones 8D activas: X, Y, Z, W, PHI (Big-O), PSI (Pearl Causal), OMEGA (Async Flow), XI (Packaging).`,
+                    text: `Genera un informe integral del Octeracto 8D:\nSalud: ${report.healthScore}/100\nTotal vértices 8D: ${octStats.totalVertices}\nProfundidad máxima 8D: ${octStats.maxDepth || octStats.octeractDepth}\nDensidad de empaquetamiento E8: ${octStats.packingDensity || octStats.e8LatticeDensity}\nDimensiones 8D activas: X, Y, Z, W, PHI (Big-O), PSI (Pearl Causal), OMEGA (Async Flow), XI (Packaging).`,
                   },
                 },
               ],
@@ -430,7 +490,7 @@ export class MCPServer {
         return {
           jsonrpc: '2.0',
           id,
-          error: { code: -32602, message: `Prompt no encontrado: ${promptName}` },
+          error: { code: -32602, message: `Prompt no encontrado: ${rawPromptName}` },
         };
       }
 
@@ -450,9 +510,9 @@ export class MCPServer {
    * Catálogo de herramientas 4D del Teseracto para Agentes IA
    */
   private getToolDefinitions(): any[] {
-    return [
+    const tools = [
       {
-        name: 'tesseract_slice',
+        name: 'octeract_slice',
         description:
           'Extrae un corte hiperdimensional quirúrgico del repositorio con presupuesto estricto de tokens. Ahorra hasta 85% de tokens y evita alucinaciones.',
         inputSchema: {
@@ -484,7 +544,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_diff_shear',
+        name: 'octeract_diff_shear',
         description:
           'Calcula el cizallamiento topológico diferencial 4D de los archivos modificados en Git frente a una rama base (HEAD, main) antes de commitear.',
         inputSchema: {
@@ -498,7 +558,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_project_shadow',
+        name: 'octeract_project_shadow',
         description:
           'Simula el impacto de un cambio de código antes de escribir en disco. Calcula el cizallamiento topológico y predice contratos rotos.',
         inputSchema: {
@@ -517,7 +577,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_rotate',
+        name: 'octeract_rotate',
         description:
           'Gira el ángulo de observación 4D en uno de los 6 planos ortogonales (XY, XZ, XW, YZ, YW, ZW) para descubrir dependencias ocultas.',
         inputSchema: {
@@ -541,7 +601,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_traverse_hamming',
+        name: 'octeract_traverse_hamming',
         description:
           'Navega a través de las aristas del hipercubo encontrando símbolos vecinos a distancia de Hamming <= k.',
         inputSchema: {
@@ -564,7 +624,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_fractal_zoom',
+        name: 'octeract_fractal_zoom',
         description:
           'Aumenta o disminuye el nivel de zoom en el Teseracto Fractal (Hexadec-Tree) para explorar sub-carpetas o visión macro.',
         inputSchema: {
@@ -579,7 +639,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_hyper_stats',
+        name: 'octeract_hyper_stats',
         description:
           'Retorna las métricas de salud global, acoplamiento espagueti y balance dimensional de todo el proyecto.',
         inputSchema: {
@@ -588,7 +648,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_safe_write',
+        name: 'octeract_safe_write',
         description:
           'Modifica o guarda un archivo en el repositorio ÚNICAMENTE si supera la validación topológica 4D. Si el cambio destruye contratos o corrompe datos (D_shear > 0.75), BLOQUEA FÍSICAMENTE la escritura en disco y devuelve la solución segura automática.',
         inputSchema: {
@@ -611,7 +671,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_trial_heal',
+        name: 'octeract_trial_heal',
         description:
           'Ejecuta un ensayo de autocuración transaccional contrafáctico en RAM (0 tokens). Clona el hipercubo en memoria, aplica la mutación propuesta y realiza un remapeo/re-auditoría delta inmediato. Si detecta cualquier regresión colateral ejecuta rollback en RAM. Retorna el dossier analítico de impacto.',
         inputSchema: {
@@ -630,7 +690,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_auto_heal',
+        name: 'octeract_auto_heal',
         description:
           'Mini-subagente autónomo de reparación en RAM: localiza una fractura, sintetiza el parche retrocompatible, ensaya en RAM sin tocar disco y confirma si es 100% seguro (0 regresiones). Si se pasa requestDescription, provee la solución nativa declarativa.',
         inputSchema: {
@@ -660,7 +720,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_audit_health',
+        name: 'octeract_audit_health',
         description:
           'Ejecuta una auditoría estática determinista 100% en R^4 SIN usar IA (0 tokens). Detecta imports rotos, contratos desfasados, dependencias circulares y código muerto/huérfano en todo el repositorio.',
         inputSchema: {
@@ -674,7 +734,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_diagnose_fracture',
+        name: 'octeract_diagnose_fracture',
         description:
           'Genera evidencia quirúrgica hiperdimensional (< 600 tokens) para un fallo topológico. Retorna el símbolo faltante, línea exacta en el caller, candidatos alternativos y la estrategia de autorreparación que previene daños colaterales.',
         inputSchema: {
@@ -712,7 +772,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_blast_radius',
+        name: 'octeract_blast_radius',
         description:
           'Calcula el radio de explosión interprocedural (Blast Radius) a 1, 2 y 3 saltos en R^4 antes de refactorizar un archivo o símbolo. Retorna la onda de choque en < 300 tokens.',
         inputSchema: {
@@ -735,7 +795,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_synthesize_patch',
+        name: 'octeract_synthesize_patch',
         description:
           'Sintetiza un parche de código TypeScript retrocompatible con zero-touch para corregir contratos rotos, promesas flotantes o violaciones de celda sin romper llamadores.',
         inputSchema: {
@@ -758,7 +818,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_trace_flow',
+        name: 'octeract_trace_flow',
         description:
           'Rastrea la geodésica o flujo causal de código en R^4 a partir de una consulta en lenguaje natural (ej: "¿Cómo se autentica el usuario y se guarda la sesión?"). Retorna la ruta exacta, firmas, archivos, números de línea y cálculo de ondas de choque colaterales consumiendo < 500 tokens con 0 alucinaciones.',
         inputSchema: {
@@ -773,7 +833,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_hybrid_audit',
+        name: 'octeract_hybrid_audit',
         description:
           'Ejecuta la auditoría colaborativa Teseracto + IA. Tesseract pre-filtra el 99.9% de archivos en R^4 con 0 tokens y extrae las 3 a 5 áreas críticas de mayor tensión semántica con sus micro-cortes (< 750 tokens) para que el modelo IA realice el diagnóstico semántico de lógica y seguridad.',
         inputSchema: {
@@ -787,7 +847,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_honeycomb_facets',
+        name: 'octeract_honeycomb_facets',
         description:
           'Inspecciona las facetas cúbicas 3D compartidas entre paquetes de un monorrepo en el Panal Teseráctico {4,3,3,4}. Permite auditar contratos de API inter-paquetes y dependencias cruzadas.',
         inputSchema: {
@@ -801,7 +861,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_swe_ci_verify',
+        name: 'octeract_swe_ci_verify',
         description:
           'Valida que una mutación o commit cumpla con la garantía matemática de cero regresiones multi-commit (D_shear <= 0.10 y Delta Fracturas <= 0).',
         inputSchema: {
@@ -815,7 +875,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_lsc_rewrite',
+        name: 'octeract_lsc_rewrite',
         description:
           'Ejecuta una reescritura semántica a gran escala (LSC) en un monorrepo, migrando un símbolo a través de todos los paquetes y generando fachadas retrocompatibles automáticas.',
         inputSchema: {
@@ -830,7 +890,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_mesh_audit',
+        name: 'octeract_mesh_audit',
         description:
           'Audita contratos de red distribuidos en el Panal {4,3,3,4} entre microservicios (OpenAPI en faceta +Z, gRPC en faceta -Z), detectando roturas cruzadas entre el consumidor y el proveedor.',
         inputSchema: {
@@ -841,7 +901,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_license_info',
+        name: 'octeract_license_info',
         description:
           'Consulta el estado de la licencia empresarial BSL 1.1 / Ed25519 (Tier, organización, límites de archivos y características activas).',
         inputSchema: {
@@ -850,7 +910,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_portfolio_advisor',
+        name: 'octeract_portfolio_advisor',
         description:
           'Consulta el Asesor de Inversión del Triángulo Mágico (Rentabilidad, Seguridad, Liquidez) para Vibe Coders e ingenieros. Proporciona el Sharpe Ratio de los archivos, el tamaño de lote seguro de Kelly para no romper la app, y las mejores jugadas para pedirle a la IA hoy.',
         inputSchema: {
@@ -864,7 +924,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_preflight_audit',
+        name: 'octeract_preflight_audit',
         description:
           'Audita los contratos de empaquetado y distribución (Eje P / 5ta Dimensión): binarios CLI, permisos POSIX 100755, shebang Unix, CRLF, trampas de dist/ en gitignore, orden de condiciones de exportación, circular npx y fugas de devDependencies.',
         inputSchema: {
@@ -878,7 +938,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_swarm_coordinate',
+        name: 'octeract_swarm_coordinate',
         description:
           'Coordina agentes de IA concurrentes asignándoles zonas de Voronoi ortogonales en R^4. Detecta colisiones semánticas invisibles a Git, previene deadlocks y genera fachadas preventivas de sincronización.',
         inputSchema: {
@@ -902,7 +962,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_mutation_fuzz',
+        name: 'octeract_mutation_fuzz',
         description:
           'Ejecuta fuzzing de mutación contrafactual en RAM para certificar la dureza de la suite de pruebas. Detecta si la IA pasó las pruebas con soluciones huecas o si los tests son frágiles/tautológicos.',
         inputSchema: {
@@ -921,7 +981,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_atomic_transmute',
+        name: 'octeract_atomic_transmute',
         description:
           'Genera la receta sincrónica atómica de refactorización multiarchivo calculando la clausura transitiva G* (subgrafo cerrado). Garantiza que no se dejen archivos rezagados.',
         inputSchema: {
@@ -944,7 +1004,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_asymptotic_audit',
+        name: 'octeract_asymptotic_audit',
         description:
           'Analiza estáticamente la complejidad asintótica Big-O (Eje PHI) de un archivo o cambio propuesto. Detecta bucles anidados, queries N+1 y operaciones O(N) dentro de loops (O(N^2)).',
         inputSchema: {
@@ -963,7 +1023,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_causal_verify',
+        name: 'octeract_causal_verify',
         description:
           'Aplica el Modelo Causal Estructural (SCM) y el Criterio de la Puerta Trasera de Judea Pearl (Eje PSI). Evalúa si una corrección es un parche cosmético/sintomático o resuelve la causa raíz.',
         inputSchema: {
@@ -982,7 +1042,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_async_flow_audit',
+        name: 'octeract_async_flow_audit',
         description:
           'Audita la dinámica del Event Loop (Eje OMEGA): detecta promesas flotantes sin await, bifurcaciones asíncronas no controladas y riesgos de carreras en microtasks.',
         inputSchema: {
@@ -997,7 +1057,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_octeract_slice',
+        name: 'octeract_octeract_slice',
         description:
           'Extrae un corte hiperdimensional quirúrgico en el espacio octodimensional R^8 utilizando el árbol 256-ario y la métrica del 8-Toroide Riemannian T^8.',
         inputSchema: {
@@ -1020,7 +1080,7 @@ export class MCPServer {
         },
       },
       {
-        name: 'tesseract_octeract_stats',
+        name: 'octeract_octeract_stats',
         description:
           'Consulta las estadísticas matemáticas del hiperespacio 8D (Octeract / E8): métricas del árbol 256-ario, densidad de empaquetamiento, dimensiones activas y balance toroidal.',
         inputSchema: {
@@ -1028,7 +1088,55 @@ export class MCPServer {
           properties: {},
         },
       },
+      {
+        name: 'octeract_8d_stats',
+        description: 'Alias de octeract_octeract_stats: Estadísticas matemáticas del hiperespacio 8D (Octeract / E8).',
+        inputSchema: { type: 'object', properties: {} },
+      },
+      {
+        name: 'octeract_asymptotic_analyze',
+        description: 'Alias de octeract_asymptotic_audit: Analiza estáticamente la complejidad Big-O (Eje PHI).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetFile: { type: 'string', description: 'Ruta del archivo a auditar' },
+            proposedContent: { type: 'string', description: 'Contenido propuesto' },
+          },
+          required: ['targetFile'],
+        },
+      },
+      {
+        name: 'octeract_causal_infer',
+        description: 'Alias de octeract_causal_verify: Modelo Causal Estructural y criterio de la puerta trasera de Judea Pearl (Eje PSI).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetFile: { type: 'string', description: 'Ruta del archivo a verificar' },
+            proposedPatch: { type: 'string', description: 'Parche o código modificado' },
+          },
+          required: ['targetFile'],
+        },
+      },
+      {
+        name: 'octeract_async_audit',
+        description: 'Alias de octeract_async_flow_audit: Audita la dinámica del Event Loop (Eje OMEGA).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetFile: { type: 'string', description: 'Ruta del archivo a auditar' },
+          },
+          required: ['targetFile'],
+        },
+      },
     ];
+
+    const aliases = tools.map((t) => ({
+      ...t,
+      name: t.name.replace(/^octeract_/, 'tesseract_'),
+      description: `[Alias de compatibilidad] ${t.description}`,
+    }));
+
+    return [...tools, ...aliases];
   }
 
   /**
@@ -1036,9 +1144,22 @@ export class MCPServer {
    */
   public async callTool(name: string, args: any): Promise<any> {
     await this.init();
+    let toolName = name.replace(/^tesseract_/, "octeract_");
+    if (toolName === 'octeract_8d_stats' || toolName === 'octeract_stats') {
+      toolName = 'octeract_octeract_stats';
+    }
+    if (toolName === 'octeract_asymptotic_analyze') {
+      toolName = 'octeract_asymptotic_audit';
+    }
+    if (toolName === 'octeract_causal_infer') {
+      toolName = 'octeract_causal_verify';
+    }
+    if (toolName === 'octeract_async_audit') {
+      toolName = 'octeract_async_flow_audit';
+    }
 
-    switch (name) {
-      case 'tesseract_slice': {
+    switch (toolName) {
+      case 'octeract_slice': {
         const mode = args.mode || 'skeleton';
         const result = this.space.slice({
           cell: args.cell,
@@ -1066,17 +1187,17 @@ export class MCPServer {
         return result.projectedCode;
       }
 
-      case 'tesseract_diff_shear': {
+      case 'octeract_diff_shear': {
         const baseRef = args.baseRef || 'HEAD';
         return DifferentialShearAnalyzer.analyzeDiff(this.rootDir, baseRef);
       }
 
-      case 'tesseract_project_shadow': {
+      case 'octeract_project_shadow': {
         const shadow = this.shadow.project(args.targetPath, args.proposedContent);
         return shadow;
       }
 
-      case 'tesseract_safe_write': {
+      case 'octeract_safe_write': {
         const targetPath = args.targetPath;
         const proposedContent = args.proposedContent;
 
@@ -1087,7 +1208,7 @@ export class MCPServer {
             isSafe: false,
             targetPath,
             attempts: this.shadow.getAttemptCount(targetPath),
-            actionRequired: `⛔ INTERRUPTOR DE SEGURIDAD 4D DISPARADO: Se han alcanzado 2 intentos fallidos consecutivos en "${targetPath}". El archivo ha sido congelado preventivamente para detener el bucle infinito de refactorización (Hydra Bug Loop) y ahorrar tokens. Consulta 'tesseract_diagnose_fracture' para resolver la causa raíz de forma quirúrgica.`,
+            actionRequired: `⛔ INTERRUPTOR DE SEGURIDAD 4D DISPARADO: Se han alcanzado 2 intentos fallidos consecutivos en "${targetPath}". El archivo ha sido congelado preventivamente para detener el bucle infinito de refactorización (Hydra Bug Loop) y ahorrar tokens. Consulta 'octeract_diagnose_fracture' para resolver la causa raíz de forma quirúrgica.`,
           };
         }
 
@@ -1188,7 +1309,7 @@ export class MCPServer {
         };
       }
 
-      case 'tesseract_audit_health': {
+      case 'octeract_audit_health': {
         const report = this.indexer.auditRepository(this.rootDir);
         if (!args.detail) {
           return {
@@ -1215,7 +1336,7 @@ export class MCPServer {
         return report;
       }
 
-      case 'tesseract_diagnose_fracture': {
+      case 'octeract_diagnose_fracture': {
         const report = this.indexer.getAuditReport() || this.indexer.auditRepository(this.rootDir);
         let matches = report.fractures;
 
@@ -1276,7 +1397,7 @@ export class MCPServer {
         };
       }
 
-      case 'tesseract_blast_radius': {
+      case 'octeract_blast_radius': {
         const targetFile = args.targetFile;
         if (!targetFile) throw new Error('Se requiere el parámetro "targetFile"');
         const blastResult = BlastRadiusCalculator.calculate(
@@ -1289,7 +1410,7 @@ export class MCPServer {
         return blastResult;
       }
 
-      case 'tesseract_synthesize_patch': {
+      case 'octeract_synthesize_patch': {
         const targetPath = args.targetPath;
         if (!targetPath) throw new Error('Se requiere el parámetro "targetPath"');
         const report = this.indexer.getAuditReport() || this.indexer.auditRepository(this.rootDir);
@@ -1322,7 +1443,7 @@ export class MCPServer {
         };
       }
 
-      case 'tesseract_trial_heal': {
+      case 'octeract_trial_heal': {
         const targetPath = args.targetPath;
         const proposedContent = args.proposedContent;
         if (!targetPath) throw new Error('Se requiere el parámetro "targetPath"');
@@ -1335,7 +1456,7 @@ export class MCPServer {
         return trialResult;
       }
 
-      case 'tesseract_auto_heal': {
+      case 'octeract_auto_heal': {
         if (args.fractureId || args.targetPath) {
           const fid = args.fractureId || args.targetPath;
           const autoHealRes = await TransactionalHealer.autoHealFracture(
@@ -1359,7 +1480,7 @@ export class MCPServer {
         } else if (desc.includes('letras') || desc.includes('color') || desc.includes('git')) {
           solution = 'Añadir en .vscode/settings.json: { "git.decorations.enabled": false, "explorer.decorations.colors": false, "explorer.decorations.badges": false } (D_shear = 0.050, 100% seguro).';
         } else {
-          solution = 'Consultar celda Config correspondiente mediante tesseract_slice para parámetros nativos declarativos.';
+          solution = 'Consultar celda Config correspondiente mediante octeract_slice para parámetros nativos declarativos.';
         }
 
         return {
@@ -1370,7 +1491,7 @@ export class MCPServer {
         };
       }
 
-      case 'tesseract_rotate': {
+      case 'octeract_rotate': {
         const angleRad = ((args.angleDegrees || 90) * Math.PI) / 180.0;
         const plane: RotationPlane = args.plane;
         const vertices = this.space.getVertices();
@@ -1395,7 +1516,7 @@ export class MCPServer {
         };
       }
 
-      case 'tesseract_traverse_hamming': {
+      case 'octeract_traverse_hamming': {
         const startHex = args.startHex;
         const limit = args.limit || 8;
         const nearest = this.space.tree.findNearest(startHex, limit);
@@ -1411,7 +1532,7 @@ export class MCPServer {
         };
       }
 
-      case 'tesseract_fractal_zoom': {
+      case 'octeract_fractal_zoom': {
         const subTree = this.space.tree.getSubTree(args.hexPrefix);
         if (!subTree) {
           return {
@@ -1430,7 +1551,7 @@ export class MCPServer {
         };
       }
 
-      case 'tesseract_trace_flow': {
+      case 'octeract_trace_flow': {
         const query = args.query;
         if (!query) throw new Error('Se requiere el parámetro "query"');
         const report = this.indexer.getAuditReport();
@@ -1438,7 +1559,7 @@ export class MCPServer {
         return trace;
       }
 
-      case 'tesseract_hybrid_audit': {
+      case 'octeract_hybrid_audit': {
         const auditor = new TopologicalAuditor();
         const triage = auditor.getHybridAuditTriage(this.space, this.rootDir);
         if (!args.detail) {
@@ -1456,11 +1577,11 @@ export class MCPServer {
         return triage;
       }
 
-      case 'tesseract_hyper_stats': {
+      case 'octeract_hyper_stats': {
         return this.space.getHyperStats();
       }
 
-      case 'tesseract_honeycomb_facets': {
+      case 'octeract_honeycomb_facets': {
         const honeycomb = new TesseracticHoneycomb();
         if (TesseracticHoneycomb.isMonorepo(this.rootDir)) {
           const packagesDir = path.join(this.rootDir, 'packages');
@@ -1487,7 +1608,7 @@ export class MCPServer {
         };
       }
 
-      case 'tesseract_swe_ci_verify': {
+      case 'octeract_swe_ci_verify': {
         const engine = new SWECIEngine(this.rootDir);
         const evalResult = engine.evaluateStep({
           healthScore: args.healthScore,
@@ -1507,7 +1628,7 @@ export class MCPServer {
         return evalResult;
       }
 
-      case 'tesseract_lsc_rewrite': {
+      case 'octeract_lsc_rewrite': {
         const engine = new LSCEngine(this.rootDir);
         const plan = engine.planTransformation({
           sourceFile: args.sourceFile,
@@ -1528,18 +1649,18 @@ export class MCPServer {
         };
       }
 
-      case 'tesseract_mesh_audit': {
+      case 'octeract_mesh_audit': {
         const mesh = new DistributedMeshEngine();
         const audit = mesh.auditMeshContracts();
         return audit;
       }
 
-      case 'tesseract_license_info': {
+      case 'octeract_license_info': {
         const manager = new EnterpriseLicenseManager();
         return manager.getLicenseStatus(this.rootDir);
       }
 
-      case 'tesseract_portfolio_advisor': {
+      case 'octeract_portfolio_advisor': {
         const engine = new TesseractPortfolioEngine(this.rootDir);
         const vertices = this.space.getVertices();
         const audit = this.indexer.getAuditReport() || this.indexer.auditRepository(this.rootDir);
@@ -1557,7 +1678,7 @@ export class MCPServer {
         return evalResult;
       }
 
-      case 'tesseract_preflight_audit': {
+      case 'octeract_preflight_audit': {
         const targetDir = args?.workspacePath ? path.resolve(args.workspacePath) : this.rootDir;
         const auditor = new PreflightAuditor(targetDir);
         const vertices = this.space.getVertices();
@@ -1571,14 +1692,14 @@ export class MCPServer {
         };
       }
 
-      case 'tesseract_swarm_coordinate': {
+      case 'octeract_swarm_coordinate': {
         const coordinator = new TesseractSwarmCoordinator(this.rootDir);
         const vertices = this.space.getVertices();
         const intents = args?.intents || [];
         return coordinator.coordinateSwarm(intents, vertices);
       }
 
-      case 'tesseract_mutation_fuzz': {
+      case 'octeract_mutation_fuzz': {
         const engine = new TesseractMutationEngine(this.rootDir);
         const targetFile = args?.targetFile;
         const maxMutants = args?.maxMutants || 20;
@@ -1599,7 +1720,7 @@ export class MCPServer {
         return engine.evaluateMutationHardness(targetFile, mutants, testFiles);
       }
 
-      case 'tesseract_atomic_transmute': {
+      case 'octeract_atomic_transmute': {
         const transmuter = new TesseractAtomicTransmuter(this.rootDir);
         const vertices = this.space.getVertices();
         return transmuter.planAtomicTransmutation(
@@ -1610,10 +1731,10 @@ export class MCPServer {
         );
       }
 
-      case 'tesseract_asymptotic_audit': {
+      case 'octeract_asymptotic_audit': {
         const analyzer = new AsymptoticAnalyzer(this.rootDir);
-        const targetFile = args?.targetFile;
-        const proposedContent = args?.proposedContent;
+        const targetFile = args?.targetFile || args?.targetPath;
+        const proposedContent = args?.proposedContent || args?.proposedPatch;
         if (proposedContent) {
           const fullPath = path.isAbsolute(targetFile) ? targetFile : path.join(this.rootDir, targetFile);
           const originalContent = fs.existsSync(fullPath) ? fs.readFileSync(fullPath, 'utf-8') : '';
@@ -1622,22 +1743,23 @@ export class MCPServer {
         return analyzer.analyzeFile(targetFile);
       }
 
-      case 'tesseract_causal_verify': {
+      case 'octeract_causal_verify': {
         const engine = new CausalInferenceEngine(this.rootDir);
-        const targetFile = args?.targetFile;
-        const proposedPatch = args?.proposedPatch;
+        const targetFile = args?.targetFile || args?.targetPath;
+        const proposedPatch = args?.proposedPatch || args?.proposedContent;
         const fullPath = path.isAbsolute(targetFile) ? targetFile : path.join(this.rootDir, targetFile);
         const originalContent = fs.existsSync(fullPath) ? fs.readFileSync(fullPath, 'utf-8') : '';
         const vertices = this.space.getVertices();
         return engine.evaluateIntervention(targetFile, originalContent, proposedPatch, vertices);
       }
 
-      case 'tesseract_async_flow_audit': {
+      case 'octeract_async_flow_audit': {
         const analyzer = new AsyncFlowAnalyzer(this.rootDir);
-        return analyzer.analyzeFile(args?.targetFile);
+        const targetFile = args?.targetFile || args?.targetPath;
+        return analyzer.analyzeFile(targetFile);
       }
 
-      case 'tesseract_octeract_slice': {
+      case 'octeract_octeract_slice': {
         const centerFile = args?.centerFile;
         const maxDist = args?.maxDistance || 0.45;
         const centerVertex = this.space.getVertex(centerFile) || this.space.getVertices().find((v) => v.path.includes(centerFile));
@@ -1658,7 +1780,7 @@ export class MCPServer {
         };
       }
 
-      case 'tesseract_octeract_stats': {
+      case 'octeract_octeract_stats': {
         return this.space.getOcteractStats();
       }
 

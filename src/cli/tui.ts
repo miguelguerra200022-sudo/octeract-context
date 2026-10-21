@@ -174,3 +174,7 @@ export class TesseractTUI {
     }, 80);
   }
 }
+
+export const OcteractTUI = TesseractTUI;
+export type OcteractTUI = TesseractTUI;
+

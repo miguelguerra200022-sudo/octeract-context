@@ -261,3 +261,7 @@ export class TesseractMutationEngine {
     return fractures;
   }
 }
+
+export const OcteractMutationEngine = TesseractMutationEngine;
+export type OcteractMutationEngine = TesseractMutationEngine;
+

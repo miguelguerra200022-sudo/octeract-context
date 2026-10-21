@@ -300,3 +300,7 @@ export class TesseractSwarmCoordinator {
     return filePath.replace(/\\/g, '/').replace(/^\.\//, '');
   }
 }
+
+export const OcteractSwarmCoordinator = TesseractSwarmCoordinator;
+export type OcteractSwarmCoordinator = TesseractSwarmCoordinator;
+

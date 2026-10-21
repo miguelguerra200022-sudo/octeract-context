@@ -19,10 +19,10 @@ test('MCPServer: Expone protocolo completo de Resources (tesseract://health, sar
   assert.equal(listRes.id, 1);
   assert.ok(Array.isArray(listRes.result.resources));
   const uris = listRes.result.resources.map((r: any) => r.uri);
-  assert.ok(uris.includes('tesseract://health'));
-  assert.ok(uris.includes('tesseract://sarif'));
-  assert.ok(uris.includes('tesseract://topology'));
-  assert.ok(uris.includes('tesseract://cells'));
+  assert.ok(uris.includes('octeract://health') || uris.includes('tesseract://health'));
+  assert.ok(uris.includes('octeract://sarif') || uris.includes('tesseract://sarif'));
+  assert.ok(uris.includes('octeract://topology') || uris.includes('tesseract://topology'));
+  assert.ok(uris.includes('octeract://cells') || uris.includes('tesseract://cells'));
 
   // 2. resources/read tesseract://health
   const readHealthMsg = { id: 2, method: 'resources/read', params: { uri: 'tesseract://health' } };
@@ -50,8 +50,8 @@ test('MCPServer: Expone protocolo completo de Prompts (tesseract-safe-refactor y
   assert.equal(listRes.id, 10);
   assert.ok(Array.isArray(listRes.result.prompts));
   const promptNames = listRes.result.prompts.map((p: any) => p.name);
-  assert.ok(promptNames.includes('tesseract-safe-refactor'));
-  assert.ok(promptNames.includes('tesseract-audit-diagnostic'));
+  assert.ok(promptNames.includes('octeract-safe-refactor') || promptNames.includes('tesseract-safe-refactor'));
+  assert.ok(promptNames.includes('octeract-audit-diagnostic') || promptNames.includes('tesseract-audit-diagnostic'));
 
   // 2. prompts/get tesseract-safe-refactor
   const getPromptMsg = {

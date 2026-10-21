@@ -166,3 +166,7 @@ export class TesseractAtomicTransmuter {
     return filePath.replace(/\\/g, '/').replace(/^\.\//, '');
   }
 }
+
+export const OcteractAtomicTransmuter = TesseractAtomicTransmuter;
+export type OcteractAtomicTransmuter = TesseractAtomicTransmuter;
+

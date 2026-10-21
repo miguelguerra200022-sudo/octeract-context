@@ -385,7 +385,7 @@ export async function runLicense(subcommand: string = 'status', tokenOrTarget?: 
   if (subcommand === 'status') {
     const status = manager.getLicenseStatus(root);
     console.log(`\n========================================================================`);
-    console.log(`💎 \x1b[1mTESSERACT ENTERPRISE: ESTADO DE LICENCIA BSL 1.1\x1b[0m`);
+    console.log(`💎 \x1b[1mOCTERACT ENTERPRISE: ESTADO DE LICENCIA BSL 1.1\x1b[0m`);
     console.log(`========================================================================`);
     console.log(`  ● Estado:          ${status.active ? '\x1b[1;32mACTIVA (Ed25519 Verified)\x1b[0m' : '\x1b[33mCOMMUNITY (Evaluación / Open Source)\x1b[0m'}`);
     console.log(`  ● Organización:    \x1b[1m${status.orgName}\x1b[0m`);
@@ -396,7 +396,7 @@ export async function runLicense(subcommand: string = 'status', tokenOrTarget?: 
     console.log(`========================================================================\n`);
   } else if (subcommand === 'activate') {
     if (!tokenOrTarget) {
-      console.error('Uso: tesseract-context license activate <token>');
+      console.error('Uso: octeract-context license activate <token>');
       process.exit(1);
     }
     try {
@@ -407,7 +407,7 @@ export async function runLicense(subcommand: string = 'status', tokenOrTarget?: 
       process.exit(1);
     }
   } else {
-    console.log('Comandos de licencia: tesseract license status | tesseract license activate <token>');
+    console.log('Comandos de licencia: octeract license status | octeract license activate <token>');
   }
 }
 
@@ -418,7 +418,7 @@ export async function runSWECI(targetDir: string = '.', action: string = 'status
   if (action === 'status') {
     const status = engine.getStatus();
     console.log(`\n========================================================================`);
-    console.log(`🔄 \x1b[1mTESSERACT SWE-CI: CONTINUOUS ZERO-REGRESSION MONITOR\x1b[0m`);
+    console.log(`🔄 \x1b[1mOCTERACT SWE-CI: CONTINUOUS ZERO-REGRESSION MONITOR\x1b[0m`);
     console.log(`========================================================================`);
     console.log(`  ● Pasos Registrados: \x1b[1m${status.totalSteps}\x1b[0m`);
     console.log(`  ● Salud Actual:      \x1b[1;32m${status.currentHealth}/100\x1b[0m`);
@@ -458,7 +458,7 @@ export async function runLSC(targetDir: string = '.', sourceFile?: string, oldSy
 
 export async function runMesh(action: string = 'audit'): Promise<void> {
   console.log(`\n========================================================================`);
-  console.log(`🌐 \x1b[1mTESSERACT DISTRIBUTED MESH: AUDITORÍA DE MICROSERVICIOS {4,3,3,4}\x1b[0m`);
+  console.log(`🌐 \x1b[1mOCTERACT DISTRIBUTED MESH: AUDITORÍA DE MICROSERVICIOS {4,3,3,4}\x1b[0m`);
   console.log(`========================================================================`);
   console.log(`Auditando contratos distribuidos entre repositorios independientes...\n`);
 }
@@ -466,7 +466,7 @@ export async function runMesh(action: string = 'audit'): Promise<void> {
 export async function runPreflight(targetDir: string = '.'): Promise<void> {
   const root = path.resolve(targetDir);
   console.log(`\n\x1b[1;35m========================================================================\x1b[0m`);
-  console.log(`🛡️  \x1b[1mTESSERACT PREFLIGHT & PACKAGING GUARD (EJE P / 5TA DIMENSIÓN)\x1b[0m`);
+  console.log(`🛡️  \x1b[1mOCTERACT PREFLIGHT & PACKAGING GUARD (EJE P / 5TA DIMENSIÓN)\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
   console.log(`Auditando contratos de empaquetado, binarios CLI, permisos Git y CI/CD en:\n  \x1b[36m${root}\x1b[0m\n`);
 
@@ -505,7 +505,7 @@ export async function runPortfolio(targetDir: string = '.', mode: 'pro' | 'vibe'
   const vibe = evalResult.vibeAdvice;
 
   console.log(`\n\x1b[1;35m========================================================================\x1b[0m`);
-  console.log(`📈 \x1b[1mTESSERACT PORTFOLIO FRONTIER: EL TRIÁNGULO MÁGICO DE LA INVERSIÓN\x1b[0m`);
+  console.log(`📈 \x1b[1mOCTERACT PORTFOLIO FRONTIER: EL TRIÁNGULO MÁGICO DE LA INVERSIÓN\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
   console.log(`  ● Activos de Software Evaluados: \x1b[1m${evalResult.totalAssets}\x1b[0m en ${root}\n`);
 
@@ -556,7 +556,7 @@ export async function runPortfolio(targetDir: string = '.', mode: 'pro' | 'vibe'
 export async function runSwarm(targetDir: string = '.', planPath?: string): Promise<void> {
   const root = path.resolve(targetDir);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
-  console.log(`🤖 \x1b[1mTESSERACT SWARM: COORDINACIÓN DE AGENTES EN ZONAS DE VORONOI 4D\x1b[0m`);
+  console.log(`🤖 \x1b[1mOCTERACT SWARM: COORDINACIÓN DE AGENTES EN ZONAS DE VORONOI 8D\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
 
   const indexer = new ProjectIndexer();
@@ -615,7 +615,7 @@ export async function runSwarm(targetDir: string = '.', planPath?: string): Prom
 export async function runMutate(targetDir: string = '.', targetFile: string): Promise<void> {
   const root = path.resolve(targetDir);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
-  console.log(`🧬 \x1b[1mTESSERACT MUTATION FUZZING: AUDITORÍA DE DUREZA DE PRUEBAS EN RAM\x1b[0m`);
+  console.log(`🧬 \x1b[1mOCTERACT MUTATION FUZZING: AUDITORÍA DE DUREZA DE PRUEBAS EN RAM\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
 
   const engine = new TesseractMutationEngine(root);
@@ -652,7 +652,7 @@ export async function runTransmute(
 ): Promise<void> {
   const root = path.resolve(targetDir);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
-  console.log(`🔄 \x1b[1mTESSERACT ATOMIC TRANSMUTER: SUBGRAFO CERRADO MULTIARQUIVO (G*)\x1b[0m`);
+  console.log(`🔄 \x1b[1mOCTERACT ATOMIC TRANSMUTER: SUBGRAFO CERRADO MULTIARQUIVO (G*)\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
 
   const indexer = new ProjectIndexer();
@@ -693,7 +693,7 @@ export async function runAsymptotic(
 ): Promise<void> {
   const root = path.resolve(targetDir);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
-  console.log(`⚡ \x1b[1mTESSERACT ASYMPTOTIC COMPLEXITY ENGINE (EJE PHI / BIG-O)\x1b[0m`);
+  console.log(`⚡ \x1b[1mOCTERACT ASYMPTOTIC COMPLEXITY ENGINE (EJE PHI / BIG-O)\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
 
   const analyzer = new AsymptoticAnalyzer(root);
@@ -733,7 +733,7 @@ export async function runCausal(
 ): Promise<void> {
   const root = path.resolve(targetDir);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
-  console.log(`🧬 \x1b[1mTESSERACT CAUSAL INFERENCE & DO-CALCULUS (EJE PSI / JUDEA PEARL)\x1b[0m`);
+  console.log(`🧬 \x1b[1mOCTERACT CAUSAL INFERENCE & DO-CALCULUS (EJE PSI / JUDEA PEARL)\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
 
   const engine = new CausalInferenceEngine(root);
@@ -759,7 +759,7 @@ export async function runAsyncAudit(
 ): Promise<void> {
   const root = path.resolve(targetDir);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
-  console.log(`⏱️ \x1b[1mTESSERACT ASYNC FLOW & EVENT LOOP DYNAMICS (EJE OMEGA)\x1b[0m`);
+  console.log(`⏱️ \x1b[1mOCTERACT ASYNC FLOW & EVENT LOOP DYNAMICS (EJE OMEGA)\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
 
   const analyzer = new AsyncFlowAnalyzer(root);
@@ -778,7 +778,8 @@ export async function runAsyncAudit(
 export async function runOcteractStats(targetDir: string = '.'): Promise<void> {
   const root = path.resolve(targetDir);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
-  console.log(`💎 \x1b[1mTESSERACT-OCTERACT: ESPACIO OCTODIMENSIONAL R^8 Y T^8 (RETÍCULO E8)\x1b[0m`);
+  console.log(`💎 \x1b[1mOCTERACT 8D: ESPACIO OCTODIMENSIONAL R^8 Y T^8 (RETÍCULO E8)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
 
   const indexer = new ProjectIndexer();

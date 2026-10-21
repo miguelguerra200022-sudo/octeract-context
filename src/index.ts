@@ -265,7 +265,7 @@ async function main() {
     }
     case '--version':
     case '-v': {
-      console.log('Tesseract-Context v4.0.0 (Enterprise Suite - 8D Octeract Context Engine)');
+      console.log('Octeract-Context v4.0.0 (8D Universal Suite - E8 Riemannian Torus T^8 Context Engine)');
       break;
     }
     case 'help':
@@ -273,29 +273,35 @@ async function main() {
     case '-h':
     default: {
       console.log(`
-\x1b[1;35mTESSERACT-CONTEXT\x1b[0m: Motor de Contexto 4D y Servidor MCP Universal
-Uso: tesseract-context <comando> [opciones]
+\x1b[1;36mOCTERACT-CONTEXT (8D)\x1b[0m: Motor de Contexto 8D (T^8 / E8) y Servidor MCP Universal
+Uso: octeract-context <comando> [opciones] (o 'octeract' / 'tesseract')
 
 Comandos disponibles:
-  \x1b[32maudit\x1b[0m [directorio]    Auditoría estática determinista sin IA (0 tokens) de fracturas en R^4
+  \x1b[32maudit\x1b[0m [directorio]    Auditoría estática determinista sin IA (0 tokens) de fracturas en R^8 / R^4
   \x1b[32mblast\x1b[0m [dir] <file> [sym] [hops] Radio de explosión interprocedural y efecto dominó (< 300 tokens)
   \x1b[32mpatch\x1b[0m [dir] <file> [sym]  Sintetiza un parche retrocompatible zero-touch para fracturas
   \x1b[32mtrial\x1b[0m [dir] <file> <code  Ensayo transaccional en RAM con remapeo delta y rollback automático
   \x1b[32mautoheal\x1b[0m [dir] <id> [--commit] Mini-subagente autónomo: sintetiza parche, ensaya en RAM y aplica
-  \x1b[32mflow\x1b[0m [dir] <pregunta> Trazado causal geodésico en R^4 a partir de lenguaje natural (< 500 tokens)
-  \x1b[32mhybrid-audit\x1b[0m [dir]    Triage colaborativo Teseracto + IA para auditoría semántica de código
+  \x1b[32mflow\x1b[0m [dir] <pregunta> Trazado causal geodésico en T^8 a partir de lenguaje natural (< 500 tokens)
+  \x1b[32mhybrid-audit\x1b[0m [dir]    Triage colaborativo Octeracto + IA para auditoría semántica de código
   \x1b[32mmcp\x1b[0m [directorio]      Inicia el servidor MCP JSON-RPC para agentes IA (Cursor/Claude/Windsurf)
-  \x1b[32mui\x1b[0m [directorio] [puerto] Inicia el Dashboard 4D interactivo táctil para Celulares y PCs (localhost:4444)
+  \x1b[32mui\x1b[0m [directorio] [puerto] Inicia el Dashboard 8D interactivo táctil para Celulares y PCs (localhost:4444)
   \x1b[32mwatch\x1b[0m [directorio]    Inicia el Guardián Autónomo en disco (Shield Watcher)
   \x1b[32minit\x1b[0m [directorio]     Inicializa la protección autónoma (AGENTS.md, .cursorrules, .mcp.json)
-  \x1b[32msafe-write\x1b[0m [dir] <file> <code  Modifica un archivo solo si supera la validación topológica 4D
-  \x1b[32mindex\x1b[0m [directorio]    Escanea y construye el árbol fractal 4D en .tesseract/
+  \x1b[32msafe-write\x1b[0m [dir] <file> <code  Modifica un archivo solo si supera la validación topológica 8D
+  \x1b[32mindex\x1b[0m [directorio]    Escanea y construye el árbol fractal 8D en memoria
   \x1b[32mstats\x1b[0m [directorio]    Muestra métricas topológicas y salud arquitectónica
+  \x1b[32mocteract\x1b[0m [dir]        Muestra métricas completas del Octeracto 8D (T^8, E8, Phi, Psi, Omega)
+  \x1b[32masymptotic\x1b[0m [dir] <f>  Analiza complejidad Big-O estática (Dimensión Phi)
+  \x1b[32mcausal\x1b[0m [dir] <f> <c>   Inferencia causal SCM Judea Pearl / Do-Calculus (Dimensión Psi)
+  \x1b[32momega\x1b[0m [dir] <f>        Audita Event Loop y promesas flotantes (Dimensión Omega)
+  \x1b[32mpreflight\x1b[0m [dir]    Auditoría 5D de empaquetado (Shebang, POSIX bits 100755, dist, exports)
+  \x1b[32mportfolio\x1b[0m [dir]    Frontera eficiente de Markowitz (Sharpe Ratio, Kelly f*, Vibe Advisor)
   \x1b[32mslice\x1b[0m [dir] [celda]   Prueba un corte hiperdimensional quirúrgico con presupuesto de tokens
-  \x1b[32mswarm\x1b[0m [dir] <agents.json> Coordinador 4D de Voronoi: detecta colisiones semánticas y deadlocks
+  \x1b[32mswarm\x1b[0m [dir] <agents.json> Coordinador de Voronoi: detecta colisiones semánticas y deadlocks
   \x1b[32mmutate\x1b[0m [dir] <file> [test] Fuzzing de mutación AST en RAM: detecta tests tramposos o tautológicos
   \x1b[32mtransmute\x1b[0m [dir] <f> <s> <sig> Transmutador atómico de cierre transitivo multi-archivo G*
-  \x1b[32mtui\x1b[0m [directorio]      Inicia la visualización interactiva del teseracto 4D en terminal
+  \x1b[32mtui\x1b[0m [directorio]      Inicia la visualización interactiva del hipercubo en terminal
   \x1b[32mhelp\x1b[0m                  Muestra esta ayuda
       `);
       break;
@@ -306,12 +312,13 @@ Comandos disponibles:
 
 const isDirectRun = Boolean(process.argv[1] && (
   fileURLToPath(import.meta.url) === path.resolve(process.argv[1]) ||
-  process.argv[1].endsWith("tesseract-context.js")
+  process.argv[1].endsWith("tesseract-context.js") ||
+  process.argv[1].endsWith("octeract-context.js")
 ));
 
 if (isDirectRun) {
   main().catch((err) => {
-    console.error('[TESSERACT FATAL ERROR]', err);
+    console.error('[OCTERACT FATAL ERROR]', err);
     process.exit(1);
   });
 }
@@ -323,12 +330,12 @@ export { TransactionalHealer } from './core/healing.ts';
 export { ShadowEngine } from './core/shadow.ts';
 export { MCPServer } from './mcp/server.ts';
 export { FlowTracer } from './core/flow.ts';
-export { eventBus } from './core/events.ts';
+export { eventBus, octeractEventBus } from './core/events.ts';
 export { ProjectIndexer } from './core/indexer.ts';
 export { SarifExporter } from './core/sarif.ts';
 export { DifferentialShearAnalyzer } from './core/diff.ts';
 export { ASTSkeletonizer } from './core/skeleton.ts';
-export { TesseracticHoneycomb } from './core/honeycomb.ts';
+export { TesseracticHoneycomb, OcteracticHoneycomb } from './core/honeycomb.ts';
 export { type HardwareAccelerator, getHardwareAccelerator, CpuMultithreadBackend, WebGPUComputeBackend } from './core/accelerator.ts';
 export { BinarySerializer } from './core/binary.ts';
 export { IncrementalCache } from './core/cache.ts';
@@ -337,12 +344,16 @@ export { EnterpriseLicenseManager } from './enterprise/license.ts';
 export { SWECIEngine } from './enterprise/swe-ci.ts';
 export { LSCEngine } from './enterprise/lsc.ts';
 export { DistributedMeshEngine } from './enterprise/mesh.ts';
-export { TesseractSwarmCoordinator, TesseractSwarmCoordinator as HyperSwarmCoordinator } from './enterprise/swarm.ts';
-export { TesseractMutationEngine, TesseractMutationEngine as ASTMutationEngine } from './enterprise/mutation.ts';
-export { TesseractAtomicTransmuter, TesseractAtomicTransmuter as AtomicTransmuter } from './enterprise/transmute.ts';
+export { TesseractPortfolioEngine, OcteractPortfolioEngine } from './enterprise/portfolio.ts';
+export { TesseractSwarmCoordinator, OcteractSwarmCoordinator, TesseractSwarmCoordinator as HyperSwarmCoordinator } from './enterprise/swarm.ts';
+export { TesseractMutationEngine, OcteractMutationEngine, TesseractMutationEngine as ASTMutationEngine } from './enterprise/mutation.ts';
+export { TesseractAtomicTransmuter, OcteractAtomicTransmuter, TesseractAtomicTransmuter as AtomicTransmuter } from './enterprise/transmute.ts';
 export { OcteractTree } from './core/octeract.ts';
 export { AsymptoticAnalyzer } from './core/asymptotics.ts';
 export { CausalInferenceEngine } from './core/causality.ts';
 export { AsyncFlowAnalyzer } from './core/async-flow.ts';
+export { TesseractDashboard, OcteractDashboard } from './ui/dashboard.ts';
+export { TesseractTUI, OcteractTUI } from './cli/tui.ts';
+
 
 

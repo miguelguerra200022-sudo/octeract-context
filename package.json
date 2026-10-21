@@ -1,11 +1,13 @@
 {
-  "name": "tesseract-context",
+  "name": "octeract-context",
   "version": "4.0.0",
-  "description": "Tesseract v4.0 Octeract 8D Enterprise Suite: 8-Dimensional Context Engine with E8 Riemannian Torus (T^8), 256-ary Octeract Tree, Big-O Asymptotic Analyzer (Phi), Judea Pearl Causal SCM (Psi), Event Loop Async Flow (Omega), and Zero-Token Topological Shield",
+  "description": "Octeract v4.0 8D Enterprise Suite: 8-Dimensional Context Engine with E8 Riemannian Torus (T^8), 256-ary Octeract Tree, Big-O Asymptotic Analyzer (Phi), Judea Pearl Causal SCM (Psi), Event Loop Async Flow (Omega), and Zero-Token Topological Shield",
   "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "bin": {
+    "octeract-context": "bin/octeract-context.js",
+    "octeract": "bin/octeract-context.js",
     "tesseract-context": "bin/tesseract-context.js",
     "tesseract": "bin/tesseract-context.js"
   },
@@ -20,13 +22,13 @@
   "keywords": [
     "mcp",
     "model-context-protocol",
-    "tesseract",
     "octeract",
+    "octeract-context",
     "8d",
-    "hypercube",
-    "hexadec-tree",
     "e8-lattice",
-    "4d",
+    "hypercube",
+    "octonions",
+    "tesseract",
     "ai-agents",
     "vibe-coding",
     "context-engine"
@@ -35,12 +37,12 @@
   "license": "BSL-1.1",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/miguelguerra200022-sudo/tesseract-context.git"
+    "url": "git+https://github.com/miguelguerra200022-sudo/octeract-context.git"
   },
   "bugs": {
-    "url": "https://github.com/miguelguerra200022-sudo/tesseract-context/issues"
+    "url": "https://github.com/miguelguerra200022-sudo/octeract-context/issues"
   },
-  "homepage": "https://github.com/miguelguerra200022-sudo/tesseract-context#readme",
+  "homepage": "https://github.com/miguelguerra200022-sudo/octeract-context#readme",
   "engines": {
     "node": ">=20.0.0"
   },

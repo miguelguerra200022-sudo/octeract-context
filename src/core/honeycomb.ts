@@ -228,3 +228,8 @@ export class TesseracticHoneycomb {
     return false;
   }
 }
+
+export const OcteracticHoneycomb = TesseracticHoneycomb;
+export type OcteracticHoneycomb = TesseracticHoneycomb;
+export type OcteractPackage = HoneycombPackage;
+

@@ -282,3 +282,7 @@ export class TesseractPortfolioEngine {
     };
   }
 }
+
+export const OcteractPortfolioEngine = TesseractPortfolioEngine;
+export type OcteractPortfolioEngine = TesseractPortfolioEngine;
+

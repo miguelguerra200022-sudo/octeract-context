@@ -27,6 +27,7 @@ class TesseractEventBus extends EventEmitter {
     }
 
     this.emit('tesseract_event', event);
+    this.emit('octeract_event', event);
   }
 
   public getRecentEvents(): TesseractEvent[] {
@@ -35,3 +36,7 @@ class TesseractEventBus extends EventEmitter {
 }
 
 export const eventBus = new TesseractEventBus();
+export const octeractEventBus = eventBus;
+export type OcteractEvent = TesseractEvent;
+export { TesseractEventBus as OcteractEventBus };
+
