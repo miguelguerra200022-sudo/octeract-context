@@ -35,7 +35,14 @@ export class CausalInferenceEngine {
     let backDoorSatisfied = true;
     let causalStabilityScore = 0.85;
 
-    const cleanLines = proposedPatch.split('\n').map((l) => l.replace(/^[\s\+\-]+/, ''));
+    let linesToEvaluate = proposedPatch;
+    if (originalCode && originalCode.trim().length > 0) {
+      const origSet = new Set(originalCode.split('\n').map((l) => l.trim()));
+      const addedLines = proposedPatch.split('\n').filter((l) => !origSet.has(l.trim()));
+      linesToEvaluate = addedLines.join('\n');
+    }
+
+    const cleanLines = linesToEvaluate.split('\n').map((l) => l.replace(/^[\s\+\-]+/, ''));
     const normalizedPatch = cleanLines.join(' ').replace(/\s+/g, ' ');
 
     // 1. Detección de Parches Sintomáticos Clásicos de IA (Antipatrones de enmascaramiento)
@@ -49,7 +56,7 @@ export class CausalInferenceEngine {
       /if\s*\(\s*(!\w+|\w+\s*===?\s*(null|undefined))\s*\)\s*(\{\s*)?return(\s+[^;]+)?;?(\s*\})?/.test(normalizedPatch);
 
     // Antipatrón C: Asignación de fallback arbitrario ("|| ''" o "?? {}") en el consumidor sin sanear la fuente
-    const hasFallbackBypass = /\?\?\s*['"{}0]|\s*\|\|\s*['"{}0]/.test(proposedPatch);
+    const hasFallbackBypass = /\?\?\s*['"{}0]|\s*\|\|\s*['"{}0]/.test(linesToEvaluate);
 
     if (hasCatchSwallow || hasSuperficialNullCheck || hasFallbackBypass) {
       isSymptomaticPatch = true;

@@ -262,14 +262,13 @@ export class TopologicalAuditor {
       // Priorizar símbolos importados ya presentes en RAM en el AST
       for (const s of vertex.symbols) {
         if (s.kind === 'import') {
+          const normDep = depSpecifier.replace(/\.[a-zA-Z0-9]+$/, '').replace(/^\.\//, '');
           const matches =
             s.dependencies.length === 0 ||
-            s.dependencies.some(
-              (d) =>
-                depSpecifier.includes(d) ||
-                d.includes(depSpecifier) ||
-                targetVertex.id.includes(d.replace(/^\.\//, ''))
-            ) ||
+            s.dependencies.some((d) => {
+              const normD = d.replace(/\.[a-zA-Z0-9]+$/, '').replace(/^\.\//, '');
+              return normD === normDep || d === depSpecifier;
+            }) ||
             vertex.dependencies.length === 1;
 
           if (matches) {
@@ -544,7 +543,11 @@ export class TopologicalAuditor {
           baseName.includes('constant') ||
           baseName.includes('types') ||
           baseName.includes('enum') ||
-          baseName.includes('interface')
+          baseName.includes('interface') ||
+          baseName.includes('tree') ||
+          baseName.includes('octeract') ||
+          baseName.includes('math') ||
+          baseName.includes('algo')
         ) {
           continue;
         }
@@ -978,6 +981,11 @@ export class TopologicalAuditor {
           for (const fn of at.symbols) {
             const callRegex = new RegExp(`(?:\\b|\\.)${fn}\\s*\\(`, 'g');
             if (callRegex.test(codeWithoutComment)) {
+              // Descartar si es una instanciación sincrónica con 'new'
+              if (new RegExp(`\\bnew\\s+${fn}\\b`).test(codeWithoutComment)) {
+                continue;
+              }
+
               // Descartar si la línea es una declaración de función o método en lugar de una llamada
               const isDeclaration =
                 codeWithoutComment.startsWith('async ') ||
@@ -1109,9 +1117,12 @@ export class TopologicalAuditor {
         for (const depId of v.dependents) {
           const depVertex = idMap.get(depId);
           if (depVertex) {
-            const usesSymbol = depVertex.symbols.some(
-              (s) => s.dependencies.includes(sym.name) || s.name.includes(sym.name) || (s.kind === 'import' && s.name === sym.name)
-            );
+            const isBarrel = path.basename(depVertex.id).startsWith('index.');
+            const usesSymbol =
+              isBarrel ||
+              depVertex.symbols.some(
+                (s) => s.dependencies.includes(sym.name) || s.name.includes(sym.name) || (s.kind === 'import' && s.name === sym.name)
+              );
             if (usesSymbol) {
               isReferenced = true;
               break;

@@ -362,7 +362,11 @@ export class ShadowEngine {
     // -------------------------------------------------------------
     const fullTarget = this.rootDir ? path.resolve(this.rootDir, targetPath) : path.resolve(targetPath);
     const originalContent = fs.existsSync(fullTarget) ? fs.readFileSync(fullTarget, 'utf-8') : '';
-    const asymp = new AsymptoticAnalyzer(this.rootDir).analyzeContent(proposedContent, targetPath);
+    const asympAnalyzer = new AsymptoticAnalyzer(this.rootDir);
+    const asympRegression = originalContent.length > 0
+      ? asympAnalyzer.detectRegression(originalContent, proposedContent, targetPath)
+      : { isDegraded: asympAnalyzer.analyzeContent(proposedContent, targetPath).isDegraded, report: asympAnalyzer.analyzeContent(proposedContent, targetPath), deltaPhi: 0 };
+    const asymp = asympRegression.report;
     const causal = new CausalInferenceEngine(this.rootDir).evaluateIntervention(targetPath, originalContent, proposedContent, vertices);
     const asyncFlow = new AsyncFlowAnalyzer(this.rootDir).analyzeContent(proposedContent, targetPath);
 
@@ -397,14 +401,14 @@ export class ShadowEngine {
       yContracts.passed &&
       zRuntime.passed &&
       wSecurity.passed &&
-      !asymp.isDegraded;
+      !asympRegression.isDegraded;
 
     // Recomendaciones y Parche Sintetizado
     const recommendations: string[] = [];
     let synthesizedPatch: string | undefined;
 
-    if (asymp.isDegraded) {
-      recommendations.push(`ALERTA ASINTÓTICA 8D (Eje PHI): Degeneración de rendimiento ${asymp.baselineComplexity}. ${asymp.recommendation}`);
+    if (asympRegression.isDegraded) {
+      recommendations.push(`ALERTA ASINTÓTICA 8D (Eje PHI): Degeneración de rendimiento ${asymp.baselineComplexity} -> ${asymp.proposedComplexity}. ${asymp.recommendation}`);
     }
 
     if (causal.isSymptomaticPatch) {

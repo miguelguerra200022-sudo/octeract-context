@@ -35,6 +35,9 @@ export class TesseractDashboard {
     eventBus.on('tesseract_event', (event) => {
       this.broadcastSSE(event);
     });
+    eventBus.on('octeract_event', (event) => {
+      this.broadcastSSE(event);
+    });
 
     const server = http.createServer((req, res) => {
       const url = new URL(req.url || '/', `http://${req.headers.host}`);

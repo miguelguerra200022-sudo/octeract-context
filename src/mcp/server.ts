@@ -18,22 +18,32 @@ import { eventBus } from '../core/events.ts';
 import { SarifExporter } from '../core/sarif.ts';
 import { ASTSkeletonizer } from '../core/skeleton.ts';
 import { DifferentialShearAnalyzer } from '../core/diff.ts';
-import { TesseracticHoneycomb } from '../core/honeycomb.ts';
+import { OcteracticHoneycomb, TesseracticHoneycomb } from '../core/honeycomb.ts';
 import { DeepContractDiagnostic } from '../core/diagnostic.ts';
 import { EnterpriseLicenseManager } from '../enterprise/license.ts';
 import { SWECIEngine } from '../enterprise/swe-ci.ts';
 import { LSCEngine } from '../enterprise/lsc.ts';
 import { DistributedMeshEngine } from '../enterprise/mesh.ts';
-import { TesseractPortfolioEngine } from '../enterprise/portfolio.ts';
+import { OcteractPortfolioEngine, TesseractPortfolioEngine } from '../enterprise/portfolio.ts';
 import { PreflightAuditor } from '../core/preflight.ts';
-import { TesseractSwarmCoordinator } from '../enterprise/swarm.ts';
-import { TesseractMutationEngine } from '../enterprise/mutation.ts';
-import { TesseractAtomicTransmuter } from '../enterprise/transmute.ts';
+import { OcteractSwarmCoordinator, TesseractSwarmCoordinator } from '../enterprise/swarm.ts';
+import { OcteractMutationEngine, TesseractMutationEngine } from '../enterprise/mutation.ts';
+import { OcteractAtomicTransmuter, TesseractAtomicTransmuter } from '../enterprise/transmute.ts';
+import { OcteractShieldSecurity } from '../core/security.ts';
 import { OcteractTree } from '../core/octeract.ts';
 import { AsymptoticAnalyzer } from '../core/asymptotics.ts';
 import { CausalInferenceEngine } from '../core/causality.ts';
 import { AsyncFlowAnalyzer } from '../core/async-flow.ts';
 import { type Point8D } from '../core/types.ts';
+import { OcteractGrepEngine } from '../core/grep.ts';
+import { OcteractOrchestratorEngine } from '../core/orchestrator.ts';
+import {
+  OcteractFunSearchEngine,
+  OcteractDeductiveEngine,
+  OcteractAlphaDevOptimizer,
+  OcteractPairformer,
+  OcteractStepVerifier,
+} from '../deepmind/index.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -139,7 +149,7 @@ export class MCPServer {
             },
             serverInfo: {
               name: 'octeract-context',
-              version: '4.0.1',
+              version: '4.1.0',
             },
           },
         };
@@ -1128,6 +1138,140 @@ export class MCPServer {
           required: ['targetFile'],
         },
       },
+      {
+        name: 'octeract_grep',
+        description:
+          'Buscador semántico y grep estructural 8D en lenguaje natural o exacto/regex. Localiza funciones, clases, errores y llamadas con micro-snippets quirúrgicos (< 150 tokens) sin gastar tokens de LLM.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            query: {
+              type: 'string',
+              description: 'Consulta en lenguaje natural (ej: "¿dónde está el login?", "manejo de errores de red") o término literal/regex',
+            },
+            mode: {
+              type: 'string',
+              enum: ['auto', 'semantic', 'exact', 'regex'],
+              description: 'Modo de búsqueda: auto (detecta automáticamente), semantic (BM25F + resonancia 8D), exact (coincidencia literal rápida), regex',
+            },
+            cell: {
+              type: 'string',
+              enum: Object.values(CubicCell),
+              description: 'Filtrar por celda 8D (Security, Storage, Network, CoreLogic, UI, Telemetry, Config, Tests, Types)',
+            },
+            pathFilter: {
+              type: 'string',
+              description: 'Filtro por ruta o subcadena de archivo',
+            },
+            maxResults: {
+              type: 'number',
+              description: 'Número máximo de resultados devueltos (por defecto 15)',
+            },
+            contextLines: {
+              type: 'number',
+              description: 'Líneas de contexto antes y después de la coincidencia (por defecto 2)',
+            },
+          },
+          required: ['query'],
+        },
+      },
+      {
+        name: 'octeract_orchestrate',
+        description:
+          'Meta-Herramienta de Orquestación Agéntica Neuro-Simbólica. Permite al Agente IA guiar a Octeract 8D para diagnosticar, planificar, simular sombras 4D y ejecutar cambios atómicos en un solo turno a costo mínimo de tokens (< 200 tokens).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            userIntent: {
+              type: 'string',
+              description: 'Intención del usuario en lenguaje natural coloquial o técnico (ej: "el login falla con desconexiones de red", "refactorizar AuthService")',
+            },
+            technicalQuery: {
+              type: 'string',
+              description: 'Consulta técnica enriquecida generada por el Agente IA (Query Expansion / HyDE) con términos canónicos de software y símbolos del proyecto.',
+            },
+            phase: {
+              type: 'string',
+              enum: ['diagnose', 'plan', 'simulate', 'execute', 'auto'],
+              description: 'Fase de la orquestación: diagnose (localiza pivotes y blast radius), plan (estrategia de pasos), simulate (shadow preflight sin tocar disco), execute (escritura segura atómica), auto (cadena completa)',
+            },
+            targetFiles: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Rutas opcionales de archivos foco si ya se conocen',
+            },
+            targetSymbols: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Símbolos opcionales de foco',
+            },
+            proposedChanges: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  file: { type: 'string' },
+                  content: { type: 'string' },
+                },
+                required: ['file', 'content'],
+              },
+              description: 'Lista de archivos y contenidos propuestos para simular o ejecutar',
+            },
+          },
+          required: ['userIntent'],
+        },
+      },
+      {
+        name: 'octeract_funsearch',
+        description:
+          'Búsqueda evolutiva en espacio de funciones (Google DeepMind FunSearch). Evalúa mutaciones de código en un sandbox efímero y mantiene un modelo genético de islas en RAM.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            functionName: { type: 'string', description: 'Nombre de la función objetivo' },
+            baselineCode: { type: 'string', description: 'Código fuente base de la función' },
+            requirements: { type: 'string', description: 'Requisitos de optimización o corrección' },
+            candidateCode: { type: 'string', description: 'Código propuesto por el agente para evaluar en el sandbox' },
+            targetPath: { type: 'string', description: 'Ruta relativa del archivo' },
+          },
+          required: ['functionName', 'baselineCode'],
+        },
+      },
+      {
+        name: 'octeract_deductive_audit',
+        description:
+          'Auditoría deductiva formal con cláusulas de Horn (Google DeepMind AlphaGeometry). Deduce contratos rotos, deadlocks y construcciones auxiliares (0 tokens).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetDir: { type: 'string', description: 'Directorio raíz a auditar (opcional)' },
+          },
+        },
+      },
+      {
+        name: 'octeract_alphadev_optimize',
+        description:
+          'Optimizador asintótico de micro-patrones en el AST (Google DeepMind AlphaDev). Convierte bucles cuadráticos O(N^2) a tablas hash O(1).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            filePath: { type: 'string', description: 'Ruta del archivo a optimizar' },
+            code: { type: 'string', description: 'Código fuente opcional a optimizar' },
+          },
+          required: ['filePath'],
+        },
+      },
+      {
+        name: 'octeract_pairformer',
+        description:
+          'Tensor relacional N x N con actualizaciones triangulares (Google DeepMind AlphaFold 3). Detecta acoplamientos transitivos y cuellos de botella de 2º y 3º orden.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetDir: { type: 'string', description: 'Directorio raíz a evaluar (opcional)' },
+          },
+        },
+      },
     ];
 
     const aliases = tools.map((t) => ({
@@ -1156,6 +1300,12 @@ export class MCPServer {
     }
     if (toolName === 'octeract_async_audit') {
       toolName = 'octeract_async_flow_audit';
+    }
+    if (toolName === 'octeract_search') {
+      toolName = 'octeract_grep';
+    }
+    if (toolName === 'octeract_agent_orchestrate' || toolName === 'octeract_conductor') {
+      toolName = 'octeract_orchestrate';
     }
 
     switch (toolName) {
@@ -1782,6 +1932,113 @@ export class MCPServer {
 
       case 'octeract_octeract_stats': {
         return this.space.getOcteractStats();
+      }
+
+      case 'octeract_grep': {
+        const grepEngine = new OcteractGrepEngine(this.rootDir);
+        const result = await grepEngine.search(this.space, {
+          query: args?.query || args?.pattern || args?.term || '',
+          mode: args?.mode,
+          cell: args?.cell,
+          pathFilter: args?.pathFilter || args?.path,
+          maxResults: args?.maxResults ? Number(args.maxResults) : 15,
+          contextLines: args?.contextLines !== undefined ? Number(args.contextLines) : 2,
+        });
+        return result.markdownDossier;
+      }
+
+      case 'octeract_orchestrate': {
+        const orchestrator = new OcteractOrchestratorEngine(this.rootDir);
+        const result = await orchestrator.orchestrate(this.space, {
+          userIntent: args?.userIntent || args?.intent || args?.query || '',
+          technicalQuery: args?.technicalQuery,
+          phase: args?.phase || 'auto',
+          targetFiles: args?.targetFiles,
+          targetSymbols: args?.targetSymbols,
+          proposedChanges: args?.proposedChanges,
+          maxBudgetTokens: args?.maxBudgetTokens,
+        });
+        return result.microDossier;
+      }
+
+      case 'octeract_funsearch': {
+        const funSearch = new OcteractFunSearchEngine(this.rootDir, this.space);
+        const spec = funSearch.createSpecification(
+          args?.functionName || 'targetFunction',
+          args?.baselineCode || '',
+          args?.requirements || 'Optimizar algoritmo y garantizar invariantes'
+        );
+
+        if (args?.candidateCode) {
+          const evalRes = funSearch.evaluateCandidate(
+            args.candidateCode,
+            args?.targetPath || 'snippet.ts',
+            args.baselineCode
+          );
+          const candidate = funSearch.registerCandidate(evalRes);
+          return {
+            status: candidate.isSafe ? 'ACCEPTED_IN_SANDBOX' : 'REJECTED_BY_EVALUATOR',
+            candidate,
+            report: funSearch.getReport(),
+          };
+        }
+
+        return {
+          specification: spec,
+          islandsSummary: funSearch.getReport().islandsSummary,
+        };
+      }
+
+      case 'octeract_deductive_audit': {
+        const deductive = new OcteractDeductiveEngine(this.rootDir);
+        const report = deductive.verify(this.space);
+        return {
+          totalFacts: report.totalFacts,
+          iterationsToFixpoint: report.iterationsToFixpoint,
+          isSymmetric: report.isSymmetric,
+          brokenContractsCount: report.brokenContracts.length,
+          deadlocksCount: report.deadlocks.length,
+          brokenContracts: report.brokenContracts,
+          deadlocks: report.deadlocks,
+          auxiliaryConstructions: report.auxiliaryConstructions,
+        };
+      }
+
+      case 'octeract_alphadev_optimize': {
+        const optimizer = new OcteractAlphaDevOptimizer(this.rootDir);
+        const filePath = args?.filePath || 'snippet.ts';
+        let code = args?.code;
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(this.rootDir, filePath);
+        if (!code && fs.existsSync(resolvedPath)) {
+          code = fs.readFileSync(resolvedPath, 'utf-8');
+        }
+        if (!code) {
+          throw new Error('Debe proporcionar el parámetro "code" o una ruta válida en "filePath".');
+        }
+        const result = optimizer.optimize(code, filePath);
+        return {
+          filePath: result.filePath,
+          theoreticalSpeedup: result.theoreticalSpeedup,
+          transformationsCount: result.transformationsApplied.length,
+          transformations: result.transformationsApplied,
+          isSyntaxValid: result.isSyntaxValid,
+          latencyImprovementScore: result.latencyImprovementScore,
+          optimizedCodeSnippet: result.optimizedCode.slice(0, 500),
+        };
+      }
+
+      case 'octeract_pairformer': {
+        const pairformer = new OcteractPairformer(this.space);
+        const report = pairformer.computePairTensor();
+        return {
+          totalVertices: report.totalVertices,
+          totalPairRelations: report.totalPairRelations,
+          triangularDensity: report.triangularDensity,
+          shadowBottlenecksCount: report.shadowBottlenecksCount,
+          violationsCount: report.violations.length,
+          violations: report.violations.slice(0, 5),
+          topCriticalPairs: report.topCriticalPairs.slice(0, 10),
+        };
       }
 
       default:

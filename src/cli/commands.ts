@@ -30,6 +30,14 @@ import { TesseractAtomicTransmuter } from '../enterprise/transmute.ts';
 import { AsymptoticAnalyzer } from '../core/asymptotics.ts';
 import { CausalInferenceEngine } from '../core/causality.ts';
 import { AsyncFlowAnalyzer } from '../core/async-flow.ts';
+import { OcteractGrepEngine } from '../core/grep.ts';
+import { OcteractOrchestratorEngine } from '../core/orchestrator.ts';
+import {
+  OcteractFunSearchEngine,
+  OcteractDeductiveEngine,
+  OcteractAlphaDevOptimizer,
+  OcteractPairformer,
+} from '../deepmind/index.ts';
 
 export async function runInit(targetDir: string = '.'): Promise<void> {
   await runUniversalInit(targetDir);
@@ -798,6 +806,207 @@ export async function runOcteractStats(targetDir: string = '.'): Promise<void> {
   console.log(`  ● Promedio Asíncrono Ω (Event Loop): \x1b[36m${stats.averageAsyncOmega}\x1b[0m`);
   console.log(`  ● Salud Arquitectónica 8D: \x1b[1;32m${stats.health8D}\x1b[0m\n`);
 }
+
+export async function runGrep(
+  targetDir: string = '.',
+  query: string,
+  options: { mode?: any; cell?: any; maxResults?: number; pathFilter?: string } = {}
+): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;36m========================================================================\x1b[0m`);
+  console.log(`🔍 \x1b[1mOCTERACT 8D GREP & MOTOR DE BÚSQUEDA SEMÁNTICA\x1b[0m`);
+  console.log(`\x1b[1;36m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+  const space = indexer.getSpace();
+  const grepEngine = new OcteractGrepEngine(root);
+
+  const result = await grepEngine.search(space, {
+    query,
+    mode: options.mode,
+    cell: options.cell,
+    pathFilter: options.pathFilter,
+    maxResults: options.maxResults || 10,
+  });
+
+  console.log(`  ● Consulta: "\x1b[1m${result.query}\x1b[0m"`);
+  console.log(`  ● Modo: \x1b[35m${result.mode}\x1b[0m | Archivos escaneados: \x1b[32m${result.filesScanned}\x1b[0m | Coincidencias: \x1b[1;32m${result.totalMatches}\x1b[0m (${result.executionTimeMs} ms)`);
+  console.log(`  ● Tokens Estimados LLM: \x1b[33m${result.estimatedTokens}\x1b[0m\n`);
+
+  if (result.matches.length === 0) {
+    console.log(`\x1b[33m⚠️ No se encontraron coincidencias para "${query}".\x1b[0m\n`);
+    return;
+  }
+
+  for (let i = 0; i < result.matches.length; i++) {
+    const m = result.matches[i];
+    const symName = m.enclosingSymbol ? ` \x1b[34m[${m.enclosingSymbol.kind} ${m.enclosingSymbol.name}]\x1b[0m` : '';
+    console.log(`\x1b[1;32m[${i + 1}]\x1b[0m \x1b[1m${m.file}\x1b[0m:\x1b[33m${m.line}\x1b[0m:\x1b[36m${m.column}\x1b[0m (\x1b[35m${m.cell}\x1b[0m)${symName} - Score: ${m.score.toFixed(1)}`);
+    for (const before of m.contextBefore) {
+      console.log(`   \x1b[90m${before}\x1b[0m`);
+    }
+    console.log(` > \x1b[1;37m${m.lineContent}\x1b[0m`);
+    for (const after of m.contextAfter) {
+      console.log(`   \x1b[90m${after}\x1b[0m`);
+    }
+    console.log('');
+  }
+}
+
+export async function runOrchestrate(
+  targetDir: string = '.',
+  intent: string,
+  options: { phase?: any; targetFiles?: string[]; targetSymbols?: string[] } = {}
+): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🧭 \x1b[1mOCTERACT 8D AGENT ORCHESTRATOR: SIMBIOSIS NEURO-SIMBÓLICA\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+  const space = indexer.getSpace();
+  const orchestrator = new OcteractOrchestratorEngine(root);
+
+  const result = await orchestrator.orchestrate(space, {
+    userIntent: intent,
+    phase: options.phase || 'auto',
+    targetFiles: options.targetFiles,
+    targetSymbols: options.targetSymbols,
+  });
+
+  console.log(`  ● Intención: "\x1b[1m${result.userIntent}\x1b[0m"`);
+  console.log(`  ● Fase: \x1b[35m${result.phase.toUpperCase()}\x1b[0m | Categoría: \x1b[32m${result.decomposition.intentCategory}\x1b[0m | Celdas: \x1b[36m${result.decomposition.resonantCells.join(', ')}\x1b[0m`);
+  console.log(`  ● Tiempo: \x1b[33m${result.executionTimeMs} ms\x1b[0m | Tokens Estimados LLM: \x1b[1;32m${result.estimatedTokens}\x1b[0m\n`);
+
+  console.log(result.microDossier);
+  console.log('');
+  console.log(`\x1b[1;34m[Resumen Vibe para Humanos]\x1b[0m: ${result.vibeSummaryForHuman}\n`);
+}
+
+export async function runFunSearch(
+  targetDir: string = '.',
+  fnName: string,
+  baselineCode: string,
+  candidateCode?: string
+): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🧬 \x1b[1mOCTERACT FUNSEARCH: BÚSQUEDA EVOLUTIVA EN ESPACIO DE FUNCIONES\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+  const engine = new OcteractFunSearchEngine(root, indexer.getSpace());
+  const spec = engine.createSpecification(fnName, baselineCode, 'Optimizar complejidad y asegurar invarianza');
+
+  console.log(`  ● Función Objetivo: \x1b[1m${fnName}\x1b[0m`);
+  console.log(`  ● Signatura Detectada: \x1b[36m${spec.signatureTemplate}\x1b[0m\n`);
+
+  if (candidateCode) {
+    console.log(`  ⏳ Evaluando candidato en Micro-Sandbox efímero...`);
+    const evalRes = engine.evaluateCandidate(candidateCode, 'snippet.ts', baselineCode);
+    const registered = engine.registerCandidate(evalRes);
+    console.log(`  ● Veredicto Sandbox: ${registered.passedSandbox ? '\x1b[1;32mPASÓ\x1b[0m' : '\x1b[1;31mFALLÓ\x1b[0m'} (${registered.executionTimeMs} ms)`);
+    console.log(`  ● Fitness Score: \x1b[1;32m${registered.score}/100\x1b[0m (Cizallamiento: ${registered.shearDistance.toFixed(3)})`);
+    console.log(`  ● Complejidad: \x1b[35m${registered.asymptoticComplexity}\x1b[0m`);
+    console.log(`  ● Estado: ${registered.isSafe ? '\x1b[1;32mSEGURO PARA PRODUCCIÓN\x1b[0m' : '\x1b[1;31mRECHAZADO\x1b[0m'}\n`);
+  } else {
+    console.log(`\x1b[33mEspecificación generada para el LLM:\x1b[0m\n${spec.systemPrompt}\n`);
+  }
+}
+
+export async function runDeductive(targetDir: string = '.'): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`📐 \x1b[1mOCTERACT DEDUCTIVE ENGINE: CLÁUSULAS DE HORN (ALPHAGEOMETRY DD+AR)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+  const engine = new OcteractDeductiveEngine(root);
+  const report = engine.verify(indexer.getSpace());
+
+  console.log(`  ● Hechos Formales en Base de Conocimiento: \x1b[1;32m${report.totalFacts}\x1b[0m`);
+  console.log(`  ● Iteraciones hasta Punto Fijo (Fixpoint): \x1b[1m${report.iterationsToFixpoint}\x1b[0m`);
+  console.log(`  ● Nuevas Deducciones Simbólicas: \x1b[36m${report.newDeductions.length}\x1b[0m`);
+  console.log(`  ● Simetría Formal: ${report.isSymmetric ? '\x1b[1;32mPERFECTA (0 Fracturas Horn)\x1b[0m' : '\x1b[1;31mFRACTURAS DETECTADAS\x1b[0m'}\n`);
+
+  if (report.auxiliaryConstructions.length > 0) {
+    console.log(`\x1b[33mConstrucciones Auxiliares Recomendadas para Destrabar Deducción:\x1b[0m`);
+    for (const aux of report.auxiliaryConstructions) {
+      console.log(`  • [${aux.type}] ${aux.sourceFile} -> ${aux.targetSymbol}`);
+      console.log(`    ${aux.rationale}`);
+    }
+    console.log('');
+  }
+}
+
+export async function runAlphaDev(targetDir: string = '.', filePath: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`⚡ \x1b[1mOCTERACT ALPHADEV OPTIMIZER: REESCRITURA DE MICRO-PATRONES AST\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[1;31m✖ Error: Archivo '${fullPath}' no existe.\x1b[0m\n`);
+    return;
+  }
+  const code = fs.readFileSync(fullPath, 'utf-8');
+  const optimizer = new OcteractAlphaDevOptimizer(root);
+  const result = optimizer.optimize(code, filePath);
+
+  console.log(`  ● Archivo Auditado: \x1b[1m${result.filePath}\x1b[0m`);
+  console.log(`  ● Ganancia Asintótica Teórica: \x1b[1;32m${result.theoreticalSpeedup}\x1b[0m`);
+  console.log(`  ● Transformaciones AST Detectadas: \x1b[1m${result.transformationsApplied.length}\x1b[0m`);
+  console.log(`  ● Puntuación de Latencia Optimizada: \x1b[36m${result.latencyImprovementScore}/100\x1b[0m\n`);
+
+  for (const t of result.transformationsApplied) {
+    console.log(`  \x1b[33m[Línea ${t.line}] ${t.type}\x1b[0m: ${t.description}`);
+    console.log(`    Antes:  \x1b[31m${t.originalPattern}\x1b[0m`);
+    console.log(`    Optim:  \x1b[32m${t.optimizedPattern}\x1b[0m\n`);
+  }
+}
+
+export async function runPairformer(targetDir: string = '.'): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🔺 \x1b[1mOCTERACT PAIRFORMER: TENSOR RELACIONAL TRIANGULAR N x N\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+  const pairformer = new OcteractPairformer(indexer.getSpace());
+  const report = pairformer.computePairTensor();
+
+  console.log(`  ● Vértices en Tensor: \x1b[1m${report.totalVertices}\x1b[0m | Relaciones de Pares: \x1b[1;32m${report.totalPairRelations}\x1b[0m`);
+  console.log(`  ● Densidad Relacional Triangular: \x1b[36m${(report.triangularDensity * 100).toFixed(1)}%\x1b[0m`);
+  console.log(`  ● Cuellos de Botella Transitivos Ocultos: \x1b[1;${report.shadowBottlenecksCount > 0 ? '33' : '32'}m${report.shadowBottlenecksCount}\x1b[0m`);
+  console.log(`  ● Violaciones de Invarianza Triangular: \x1b[1;${report.violations.length > 0 ? '31' : '32'}m${report.violations.length}\x1b[0m\n`);
+
+  if (report.topCriticalPairs.length > 0) {
+    console.log(`\x1b[33mTop 5 Acoplamientos Triangulares Más Críticos:\x1b[0m`);
+    for (const p of report.topCriticalPairs.slice(0, 5)) {
+      console.log(`  • \x1b[1m${p.source}\x1b[0m ➔ \x1b[1m${p.target}\x1b[0m | Fuerza: \x1b[35m${p.triangularStrength}\x1b[0m | Dist 8D: \x1b[36m${p.geodesicDistance}\x1b[0m`);
+    }
+    console.log('');
+  }
+}
+
+
+
 
 
 

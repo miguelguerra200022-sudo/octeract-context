@@ -241,16 +241,35 @@ export class ProjectIndexer {
       this.cache = new IncrementalCache(rootDir);
     }
 
+    const MAX_FULL_FILE_SIZE = 1500 * 1024; // 1.5MB
+    const SKELETON_SAMPLE_SIZE = 128 * 1024; // 128KB para esqueletizar archivos gigantes sin desbordar RAM
+
     for (const relPath of fileList) {
       const fullPath = path.join(rootDir, relPath);
       let content = '';
+      let isSkeleton = false;
 
       try {
         const stats = fs.statSync(fullPath);
-        // Omitir archivos mayores a 1.5MB (binarios o volcados)
-        if (stats.size > 1500 * 1024) continue;
+        const vertexId = relPath.replace(/\\/g, '/');
 
-        content = fs.readFileSync(fullPath, 'utf-8');
+        // Pre-check de Caché Incremental: Si el archivo no ha cambiado y ya está en el espacio, reutilizar en O(1)
+        const existingVertex = this.space.getVertex(vertexId);
+        if (existingVertex && !this.cache.isModified(fullPath) && existingVertex.lastModified === stats.mtimeMs) {
+          continue;
+        }
+
+        // Esqueletización superficial (Skeleton Indexing) para archivos mayores a 1.5MB
+        if (stats.size > MAX_FULL_FILE_SIZE) {
+          isSkeleton = true;
+          const fd = fs.openSync(fullPath, 'r');
+          const buf = Buffer.alloc(SKELETON_SAMPLE_SIZE);
+          const bytesRead = fs.readSync(fd, buf, 0, SKELETON_SAMPLE_SIZE, 0);
+          fs.closeSync(fd);
+          content = buf.toString('utf-8', 0, bytesRead);
+        } else {
+          content = fs.readFileSync(fullPath, 'utf-8');
+        }
 
         // Seleccionar parser apropiado
         const parser = this.parsers.find((p) => p.supports(relPath)) || this.parsers[2];
@@ -269,13 +288,13 @@ export class ProjectIndexer {
         const coordinate8D = this.computeCoordinate8D(coordinate, content, relPath);
 
         const vertex: HyperVertex = {
-          id: relPath.replace(/\\/g, '/'),
+          id: vertexId,
           hexCode,
           path: relPath,
           cell,
           coordinate,
           coordinate8D,
-          lines: parseResult.totalLines,
+          lines: isSkeleton ? Math.max(parseResult.totalLines, Math.round(stats.size / 40)) : parseResult.totalLines,
           sizeBytes: stats.size,
           tokenEstimate: Math.round(content.length / 3.8),
           symbols: parseResult.symbols,
@@ -287,7 +306,7 @@ export class ProjectIndexer {
         };
 
         this.space.addVertex(vertex);
-        this.cache?.record(fullPath);
+        this.cache.record(fullPath);
       } catch (_e) {
         // Ignorar archivos que no se puedan leer como texto UTF-8
         continue;
@@ -306,38 +325,42 @@ export class ProjectIndexer {
   }
 
   /**
-   * Recorre directorios respetando exclusiones
+   * Recorre directorios de forma iterativa y ultra-rápida (Zero-Recursion, fdir style)
+   * Usa fs.readdirSync con withFileTypes: true para evitar llamadas adicionales a stat
    */
   private walkDirectory(
-    currentDir: string,
+    startDir: string,
     rootDir: string,
     ignoreList: string[],
     result: string[],
     maxFiles: number
   ): void {
-    if (result.length >= maxFiles) return;
+    const queue: string[] = [startDir];
 
-    let entries: fs.Dirent[] = [];
-    try {
-      entries = fs.readdirSync(currentDir, { withFileTypes: true });
-    } catch (_e) {
-      return;
-    }
-
-    for (const entry of entries) {
-      if (result.length >= maxFiles) break;
-
-      const fullPath = path.join(currentDir, entry.name);
-      const relPath = path.relative(rootDir, fullPath);
-
-      if (ignoreList.some((pattern) => entry.name === pattern || relPath.includes(pattern))) {
+    while (queue.length > 0 && result.length < maxFiles) {
+      const currentDir = queue.shift()!;
+      let entries: fs.Dirent[] = [];
+      try {
+        entries = fs.readdirSync(currentDir, { withFileTypes: true });
+      } catch (_e) {
         continue;
       }
 
-      if (entry.isDirectory()) {
-        this.walkDirectory(fullPath, rootDir, ignoreList, result, maxFiles);
-      } else if (entry.isFile()) {
-        result.push(relPath);
+      for (const entry of entries) {
+        if (result.length >= maxFiles) break;
+
+        const fullPath = path.join(currentDir, entry.name);
+        const relPath = path.relative(rootDir, fullPath);
+
+        if (ignoreList.some((pattern) => entry.name === pattern || relPath.includes(pattern))) {
+          continue;
+        }
+
+        if (entry.isDirectory()) {
+          queue.push(fullPath);
+        } else if (entry.isFile()) {
+          result.push(relPath);
+        }
       }
     }
   }

@@ -1,7 +1,7 @@
 {
   "name": "octeract-context",
-  "version": "4.0.1",
-  "description": "Octeract v4.0 8D Enterprise Suite: 8-Dimensional Context Engine with E8 Riemannian Torus (T^8), 256-ary Octeract Tree, Big-O Asymptotic Analyzer (Phi), Judea Pearl Causal SCM (Psi), Event Loop Async Flow (Omega), and Zero-Token Topological Shield",
+  "version": "4.1.0",
+  "description": "Octeract v4.1 8D Enterprise Suite: 8-Dimensional Context Engine, Google DeepMind Neuro-Symbolic Suite (FunSearch, AlphaGeometry, AlphaDev, Pairformer, PRM), Supreme Agent Orchestrator, E8 Riemannian Torus (T^8), and Zero-Token Topological Shield",
   "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",
@@ -29,6 +29,13 @@
     "hypercube",
     "octonions",
     "tesseract",
+    "deepmind",
+    "funsearch",
+    "alphageometry",
+    "alphadev",
+    "pairformer",
+    "orchestrator",
+    "neuro-symbolic",
     "ai-agents",
     "vibe-coding",
     "context-engine"

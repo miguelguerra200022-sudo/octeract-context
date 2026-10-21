@@ -29,9 +29,9 @@ export class TypeScriptParser implements LanguageParser {
       const line = lines[i].trim();
       if (!line || line.startsWith('//') || line.startsWith('*')) continue;
 
-      const importMatch = line.match(/^import\s+(?:.+?\s+from\s+)?['"]([^'"]+)['"]/);
-      if (importMatch && importMatch[1]) {
-        const dep = importMatch[1];
+      const depMatch = line.match(/^(?:import|export)\s+(?:.+?\s+from\s+|type\s+.+?\s+from\s+)?['"]([^'"]+)['"]/);
+      if (depMatch && depMatch[1]) {
+        const dep = depMatch[1];
         if (!dependencies.includes(dep)) dependencies.push(dep);
         continue;
       }
@@ -43,8 +43,9 @@ export class TypeScriptParser implements LanguageParser {
       }
     }
 
-    // 2. Extraer símbolos línea por línea
-    let inClassOrInterface = false;
+    // 2. Extraer símbolos línea por línea con tracking de profundidad de llaves
+    let currentBraceDepth = 0;
+    let classStartDepth = -1;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
@@ -52,14 +53,12 @@ export class TypeScriptParser implements LanguageParser {
 
       if (!line || line.startsWith('//') || line.startsWith('*')) continue;
 
-      // Detectar fin de bloque
-      if (line === '}') {
-        inClassOrInterface = false;
-        continue;
-      }
+      const openCount = (line.match(/\{/g) || []).length;
+      const closeCount = (line.match(/\}/g) || []).length;
+      const inClassOrInterface = classStartDepth !== -1;
 
-      // Importaciones con nombre: import { a, b } from '...'
-      const namedImportMatch = line.match(/^import\s*\{([^}]+)\}\s*from\s*['"]([^'"]+)['"]/);
+      // Importaciones y Re-exportaciones con nombre: import/export { a, b } from '...'
+      const namedImportMatch = line.match(/^(?:import|export)\s*\{([^}]+)\}\s*from\s*['"]([^'"]+)['"]/);
       if (namedImportMatch) {
         const parts = namedImportMatch[1].split(',');
         const targetDep = namedImportMatch[2];
@@ -76,6 +75,7 @@ export class TypeScriptParser implements LanguageParser {
             });
           }
         }
+        currentBraceDepth += openCount - closeCount;
         continue;
       }
 
@@ -91,7 +91,8 @@ export class TypeScriptParser implements LanguageParser {
           dependencies: [],
           isExported: line.startsWith('export'),
         });
-        inClassOrInterface = true;
+        classStartDepth = currentBraceDepth;
+        currentBraceDepth += openCount - closeCount;
         continue;
       }
 
@@ -107,7 +108,8 @@ export class TypeScriptParser implements LanguageParser {
           dependencies: [],
           isExported: line.startsWith('export'),
         });
-        inClassOrInterface = true;
+        classStartDepth = currentBraceDepth;
+        currentBraceDepth += openCount - closeCount;
         continue;
       }
 
@@ -197,11 +199,11 @@ export class TypeScriptParser implements LanguageParser {
         continue;
       }
 
-      // Miembros públicos de clase o métodos de interfaz (ej. startRow, fetch, get)
+      // Miembros públicos de clase o métodos de interfaz (ej. startRow, fetch, get, indexDirectory)
       if (inClassOrInterface) {
         // Propiedades públicas o readonly: public readonly startRow: number; o startRow: number;
-        const propMatch = line.match(/^(?:public\s+)?(?:readonly\s+)?([A-Za-z0-9_$]+)\s*[:=]/);
-        if (propMatch && !['constructor', 'return', 'if', 'else', 'for', 'while'].includes(propMatch[1])) {
+        const propMatch = line.match(/^(?:public\s+|private\s+|protected\s+)?(?:readonly\s+)?([A-Za-z0-9_$]+)\s*[:=]/);
+        if (propMatch && !['constructor', 'return', 'if', 'else', 'for', 'while', 'switch', 'catch'].includes(propMatch[1])) {
           if (!symbols.some((s) => s.name === propMatch[1])) {
             symbols.push({
               name: propMatch[1],
@@ -212,12 +214,19 @@ export class TypeScriptParser implements LanguageParser {
               dependencies: [],
             });
           }
+          currentBraceDepth += openCount - closeCount;
+          if (classStartDepth !== -1 && currentBraceDepth <= classStartDepth) {
+            classStartDepth = -1;
+          }
           continue;
         }
 
-        // Métodos: fetch(key: string): Promise<string>; o get(key: string, ...): ...
-        const methodMatch = line.match(/^(?:public\s+)?(?:async\s+)?([A-Za-z0-9_$]+)\s*\([^)]*\)\s*[:{]/);
-        if (methodMatch && !['constructor', 'return', 'if', 'else', 'for', 'while'].includes(methodMatch[1])) {
+        // Métodos: fetch(key: string): Promise<string>; o get(key: string, ...): ... o indexDirectory(...)
+        const methodMatch =
+          line.match(/^(?:public\s+|private\s+|protected\s+)?(?:static\s+)?(?:async\s+)?([A-Za-z0-9_$]+)\s*\([^)]*\)\s*[:{]/) ||
+          line.match(/^(?:public\s+|private\s+|protected\s+)?(?:static\s+)?(?:async\s+)?([A-Za-z0-9_$]+)\s*\(/);
+
+        if (methodMatch && !['constructor', 'return', 'if', 'else', 'for', 'while', 'switch', 'catch', 'throw'].includes(methodMatch[1])) {
           if (!symbols.some((s) => s.name === methodMatch[1])) {
             symbols.push({
               name: methodMatch[1],
@@ -228,8 +237,17 @@ export class TypeScriptParser implements LanguageParser {
               dependencies: [],
             });
           }
+          currentBraceDepth += openCount - closeCount;
+          if (classStartDepth !== -1 && currentBraceDepth <= classStartDepth) {
+            classStartDepth = -1;
+          }
           continue;
         }
+      }
+
+      currentBraceDepth += openCount - closeCount;
+      if (classStartDepth !== -1 && currentBraceDepth <= classStartDepth) {
+        classStartDepth = -1;
       }
     }
 

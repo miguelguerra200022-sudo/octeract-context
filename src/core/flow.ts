@@ -6,6 +6,7 @@
 
 import { CubicCell, type HyperVertex, type TopologicalFracture } from './types.ts';
 import { HypercubeSpace } from './hypercube.ts';
+import { OcteractGrepEngine } from './grep.ts';
 
 export interface FlowStep {
   index: number;
@@ -84,6 +85,15 @@ export class FlowTracer {
         }
       }
     }
+
+    // Enriquecer con descomposición de identificadores y sinónimos de ingeniería de software
+    const { expandedTerms } = OcteractGrepEngine.tokenizeNaturalQuery(query);
+    for (const term of expandedTerms) {
+      if (!keywords.includes(term) && term.length >= 3) {
+        keywords.push(term);
+      }
+    }
+
     return keywords;
   }
 

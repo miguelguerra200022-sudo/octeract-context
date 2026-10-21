@@ -4,7 +4,7 @@ import * as path from 'node:path';
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
 
-import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats } from './cli/commands.ts';
+import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats, runGrep, runOrchestrate, runFunSearch, runDeductive, runAlphaDev, runPairformer } from './cli/commands.ts';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -257,6 +257,101 @@ async function main() {
       await runAsyncAudit(targetDir, targetFile);
       break;
     }
+    case 'grep':
+    case 'search': {
+      let targetDir = '.';
+      let query = '';
+      let mode = 'auto';
+      let cell: string | undefined;
+      let maxResults = 10;
+
+      const remaining: string[] = [];
+      for (let i = 1; i < args.length; i++) {
+        if (args[i] === '--semantic') mode = 'semantic';
+        else if (args[i] === '--exact') mode = 'exact';
+        else if (args[i] === '--regex') mode = 'regex';
+        else if (args[i] === '--cell' && args[i + 1]) {
+          cell = args[++i];
+        } else if ((args[i] === '--max' || args[i] === '-n') && args[i + 1]) {
+          maxResults = parseInt(args[++i], 10);
+        } else {
+          remaining.push(args[i]);
+        }
+      }
+
+      if (remaining.length > 1 && (fs.existsSync(remaining[0]) || remaining[0] === '.')) {
+        targetDir = remaining[0];
+        query = remaining.slice(1).join(' ');
+      } else {
+        query = remaining.join(' ');
+      }
+
+      if (!query) {
+        console.error('Uso: octeract grep [dir] "<consulta_en_lenguaje_natural_o_regex>" [--semantic|--exact|--regex] [--cell <Cell>] [--max <N>]');
+        process.exit(1);
+      }
+
+      await runGrep(targetDir, query, { mode, cell, maxResults });
+      break;
+    }
+    case 'orchestrate':
+    case 'conductor': {
+      let targetDir = '.';
+      let intent = '';
+      let phase = 'auto';
+
+      const remaining: string[] = [];
+      for (let i = 1; i < args.length; i++) {
+        if (args[i] === '--phase' && args[i + 1]) {
+          phase = args[++i];
+        } else {
+          remaining.push(args[i]);
+        }
+      }
+
+      if (remaining.length > 1 && (fs.existsSync(remaining[0]) || remaining[0] === '.')) {
+        targetDir = remaining[0];
+        intent = remaining.slice(1).join(' ');
+      } else {
+        intent = remaining.join(' ');
+      }
+
+      if (!intent) {
+        console.error('Uso: octeract orchestrate [dir] "<intencion_usuario>" [--phase <diagnose|plan|simulate|execute|auto>]');
+        process.exit(1);
+      }
+
+      await runOrchestrate(targetDir, intent, { phase });
+      break;
+    }
+    case 'funsearch': {
+      const targetDir = args[1] || '.';
+      const fnName = args[2] || 'targetFunction';
+      const baselineCode = args[3] || '';
+      const candidateCode = args[4];
+      await runFunSearch(targetDir, fnName, baselineCode, candidateCode);
+      break;
+    }
+    case 'deductive': {
+      const targetDir = args[1] || '.';
+      await runDeductive(targetDir);
+      break;
+    }
+    case 'alphadev': {
+      const targetDir = args[1] || '.';
+      const filePath = args[2];
+      if (!filePath) {
+        console.error('Uso: octeract alphadev [dir] <archivo>');
+        process.exit(1);
+      }
+      await runAlphaDev(targetDir, filePath);
+      break;
+    }
+    case 'pairformer': {
+      const targetDir = args[1] || '.';
+      await runPairformer(targetDir);
+      break;
+    }
     case 'octeract':
     case '8d': {
       const targetDir = args[1] || '.';
@@ -265,7 +360,7 @@ async function main() {
     }
     case '--version':
     case '-v': {
-      console.log('Octeract-Context v4.0.1 (8D Universal Suite - E8 Riemannian Torus T^8 Context Engine)');
+      console.log('Octeract-Context v4.1.0 (8D Universal Suite - E8 Riemannian Torus T^8 Context Engine)');
       break;
     }
     case 'help':
@@ -290,6 +385,7 @@ Comandos disponibles:
   \x1b[32minit\x1b[0m [directorio]     Inicializa la protección autónoma (AGENTS.md, .cursorrules, .mcp.json)
   \x1b[32msafe-write\x1b[0m [dir] <file> <code  Modifica un archivo solo si supera la validación topológica 8D
   \x1b[32mindex\x1b[0m [directorio]    Escanea y construye el árbol fractal 8D en memoria
+  \x1b[32mgrep\x1b[0m [dir] <query>    Grep semántico en lenguaje natural y estructural por líneas con snippets (< 150 tokens)
   \x1b[32mstats\x1b[0m [directorio]    Muestra métricas topológicas y salud arquitectónica
   \x1b[32mocteract\x1b[0m [dir]        Muestra métricas completas del Octeracto 8D (T^8, E8, Phi, Psi, Omega)
   \x1b[32masymptotic\x1b[0m [dir] <f>  Analiza complejidad Big-O estática (Dimensión Phi)
@@ -354,6 +450,8 @@ export { CausalInferenceEngine } from './core/causality.ts';
 export { AsyncFlowAnalyzer } from './core/async-flow.ts';
 export { TesseractDashboard, OcteractDashboard } from './ui/dashboard.ts';
 export { TesseractTUI, OcteractTUI } from './cli/tui.ts';
+export { OcteractOrchestratorEngine } from './core/orchestrator.ts';
+export * from './deepmind/index.ts';
 
 
 
