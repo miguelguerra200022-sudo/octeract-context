@@ -4,7 +4,7 @@ import * as path from 'node:path';
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
 
-import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute } from './cli/commands.ts';
+import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats } from './cli/commands.ts';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -222,9 +222,50 @@ async function main() {
       await runTransmute(targetDir, targetFile, symbol, newSig);
       break;
     }
+    case 'asymptotic':
+    case 'phi': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      const proposedFile = args[3];
+      if (!targetFile) {
+        console.error('Uso: tesseract-context asymptotic <dir> <archivo> [archivoPropuesto]');
+        process.exit(1);
+      }
+      await runAsymptotic(targetDir, targetFile, proposedFile);
+      break;
+    }
+    case 'causal':
+    case 'psi': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      const patchFile = args[3];
+      if (!targetFile) {
+        console.error('Uso: tesseract-context causal <dir> <archivo> [archivoParche]');
+        process.exit(1);
+      }
+      await runCausal(targetDir, targetFile, patchFile);
+      break;
+    }
+    case 'async-audit':
+    case 'omega': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      if (!targetFile) {
+        console.error('Uso: tesseract-context async-audit <dir> <archivo>');
+        process.exit(1);
+      }
+      await runAsyncAudit(targetDir, targetFile);
+      break;
+    }
+    case 'octeract':
+    case '8d': {
+      const targetDir = args[1] || '.';
+      await runOcteractStats(targetDir);
+      break;
+    }
     case '--version':
     case '-v': {
-      console.log('Tesseract-Context v3.2.0 (Enterprise Suite - 4D Hypercube Context Engine)');
+      console.log('Tesseract-Context v4.0.0 (Enterprise Suite - 8D Octeract Context Engine)');
       break;
     }
     case 'help':
@@ -299,5 +340,9 @@ export { DistributedMeshEngine } from './enterprise/mesh.ts';
 export { TesseractSwarmCoordinator, TesseractSwarmCoordinator as HyperSwarmCoordinator } from './enterprise/swarm.ts';
 export { TesseractMutationEngine, TesseractMutationEngine as ASTMutationEngine } from './enterprise/mutation.ts';
 export { TesseractAtomicTransmuter, TesseractAtomicTransmuter as AtomicTransmuter } from './enterprise/transmute.ts';
+export { OcteractTree } from './core/octeract.ts';
+export { AsymptoticAnalyzer } from './core/asymptotics.ts';
+export { CausalInferenceEngine } from './core/causality.ts';
+export { AsyncFlowAnalyzer } from './core/async-flow.ts';
 
 

@@ -5,7 +5,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { CubicCell, type HyperVertex, type Point4D, type AuditReport } from './types.ts';
+import { CubicCell, type HyperVertex, type Point4D, type Point8D, type AuditReport } from './types.ts';
 import { HypercubeSpace } from './hypercube.ts';
 import { TopologicalAuditor } from './auditor.ts';
 import type { LanguageParser } from '../parsers/base.ts';
@@ -14,6 +14,8 @@ import { PythonParser } from '../parsers/py-parser.ts';
 import { GenericParser } from '../parsers/generic-parser.ts';
 import { BinarySerializer } from './binary.ts';
 import { IncrementalCache } from './cache.ts';
+import { AsymptoticAnalyzer } from './asymptotics.ts';
+import { AsyncFlowAnalyzer } from './async-flow.ts';
 
 export interface IndexerOptions {
   rootDir: string;
@@ -198,6 +200,33 @@ export class ProjectIndexer {
   }
 
   /**
+   * Calcula la coordenada 8D canónica [X, Y, Z, W, PHI, PSI, OMEGA, XI]
+   */
+  public computeCoordinate8D(
+    coord4D: Point4D,
+    content: string,
+    relPath: string
+  ): Point8D {
+    const asymp = new AsymptoticAnalyzer().analyzeContent(content, relPath);
+    const asyncFlow = new AsyncFlowAnalyzer().analyzeContent(content, relPath);
+    const phi = asymp.asymptoticScore;
+    const psi = 0.85; // Estabilidad causal base
+    const omega = asyncFlow.asyncComplexityScore;
+    const xi = relPath.startsWith('package.json') || relPath.startsWith('bin/') ? 0.90 : 0.20;
+
+    return [
+      coord4D[0],
+      coord4D[1],
+      coord4D[2],
+      coord4D[3],
+      parseFloat(phi.toFixed(3)),
+      parseFloat(psi.toFixed(3)),
+      parseFloat(omega.toFixed(3)),
+      parseFloat(xi.toFixed(3)),
+    ];
+  }
+
+  /**
    * Escanea e indexa el repositorio recursivamente
    */
   public indexDirectory(options: IndexerOptions): HypercubeSpace {
@@ -237,12 +266,15 @@ export class ProjectIndexer {
 
         const hexCode = this.space.tree.coordinateToHex(coordinate);
 
+        const coordinate8D = this.computeCoordinate8D(coordinate, content, relPath);
+
         const vertex: HyperVertex = {
           id: relPath.replace(/\\/g, '/'),
           hexCode,
           path: relPath,
           cell,
           coordinate,
+          coordinate8D,
           lines: parseResult.totalLines,
           sizeBytes: stats.size,
           tokenEstimate: Math.round(content.length / 3.8),
@@ -540,12 +572,14 @@ export class ProjectIndexer {
             stat.mtimeMs
           );
           const hexCode = this.space.tree.coordinateToHex(coordinate);
+          const coordinate8D = this.computeCoordinate8D(coordinate, content, relPath);
           const vertex: HyperVertex = {
             id,
             hexCode,
             path: relPath,
             cell,
             coordinate,
+            coordinate8D,
             lines: parseResult.totalLines,
             sizeBytes: stat.size,
             tokenEstimate: Math.round(content.length / 3.8),

@@ -3,16 +3,19 @@
  * Rotaciones ortogonales en 6 planos, proyección de sombras y cortes dimensionales (Slices)
  */
 
-import { CubicCell, type Point4D, type RotationPlane, type HyperVertex, type HyperStats, type SliceRequest, type SliceResult, type TopologyMode } from './types.ts';
+import { CubicCell, type Point4D, type Point8D, type RotationPlane, type HyperVertex, type HyperStats, type SliceRequest, type SliceResult, type TopologyMode, type OcteractStats } from './types.ts';
 import { HexadecTree } from './hexadectree.ts';
+import { OcteractTree } from './octeract.ts';
 
 export class HypercubeSpace {
   public tree: HexadecTree;
+  public octeractTree: OcteractTree;
   private vertices: Map<string, HyperVertex> = new Map();
   private topologyMode: TopologyMode = 'torus';
 
-  constructor(tree?: HexadecTree) {
+  constructor(tree?: HexadecTree, octeractTree?: OcteractTree) {
     this.tree = tree || new HexadecTree();
+    this.octeractTree = octeractTree || new OcteractTree();
   }
 
   /**
@@ -77,6 +80,7 @@ export class HypercubeSpace {
   public addVertex(vertex: HyperVertex): void {
     this.vertices.set(vertex.id, vertex);
     this.tree.insert(vertex);
+    this.octeractTree.insert(vertex);
   }
 
   /**
@@ -101,6 +105,13 @@ export class HypercubeSpace {
   }
 
   /**
+   * Obtiene estadísticas del espacio octodimensional R^8
+   */
+  public getOcteractStats(): OcteractStats {
+    return this.octeractTree.getStats();
+  }
+
+  /**
    * Clona el espacio hiperdimensional de forma ultra-ligera en RAM para transacciones efímeras
    */
   public clone(): HypercubeSpace {
@@ -112,6 +123,7 @@ export class HypercubeSpace {
         dependencies: [...v.dependencies],
         dependents: [...v.dependents],
         coordinate: [...v.coordinate] as Point4D,
+        coordinate8D: v.coordinate8D ? ([...v.coordinate8D] as Point8D) : undefined,
       });
     }
     return newSpace;

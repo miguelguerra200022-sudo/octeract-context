@@ -6,8 +6,23 @@
 /** Coordenada continua en el espacio hiperdimensional R^4, acotada en [0, 1] */
 export type Point4D = [x: number, y: number, z: number, w: number];
 
+/** Coordenada continua canónica en el espacio octodimensional R^8 / T^8 acotada en [0, 1] */
+export type Point8D = [
+  x: number,      // X: Abstracción Sintáctica / Profundidad AST
+  y: number,      // Y: Densidad de Acoplamiento y PageRank
+  z: number,      // Z: Capa Arquitectónica / Dominio Funcional
+  w: number,      // W: Estabilidad Temporal y Velocidad Git
+  phi: number,    // PHI: Complejidad Asintótica Formal Big-O
+  psi: number,    // PSI: Causalidad Estructural y Resistencia a Confusión (Pearl)
+  omega: number,  // OMEGA: Dinámica Asíncrona y Event Loop (Microtasks)
+  xi: number      // XI: Empaquetado, Runtime y Despliegue en Producción
+];
+
 /** Los 4 ejes ortogonales fundamentales */
 export type Axis4D = 'X' | 'Y' | 'Z' | 'W';
+
+/** Los 8 ejes ortogonales fundamentales del Octeracto */
+export type Axis8D = 'X' | 'Y' | 'Z' | 'W' | 'PHI' | 'PSI' | 'OMEGA' | 'XI';
 
 /** Los 6 planos ortogonales de rotación en 4D */
 export type RotationPlane = 'XY' | 'XZ' | 'XW' | 'YZ' | 'YW' | 'ZW';
@@ -44,6 +59,8 @@ export interface HyperVertex {
   path: string;                    // Ruta relativa del archivo
   cell: CubicCell;                 // Celda cúbica asignada
   coordinate: Point4D;             // Coordenada continua (x: sintaxis, y: semántica, z: contratos, w: volatilidad)
+  coordinate8D?: Point8D;          // Coordenada octodimensional canónica [X, Y, Z, W, PHI, PSI, OMEGA, XI]
+  octeractHexCode?: string;        // Dirección fractal en el Octeract-Tree 256-ario (ej. "0x8FA4")
   lines: number;                   // Líneas de código
   sizeBytes: number;               // Tamaño en bytes
   tokenEstimate: number;           // Estimación aproximada de tokens
@@ -107,8 +124,11 @@ export interface SliceResult {
 export interface ShadowProjection {
   targetPath: string;
   stateVector4D: Point4D;          // Vector de conformidad S = [x, y, z, w] in [0, 1]^4
+  stateVector8D?: Point8D;         // Vector de conformidad octodimensional [X, Y, Z, W, PHI, PSI, OMEGA, XI]
   shearVector: Point4D;            // Desviación por eje (dx, dy, dz, dw) = [1-x, 1-y, 1-z, 1-w]
+  shearVector8D?: Point8D;         // Desviación octodimensional en R^8
   shearDistance: number;           // Distancia euclidiana en R^4: sqrt(sum((1-v_i)^2))
+  shearDistance8D?: number;        // Distancia euclidiana octodimensional en R^8
   isSafe: boolean;                 // Verdadero si D_shear <= 0.75 y no hay violaciones críticas
   axes: {
     xSyntax: { passed: boolean; score: number; issues: string[]; isTruncated?: boolean };
@@ -213,7 +233,10 @@ export type FractureType =
   | 'RELEASE_SYNC_FRACTURE'
   | 'SEMANTIC_RACE_FRACTURE'
   | 'MUTATION_RESILIENCE_FRACTURE'
-  | 'ATOMIC_TRANSFORMATION_FRACTURE';
+  | 'ATOMIC_TRANSFORMATION_FRACTURE'
+  | 'ASYMPTOTIC_DEGRADATION_FRACTURE'
+  | 'SPURIOUS_CORRELATION_FRACTURE'
+  | 'UNHANDLED_ASYNC_FRACTURE';
 
 /** Representación de una fractura topológica en el hipercubo */
 export interface TopologicalFracture {
@@ -406,4 +429,78 @@ export interface TransmutationReport {
   isComplete: boolean;
   verdict: 'ATOMIC_RECIPE_READY' | 'PARTIAL_COLLAPSE_DETECTED';
 }
+
+/** Nodo en el Árbol Octeract-Tree 256-ario (Octeracto Fractal 8D) */
+export interface OcteractNode {
+  byteIndex: number;               // Índice de cuadrante 8D (0 a 255 = 1 byte uint8)
+  depth: number;                   // Nivel de profundidad fractal en R^8
+  hexPrefix: string;               // Prefijo hexadecimal de dirección (ej. "0x8FA4")
+  children: Array<OcteractNode | null>; // 256 ramas hijas ortogonales
+  vertexIds: string[];             // Vértices asociados a este hiper-octante
+  aggregate: {
+    totalTokens: number;
+    totalFiles: number;
+    cellCounts: Record<CubicCell, number>;
+  };
+}
+
+/** Notación Asintótica Formal de Complejidad Computacional */
+export type AsymptoticComplexity =
+  | 'O(1)'
+  | 'O(log N)'
+  | 'O(N)'
+  | 'O(N log N)'
+  | 'O(N^2)'
+  | 'O(2^N)';
+
+/** Reporte de Análisis Asintótico Estático Big-O (Eje PHI) */
+export interface AsymptoticReport {
+  filePath: string;
+  baselineComplexity: AsymptoticComplexity;
+  proposedComplexity?: AsymptoticComplexity;
+  asymptoticScore: number;         // [0, 1] en el eje PHI
+  nestedLoopDepth: number;
+  hasQuadraticCollections: boolean; // .find() / .includes() inside loops
+  suspiciousLines: { line: number; reason: string; complexity: AsymptoticComplexity }[];
+  isDegraded: boolean;             // Transición de O(N) a O(N^2) o superior
+  recommendation?: string;
+}
+
+/** Reporte de Inferencia Causal Estructural y Do-Calculus (Eje PSI) */
+export interface CausalInferenceReport {
+  targetPath: string;
+  proposedPatchSnippet?: string;
+  causalStabilityScore: number;    // [0, 1] en el eje PSI
+  confoundersDetected: string[];   // Variables o estados que confunden la causalidad
+  isSymptomaticPatch: boolean;     // True si es un parche superficial (ej. if(!x)return)
+  backDoorCriterionSatisfied: boolean; // True si bloquea la causa raíz real
+  rootCauseNode?: string;
+  verdict: 'CAUSALLY_SOUND' | 'SPURIOUS_CORRELATION_DETECTED';
+  recommendation: string;
+}
+
+/** Reporte de Dinámica Asíncrona y Event Loop (Eje OMEGA) */
+export interface AsyncFlowReport {
+  filePath: string;
+  asyncComplexityScore: number;    // [0, 1] en el eje OMEGA
+  floatingPromisesCount: number;   // Promesas llamadas sin await ni catch
+  unhandledForks: { line: number; expression: string }[];
+  asyncRaceRisks: { line: number; variable: string; reason: string }[];
+  isSafe: boolean;
+  verdict: 'ASYNC_FLOW_SAFE' | 'UNHANDLED_ASYNC_FORK_DETECTED';
+  recommendation?: string;
+}
+
+/** Estadísticas del Espacio Octodimensional R^8 */
+export interface OcteractStats {
+  totalVertices: number;
+  octeractDepth: number;
+  torusVolume8D: number;
+  e8LatticeDensity: number;
+  averageAsymptoticPhi: number;
+  averageCausalPsi: number;
+  averageAsyncOmega: number;
+  health8D: 'PERFECT_OCTAGONAL_SYMMETRY' | 'ASYMPTOTIC_TENSION' | 'OCTA_FRACTURE_DETECTED';
+}
+
 

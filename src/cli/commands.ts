@@ -27,6 +27,9 @@ import { TesseractPortfolioEngine } from '../enterprise/portfolio.ts';
 import { TesseractSwarmCoordinator } from '../enterprise/swarm.ts';
 import { TesseractMutationEngine } from '../enterprise/mutation.ts';
 import { TesseractAtomicTransmuter } from '../enterprise/transmute.ts';
+import { AsymptoticAnalyzer } from '../core/asymptotics.ts';
+import { CausalInferenceEngine } from '../core/causality.ts';
+import { AsyncFlowAnalyzer } from '../core/async-flow.ts';
 
 export async function runInit(targetDir: string = '.'): Promise<void> {
   await runUniversalInit(targetDir);
@@ -682,6 +685,119 @@ export async function runTransmute(
     console.log('');
   }
 }
+
+export async function runAsymptotic(
+  targetDir: string = '.',
+  targetFile: string,
+  proposedFile?: string
+): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`⚡ \x1b[1mTESSERACT ASYMPTOTIC COMPLEXITY ENGINE (EJE PHI / BIG-O)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const analyzer = new AsymptoticAnalyzer(root);
+  if (proposedFile && fs.existsSync(path.resolve(proposedFile))) {
+    const origPath = path.isAbsolute(targetFile) ? targetFile : path.join(root, targetFile);
+    const origContent = fs.existsSync(origPath) ? fs.readFileSync(origPath, 'utf-8') : '';
+    const propContent = fs.readFileSync(path.resolve(proposedFile), 'utf-8');
+    const { isDegraded, deltaPhi, report } = analyzer.detectRegression(origContent, propContent, targetFile);
+
+    console.log(`  ● Archivo Auditado: \x1b[1m${report.filePath}\x1b[0m`);
+    console.log(`  ● Complejidad Base: \x1b[36m${report.baselineComplexity}\x1b[0m ➔ Propuesta: \x1b[1;33m${report.proposedComplexity}\x1b[0m`);
+    console.log(`  ● Desviación Asintótica ΔΦ: ${deltaPhi > 0 ? `\x1b[31m+${deltaPhi}\x1b[0m` : `\x1b[32m${deltaPhi}\x1b[0m`}`);
+    console.log(`  ● ¿Degeneración Cuadrática?: ${isDegraded ? '\x1b[1;31mSÍ (CRÍTICO)\x1b[0m' : '\x1b[1;32mNO (ÓPTIMO)\x1b[0m'}`);
+    if (report.recommendation) {
+      console.log(`  💡 Recomendación: ${report.recommendation}`);
+    }
+  } else {
+    const report = analyzer.analyzeFile(targetFile);
+    console.log(`  ● Archivo: \x1b[1m${report.filePath}\x1b[0m`);
+    console.log(`  ● Complejidad Asintótica Estática: \x1b[1;32m${report.baselineComplexity}\x1b[0m (Coordenada Φ: ${report.asymptoticScore})`);
+    console.log(`  ● Profundidad de Bucles Anidados: ${report.nestedLoopDepth}`);
+    console.log(`  ● Búsquedas O(N) en Colecciones dentro de Loops: ${report.hasQuadraticCollections ? '\x1b[31mDETECTADAS\x1b[0m' : 'Ninguna'}`);
+    if (report.suspiciousLines.length > 0) {
+      console.log(`\n\x1b[33mLíneas con patrones asintóticos:\x1b[0m`);
+      for (const item of report.suspiciousLines) {
+        console.log(`  • Línea ${item.line} [${item.complexity}]: ${item.reason}`);
+      }
+    }
+  }
+  console.log('');
+}
+
+export async function runCausal(
+  targetDir: string = '.',
+  targetFile: string,
+  patchFile?: string
+): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🧬 \x1b[1mTESSERACT CAUSAL INFERENCE & DO-CALCULUS (EJE PSI / JUDEA PEARL)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const engine = new CausalInferenceEngine(root);
+  const fullPath = path.isAbsolute(targetFile) ? targetFile : path.join(root, targetFile);
+  const originalContent = fs.existsSync(fullPath) ? fs.readFileSync(fullPath, 'utf-8') : '';
+  const patchContent = patchFile && fs.existsSync(path.resolve(patchFile))
+    ? fs.readFileSync(path.resolve(patchFile), 'utf-8')
+    : originalContent;
+
+  const report = engine.evaluateIntervention(targetFile, originalContent, patchContent);
+
+  console.log(`  ● Archivo Objetivo: \x1b[1m${report.targetPath}\x1b[0m`);
+  console.log(`  ● Estabilidad Causal (Ψ): \x1b[1;32m${(report.causalStabilityScore * 100).toFixed(0)}%\x1b[0m`);
+  console.log(`  ● Criterio de la Puerta Trasera (Back-Door): ${report.backDoorCriterionSatisfied ? '\x1b[32mSATISFECHO\x1b[0m' : '\x1b[31mVIOLADO\x1b[0m'}`);
+  console.log(`  ● ¿Parche Sintomático / Espurio?: ${report.isSymptomaticPatch ? '\x1b[31mSÍ (ENMASCARAMIENTO)\x1b[0m' : '\x1b[32mNO (CAUSALMENTE SÓLIDO)\x1b[0m'}`);
+  console.log(`  ● Veredicto: \x1b[1m${report.verdict}\x1b[0m`);
+  console.log(`  💡 Recomendación: ${report.recommendation}\n`);
+}
+
+export async function runAsyncAudit(
+  targetDir: string = '.',
+  targetFile: string
+): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`⏱️ \x1b[1mTESSERACT ASYNC FLOW & EVENT LOOP DYNAMICS (EJE OMEGA)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const analyzer = new AsyncFlowAnalyzer(root);
+  const report = analyzer.analyzeFile(targetFile);
+
+  console.log(`  ● Archivo: \x1b[1m${report.filePath}\x1b[0m`);
+  console.log(`  ● Complejidad Asíncrona (Ω): \x1b[36m${report.asyncComplexityScore}\x1b[0m`);
+  console.log(`  ● Promesas Flotantes sin Await: ${report.floatingPromisesCount > 0 ? `\x1b[31m${report.floatingPromisesCount}\x1b[0m` : '\x1b[32m0\x1b[0m'}`);
+  console.log(`  ● Riesgos de Carreras en Event Loop: ${report.asyncRaceRisks.length > 0 ? `\x1b[31m${report.asyncRaceRisks.length}\x1b[0m` : '\x1b[32m0\x1b[0m'}`);
+  console.log(`  ● Veredicto: \x1b[1m${report.verdict}\x1b[0m\n`);
+  if (report.recommendation) {
+    console.log(`  💡 Recomendación: ${report.recommendation}\n`);
+  }
+}
+
+export async function runOcteractStats(targetDir: string = '.'): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`💎 \x1b[1mTESSERACT-OCTERACT: ESPACIO OCTODIMENSIONAL R^8 Y T^8 (RETÍCULO E8)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+  const space = indexer.getSpace();
+  const stats = space.getOcteractStats();
+
+  console.log(`  ● Variedad Riemanniana: \x1b[1mT^8 = R^8 / Z^8 (8-Toroide sin distorsión de borde)\x1b[0m`);
+  console.log(`  ● Total de Vértices Indexados en 8D: \x1b[1;32m${stats.totalVertices} nodos\x1b[0m`);
+  console.log(`  ● Profundidad del Árbol 256-ario (Octeract-Tree): \x1b[1mNivel ${stats.octeractDepth} (1 Byte/nivel)\x1b[0m`);
+  console.log(`  ● Densidad de Empaquetamiento de Esferas E8: \x1b[1;32m${(stats.e8LatticeDensity * 100).toFixed(1)}% (Óptimo de Viazovska)\x1b[0m`);
+  console.log(`  ● Promedio Asintótico Φ (Big-O): \x1b[36m${stats.averageAsymptoticPhi}\x1b[0m`);
+  console.log(`  ● Promedio Causal Ψ (Invariantes Pearl): \x1b[36m${stats.averageCausalPsi}\x1b[0m`);
+  console.log(`  ● Promedio Asíncrono Ω (Event Loop): \x1b[36m${stats.averageAsyncOmega}\x1b[0m`);
+  console.log(`  ● Salud Arquitectónica 8D: \x1b[1;32m${stats.health8D}\x1b[0m\n`);
+}
+
 
 
 

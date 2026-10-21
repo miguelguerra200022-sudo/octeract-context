@@ -6,19 +6,19 @@
   <img src="assets/logo.jpg" alt="Tesseract Logo" width="140" height="140" style="border-radius: 50%;" />
 </p>
 
-<h1 align="center">💎 TESSERACT-CONTEXT (4D)</h1>
+<h1 align="center">💎 TESSERACT-OCTERACT (8D)</h1>
 
 <p align="center">
-  <strong>The Fractal 4D Hypercube Context Engine & Autonomous Refactoring Shield for AI Coding Agents</strong>
+  <strong>The 8-Dimensional Context Engine ($E_8$ Riemannian Torus $T^8$) & Autonomous Refactoring Shield for AI Coding Agents</strong>
 </p>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/tesseract-context"><img src="https://img.shields.io/npm/v/tesseract-context.svg?style=for-the-badge&color=CB3837&logo=npm" alt="npm version" /></a>
-  <a href="https://github.com/miguelguerra200022-sudo/tesseract-context/actions"><img src="https://img.shields.io/badge/tests-100%2F100%20passing-brightgreen.svg?style=for-the-badge" alt="Tests" /></a>
+  <a href="https://github.com/miguelguerra200022-sudo/tesseract-context/actions"><img src="https://img.shields.io/badge/tests-110%2F110%20passing-brightgreen.svg?style=for-the-badge" alt="Tests" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D20.0.0-blue.svg?style=for-the-badge" alt="Node" /></a>
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-JSON--RPC%202.0-purple.svg?style=for-the-badge" alt="MCP" /></a>
   <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-BSL%201.1%20%2F%20Fair--Source-orange.svg?style=for-the-badge" alt="License" /></a>
-  <a href="#benchmarks"><img src="https://img.shields.io/badge/tokens-0%20tokens%20static%20audit-success.svg?style=for-the-badge" alt="Zero-Tokens" /></a>
+  <a href="#octeract-8d"><img src="https://img.shields.io/badge/dimension-8D%20Octeract%20E8-blueviolet.svg?style=for-the-badge" alt="8D Octeract" /></a>
 </p>
 
 <p align="center">
@@ -112,6 +112,46 @@ Tesseract v3.2 solves the three critical industry bottlenecks that cause autonom
 - **Preventing SWE-EVO Context Amnesia:** Solves the multi-file refactoring collapse where an agent updates an exported symbol in a core library but forgets to update distant consumers or test fixtures.
 - **Topological Transitive Closure ($\mathcal{G}^*$):** Computes the full closure of all call sites across the entire dependency graph and enforces atomic, synchronous multi-file patch recipes.
 - **Physical Commit Shield:** If a partial commit is detected, Tesseract physically blocks the write with `ATOMIC_TRANSFORMATION_FRACTURE` (`CRITICAL`), guaranteeing zero half-baked commits. Tested empirically on Express.js `cors` in $< 12\text{ ms}$.
+
+---
+
+<a id="octeract-8d"></a>
+## 🌌 Tesseract v4.0: The Octeract 8D Engine ($E_8$ Riemannian Torus $T^8$)
+
+Tesseract v4.0 reaches the mathematical pinnacle of normed division algebras by upgrading from 4D to an **8-dimensional Riemannian Torus ($\mathbb{R}^8 / \mathbb{Z}^8$)** structured upon the **$E_8$ Gosset Lattice** (proven optimal by Maryna Viazovska, Fields Medal 2022) and partitioned by a **256-ary fractal Octeract-Tree**:
+
+```
+                       Canonical 8D Vector: (X, Y, Z, W, Φ, Ψ, Ω, Ξ)
+ ┌───────────────────────┬──────────────────────────────────────────────────────────────┐
+ │ Dimension             │ Semantic & Architectural Invariant                           │
+ ├───────────────────────┼──────────────────────────────────────────────────────────────┤
+ │ X: AST Depth          │ Structural Abstraction & Interface Hierarchy                 │
+ │ Y: Centrality Density │ Topological PageRank & Contract In-Degree                    │
+ │ Z: Functional Cell    │ 8 Orthogonal Cubic Domains (CoreLogic, Storage, UI, etc.)     │
+ │ W: Git Temporal Churn │ Commit Frequency & Defect Velocity Hotspots                  │
+ │ Φ: Asymptotic Big-O   │ Computational Complexity (O(1) to O(2^N) Degradation Guard)  │
+ │ Ψ: Causal SCM         │ Judea Pearl Back-Door Criterion (Symptomatic vs Root Fix)    │
+ │ Ω: Async Event Loop   │ Microtask Dynamics, Floating Promises & Race Condition Guard │
+ │ Ξ: Runtime Packaging  │ POSIX Binary Bits, Shebang, Node ESM/CJS & Tarball Integrity │
+ └───────────────────────┴──────────────────────────────────────────────────────────────┘
+```
+
+### 1. 256-ary Fractal Octeract Tree & 1-Byte Hardware Bitwise Indexing
+- **Hardware-Native Indexing:** $2^8 = 256$ hyper-octants are mapped directly to a single `uint8` byte ($0\text{x}00$ to $0\text{xFF}$), achieving $O(1)$ spatial quantization and instant bitwise masking with zero hash table overhead.
+- **Riemannian Geodesic Torus Metric ($T^8$):** Eliminates boundary artifacts across all 8 dimensions simultaneously:
+  $$D_{\text{torus8D}}(\vec{p}_1, \vec{p}_2) = \sqrt{\sum_{i=1}^8 \min(|p_{1,i} - p_{2,i}|, 1 - |p_{1,i} - p_{2,i}|)^2}$$
+
+### 2. Dimension $\Phi$: Static Asymptotic Big-O Complexity Guard (`tesseract asymptotic`)
+- Detects computational degradation where an AI agent unknowingly turns an $\mathcal{O}(N)$ lookup into an $\mathcal{O}(N^2)$ quadratic disaster (e.g., nested `Array.filter` or `.find` inside tight loops).
+- Automatically emits `ASYMPTOTIC_DEGRADATION_FRACTURE` and synthesizes an $\mathcal{O}(1)$ `Map` / `Set` indexing replacement.
+
+### 3. Dimension $\Psi$: Judea Pearl Causal Structural Model (`tesseract causal`)
+- Applies Judea Pearl's **do-calculus** and the **Back-Door Criterion** to distinguish between superficial symptomatic patches (e.g., wrapping code in `try/catch` with empty fallback returns) and true root-cause interventions.
+- Flags `SPURIOUS_CORRELATION_FRACTURE` if the proposed patch merely silences errors without addressing the causal parent nodes.
+
+### 4. Dimension $\Omega$: Event Loop & Async Flow Dynamics (`tesseract async-audit`)
+- Analyzes Promise resolution chains, floating asynchronous calls lacking `await`, and uncontrolled microtask interleaving.
+- Emits `UNHANDLED_ASYNC_FRACTURE` and provides deterministic synchronization guards to prevent production race conditions.
 
 ---
 

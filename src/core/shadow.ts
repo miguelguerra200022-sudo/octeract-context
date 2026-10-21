@@ -3,10 +3,15 @@
  * Evalúa el impacto de cambios propuestos antes de que toquen el disco
  */
 
-import { CubicCell, type Point4D, type HyperVertex, type HyperEdge, type ShadowProjection } from './types.ts';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { CubicCell, type Point4D, type Point8D, type HyperVertex, type HyperEdge, type ShadowProjection } from './types.ts';
 import { HypercubeSpace } from './hypercube.ts';
 import { TesseractShieldSecurity } from './security.ts';
 import { TopologicalAuditor } from './auditor.ts';
+import { AsymptoticAnalyzer } from './asymptotics.ts';
+import { CausalInferenceEngine } from './causality.ts';
+import { AsyncFlowAnalyzer } from './async-flow.ts';
 
 export class ShadowEngine {
   private space: HypercubeSpace;
@@ -352,16 +357,63 @@ export class ShadowEngine {
       Math.sqrt(shearVector.reduce((acc, v) => acc + v * v, 0)).toFixed(3)
     );
 
+    // -------------------------------------------------------------
+    // ANÁLISIS OCTODIMENSIONAL 8D (PHI: Asintótica, PSI: Causal, OMEGA: Async, XI: Runtime)
+    // -------------------------------------------------------------
+    const fullTarget = this.rootDir ? path.resolve(this.rootDir, targetPath) : path.resolve(targetPath);
+    const originalContent = fs.existsSync(fullTarget) ? fs.readFileSync(fullTarget, 'utf-8') : '';
+    const asymp = new AsymptoticAnalyzer(this.rootDir).analyzeContent(proposedContent, targetPath);
+    const causal = new CausalInferenceEngine(this.rootDir).evaluateIntervention(targetPath, originalContent, proposedContent, vertices);
+    const asyncFlow = new AsyncFlowAnalyzer(this.rootDir).analyzeContent(proposedContent, targetPath);
+
+    const scorePhi = 1.0 - Math.min(1.0, asymp.asymptoticScore);
+    const scorePsi = causal.causalStabilityScore;
+    const scoreOmega = asyncFlow.isSafe ? 1.0 : 0.40;
+    const scoreXi = 1.0;
+
+    const stateVector8D: Point8D = [
+      stateVector4D[0], stateVector4D[1], stateVector4D[2], stateVector4D[3],
+      parseFloat(scorePhi.toFixed(3)),
+      parseFloat(scorePsi.toFixed(3)),
+      parseFloat(scoreOmega.toFixed(3)),
+      parseFloat(scoreXi.toFixed(3)),
+    ];
+
+    const shearVector8D: Point8D = [
+      shearVector[0], shearVector[1], shearVector[2], shearVector[3],
+      parseFloat((1 - scorePhi).toFixed(3)),
+      parseFloat((1 - scorePsi).toFixed(3)),
+      parseFloat((1 - scoreOmega).toFixed(3)),
+      parseFloat((1 - scoreXi).toFixed(3)),
+    ];
+
+    const shearDistance8D = parseFloat(
+      Math.sqrt(shearVector8D.reduce((acc, v) => acc + v * v, 0)).toFixed(3)
+    );
+
     const isSafe =
       shearDistance <= 0.75 &&
       xSyntax.passed &&
       yContracts.passed &&
       zRuntime.passed &&
-      wSecurity.passed;
+      wSecurity.passed &&
+      !asymp.isDegraded;
 
     // Recomendaciones y Parche Sintetizado
     const recommendations: string[] = [];
     let synthesizedPatch: string | undefined;
+
+    if (asymp.isDegraded) {
+      recommendations.push(`ALERTA ASINTÓTICA 8D (Eje PHI): Degeneración de rendimiento ${asymp.baselineComplexity}. ${asymp.recommendation}`);
+    }
+
+    if (causal.isSymptomaticPatch) {
+      recommendations.push(`ALERTA CAUSAL 8D (Eje PSI): Parche sintomático detectado. ${causal.recommendation}`);
+    }
+
+    if (!asyncFlow.isSafe) {
+      recommendations.push(`ALERTA ASÍNCRONA 8D (Eje OMEGA): ${asyncFlow.recommendation}`);
+    }
 
     if (missingSymbolsCount > 0) {
       recommendations.push(
@@ -405,14 +457,17 @@ export class ShadowEngine {
     }
 
     if (isSafe) {
-      recommendations.push('El cambio es topológicamente seguro. La simetría del hipercubo se mantiene.');
+      recommendations.push('El cambio es topológicamente seguro. La simetría del octeracto 8D se mantiene.');
     }
 
     return {
       targetPath,
       stateVector4D,
+      stateVector8D,
       shearVector,
+      shearVector8D,
       shearDistance,
+      shearDistance8D,
       isSafe,
       axes: {
         xSyntax,

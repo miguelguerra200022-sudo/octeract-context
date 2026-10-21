@@ -225,6 +225,27 @@ export class SarifExporter {
       full: 'Se intentó modificar un contrato o firma raíz sin actualizar atómicamente todos los archivos del subgrafo cerrado transitivo, dejando consumidores rezagados y fracturas de cizallamiento.',
       level: 'error',
     },
+    ASYMPTOTIC_DEGRADATION_FRACTURE: {
+      id: 'TESS-023',
+      name: 'AsymptoticComplexityDegradation',
+      short: 'Degeneración de complejidad asintótica Big-O (Eje PHI)',
+      full: 'El código propuesto introduce bucles anidados o búsquedas lineales dentro de iteraciones, aumentando la complejidad computacional a O(N^2) o superior y arriesgando colapso de rendimiento.',
+      level: 'error',
+    },
+    SPURIOUS_CORRELATION_FRACTURE: {
+      id: 'TESS-024',
+      name: 'SpuriousCorrelationPatch',
+      short: 'Parche sintomático de IA que ataca correlación espuria sin resolver la causa raíz (Eje PSI)',
+      full: 'La modificación enmascara el fallo con un guard superficial sin intervenir el nodo causal primario que viola el criterio de la puerta trasera de Judea Pearl.',
+      level: 'warning',
+    },
+    UNHANDLED_ASYNC_FRACTURE: {
+      id: 'TESS-025',
+      name: 'UnhandledAsyncFork',
+      short: 'Promesa flotante o bifurcación asíncrona no gestionada en el Event Loop (Eje OMEGA)',
+      full: 'Se detectaron promesas flotantes sin await, forEach(async) o mutaciones concurrentes no atómicas en contexto asíncrono.',
+      level: 'error',
+    },
   };
 
   /**

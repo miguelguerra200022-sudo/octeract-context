@@ -29,6 +29,11 @@ import { PreflightAuditor } from '../core/preflight.ts';
 import { TesseractSwarmCoordinator } from '../enterprise/swarm.ts';
 import { TesseractMutationEngine } from '../enterprise/mutation.ts';
 import { TesseractAtomicTransmuter } from '../enterprise/transmute.ts';
+import { OcteractTree } from '../core/octeract.ts';
+import { AsymptoticAnalyzer } from '../core/asymptotics.ts';
+import { CausalInferenceEngine } from '../core/causality.ts';
+import { AsyncFlowAnalyzer } from '../core/async-flow.ts';
+import { type Point8D } from '../core/types.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -134,7 +139,7 @@ export class MCPServer {
             },
             serverInfo: {
               name: 'tesseract-context',
-              version: '1.1.0',
+              version: '4.0.0',
             },
           },
         };
@@ -209,6 +214,11 @@ export class MCPServer {
               {
                 uri: 'tesseract://audit-triage',
                 name: 'Triage de Auditoría Híbrida (Tesseract + IA)',
+                mimeType: 'application/json',
+              },
+              {
+                uri: 'tesseract://octeract',
+                name: 'Métricas del Hiperespacio 8D (Octeract Tree y Variedad Toroidal T^8)',
                 mimeType: 'application/json',
               },
             ],
@@ -296,6 +306,16 @@ export class MCPServer {
             },
           };
         }
+        if (uri === 'tesseract://octeract') {
+          const stats = this.space.getOcteractStats();
+          return {
+            jsonrpc: '2.0',
+            id,
+            result: {
+              contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(stats, null, 2) }],
+            },
+          };
+        }
         return {
           jsonrpc: '2.0',
           id,
@@ -328,6 +348,11 @@ export class MCPServer {
               {
                 name: 'tesseract-audit-diagnostic',
                 description: 'Diagnóstico integral de salud arquitectónica 4D para presentar al usuario con evidencia quirúrgica y plan de curación.',
+                arguments: [],
+              },
+              {
+                name: 'tesseract-octeract-8d-audit',
+                description: 'Diagnóstico universal octodimensional 8D (Topología, Big-O Phi, Pearl Causal Psi, Async Omega, Packaging Xi) en el toroide T^8.',
                 arguments: [],
               },
             ],
@@ -373,6 +398,28 @@ export class MCPServer {
                   content: {
                     type: 'text',
                     text: `Genera un informe de salud para el usuario con base en el estado del hipercubo:\nSalud actual: ${report.healthScore}/100 (${report.status})\nTotal de fracturas: ${report.totalFractures}\nArchivos auditados: ${report.totalFilesAudited}\nSigue los 4 pilares: Radiografía, Peligro Oculto, Evidencia en Código y Solución Quirúrgica.`,
+                  },
+                },
+              ],
+            },
+          };
+        }
+
+        if (promptName === 'tesseract-octeract-8d-audit') {
+          const auditor = new TopologicalAuditor();
+          const report = auditor.audit(this.space);
+          const octStats = this.space.getOcteractStats();
+          return {
+            jsonrpc: '2.0',
+            id,
+            result: {
+              description: 'Auditoría Universal Octodimensional 8D (T^8 / E8)',
+              messages: [
+                {
+                  role: 'user',
+                  content: {
+                    type: 'text',
+                    text: `Genera un informe integral del Octeracto 8D:\nSalud: ${report.healthScore}/100\nTotal vértices 8D: ${octStats.totalVertices}\nNodos en árbol 256-ario: ${octStats.treeNodes}\nProfundidad máxima 8D: ${octStats.maxDepth}\nDensidad de empaquetamiento E8: ${octStats.packingDensity}\nDimensiones 8D activas: X, Y, Z, W, PHI (Big-O), PSI (Pearl Causal), OMEGA (Async Flow), XI (Packaging).`,
                   },
                 },
               ],
@@ -896,6 +943,91 @@ export class MCPServer {
           required: ['rootFile', 'rootSymbol', 'newSignature'],
         },
       },
+      {
+        name: 'tesseract_asymptotic_audit',
+        description:
+          'Analiza estáticamente la complejidad asintótica Big-O (Eje PHI) de un archivo o cambio propuesto. Detecta bucles anidados, queries N+1 y operaciones O(N) dentro de loops (O(N^2)).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetFile: {
+              type: 'string',
+              description: 'Ruta del archivo a auditar',
+            },
+            proposedContent: {
+              type: 'string',
+              description: 'Contenido propuesto para comparar contra la versión en disco (detección de degradación)',
+            },
+          },
+          required: ['targetFile'],
+        },
+      },
+      {
+        name: 'tesseract_causal_verify',
+        description:
+          'Aplica el Modelo Causal Estructural (SCM) y el Criterio de la Puerta Trasera de Judea Pearl (Eje PSI). Evalúa si una corrección es un parche cosmético/sintomático o resuelve la causa raíz.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetFile: {
+              type: 'string',
+              description: 'Ruta del archivo a verificar',
+            },
+            proposedPatch: {
+              type: 'string',
+              description: 'Parche o código modificado que propone la IA',
+            },
+          },
+          required: ['targetFile', 'proposedPatch'],
+        },
+      },
+      {
+        name: 'tesseract_async_flow_audit',
+        description:
+          'Audita la dinámica del Event Loop (Eje OMEGA): detecta promesas flotantes sin await, bifurcaciones asíncronas no controladas y riesgos de carreras en microtasks.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetFile: {
+              type: 'string',
+              description: 'Ruta del archivo a auditar',
+            },
+          },
+          required: ['targetFile'],
+        },
+      },
+      {
+        name: 'tesseract_octeract_slice',
+        description:
+          'Extrae un corte hiperdimensional quirúrgico en el espacio octodimensional R^8 utilizando el árbol 256-ario y la métrica del 8-Toroide Riemannian T^8.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            centerFile: {
+              type: 'string',
+              description: 'Archivo pivote central del corte',
+            },
+            maxDistance: {
+              type: 'number',
+              description: 'Distancia toroidal máxima en R^8 (por defecto: 0.45)',
+            },
+            tokenBudget: {
+              type: 'number',
+              description: 'Presupuesto de tokens para el corte (por defecto: 2500)',
+            },
+          },
+          required: ['centerFile'],
+        },
+      },
+      {
+        name: 'tesseract_octeract_stats',
+        description:
+          'Consulta las estadísticas matemáticas del hiperespacio 8D (Octeract / E8): métricas del árbol 256-ario, densidad de empaquetamiento, dimensiones activas y balance toroidal.',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+        },
+      },
     ];
   }
 
@@ -998,8 +1130,11 @@ export class MCPServer {
             attempts,
             remainingAttempts: Math.max(0, 2 - attempts),
             stateVector4D: shadow.stateVector4D,
+            stateVector8D: shadow.stateVector8D,
             shearDistance: shadow.shearDistance,
+            shearDistance8D: shadow.shearDistance8D,
             shearVector: shadow.shearVector,
+            shearVector8D: shadow.shearVector8D,
             axes: shadow.axes,
             brokenEdgesCount: shadow.brokenEdges.length,
             entropyViolation: !entropyCheck.allowed ? entropyCheck.reason : undefined,
@@ -1041,8 +1176,11 @@ export class MCPServer {
           status: 'WRITTEN_SAFELY',
           isSafe: true,
           stateVector4D: shadow.stateVector4D,
+          stateVector8D: shadow.stateVector8D,
           shearDistance: shadow.shearDistance,
+          shearDistance8D: shadow.shearDistance8D,
           shearVector: shadow.shearVector,
+          shearVector8D: shadow.shearVector8D,
           axes: shadow.axes,
           healedFractures: healedCount,
           newHealthScore: newAudit.healthScore,
@@ -1470,6 +1608,58 @@ export class MCPServer {
           args?.newSignature,
           vertices
         );
+      }
+
+      case 'tesseract_asymptotic_audit': {
+        const analyzer = new AsymptoticAnalyzer(this.rootDir);
+        const targetFile = args?.targetFile;
+        const proposedContent = args?.proposedContent;
+        if (proposedContent) {
+          const fullPath = path.isAbsolute(targetFile) ? targetFile : path.join(this.rootDir, targetFile);
+          const originalContent = fs.existsSync(fullPath) ? fs.readFileSync(fullPath, 'utf-8') : '';
+          return analyzer.detectRegression(originalContent, proposedContent, targetFile);
+        }
+        return analyzer.analyzeFile(targetFile);
+      }
+
+      case 'tesseract_causal_verify': {
+        const engine = new CausalInferenceEngine(this.rootDir);
+        const targetFile = args?.targetFile;
+        const proposedPatch = args?.proposedPatch;
+        const fullPath = path.isAbsolute(targetFile) ? targetFile : path.join(this.rootDir, targetFile);
+        const originalContent = fs.existsSync(fullPath) ? fs.readFileSync(fullPath, 'utf-8') : '';
+        const vertices = this.space.getVertices();
+        return engine.evaluateIntervention(targetFile, originalContent, proposedPatch, vertices);
+      }
+
+      case 'tesseract_async_flow_audit': {
+        const analyzer = new AsyncFlowAnalyzer(this.rootDir);
+        return analyzer.analyzeFile(args?.targetFile);
+      }
+
+      case 'tesseract_octeract_slice': {
+        const centerFile = args?.centerFile;
+        const maxDist = args?.maxDistance || 0.45;
+        const centerVertex = this.space.getVertex(centerFile) || this.space.getVertices().find((v) => v.path.includes(centerFile));
+        const centerCoord: Point8D = centerVertex?.coordinate8D || [0.5, 0.5, 0.5, 0.5, 0.5, 0.85, 0.5, 0.5];
+        const neighbors = this.space.octeractTree.searchNeighborhood(centerCoord, maxDist);
+        return {
+          centerFile,
+          maxDistance: maxDist,
+          totalNeighborsFound: neighbors.length,
+          octeractStats: this.space.getOcteractStats(),
+          vertices: neighbors.slice(0, 15).map((v) => ({
+            id: v.id,
+            cell: v.cell,
+            coordinate8D: v.coordinate8D,
+            octeractHex: v.octeractHexCode,
+            symbols: v.symbols.slice(0, 5).map((s) => s.name),
+          })),
+        };
+      }
+
+      case 'tesseract_octeract_stats': {
+        return this.space.getOcteractStats();
       }
 
       default:

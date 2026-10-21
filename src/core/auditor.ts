@@ -97,6 +97,9 @@ export class TopologicalAuditor {
       SEMANTIC_RACE_FRACTURE: 0,
       MUTATION_RESILIENCE_FRACTURE: 0,
       ATOMIC_TRANSFORMATION_FRACTURE: 0,
+      ASYMPTOTIC_DEGRADATION_FRACTURE: 0,
+      SPURIOUS_CORRELATION_FRACTURE: 0,
+      UNHANDLED_ASYNC_FRACTURE: 0,
     };
 
     const architecturalLoops: ArchitecturalLoop[] = [];
