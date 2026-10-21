@@ -4,7 +4,7 @@ import * as path from 'node:path';
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
 
-import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio } from './cli/commands.ts';
+import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute } from './cli/commands.ts';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -194,9 +194,37 @@ async function main() {
       await runPortfolio(targetDir, mode);
       break;
     }
+    case 'swarm': {
+      const targetDir = args[1] || '.';
+      const planPath = args[2];
+      await runSwarm(targetDir, planPath);
+      break;
+    }
+    case 'mutate': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      if (!targetFile) {
+        console.error('Uso: tesseract-context mutate <dir> <archivo>');
+        process.exit(1);
+      }
+      await runMutate(targetDir, targetFile);
+      break;
+    }
+    case 'transmute': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      const symbol = args[3];
+      const newSig = args[4] || `${symbol}V2`;
+      if (!targetFile || !symbol) {
+        console.error('Uso: tesseract-context transmute <dir> <archivo> <símbolo> [nuevaFirma]');
+        process.exit(1);
+      }
+      await runTransmute(targetDir, targetFile, symbol, newSig);
+      break;
+    }
     case '--version':
     case '-v': {
-      console.log('Tesseract-Context v3.1.1 (Enterprise Suite - 4D Hypercube Context Engine)');
+      console.log('Tesseract-Context v3.2.0 (Enterprise Suite - 4D Hypercube Context Engine)');
       break;
     }
     case 'help':
@@ -223,7 +251,9 @@ Comandos disponibles:
   \x1b[32mindex\x1b[0m [directorio]    Escanea y construye el árbol fractal 4D en .tesseract/
   \x1b[32mstats\x1b[0m [directorio]    Muestra métricas topológicas y salud arquitectónica
   \x1b[32mslice\x1b[0m [dir] [celda]   Prueba un corte hiperdimensional quirúrgico con presupuesto de tokens
-  \x1b[32mshadow\x1b[0m [dir] <file> <code Calcula el cizallamiento topológico 4D antes de escribir
+  \x1b[32mswarm\x1b[0m [dir] <agents.json> Coordinador 4D de Voronoi: detecta colisiones semánticas y deadlocks
+  \x1b[32mmutate\x1b[0m [dir] <file> [test] Fuzzing de mutación AST en RAM: detecta tests tramposos o tautológicos
+  \x1b[32mtransmute\x1b[0m [dir] <f> <s> <sig> Transmutador atómico de cierre transitivo multi-archivo G*
   \x1b[32mtui\x1b[0m [directorio]      Inicia la visualización interactiva del teseracto 4D en terminal
   \x1b[32mhelp\x1b[0m                  Muestra esta ayuda
       `);
@@ -266,5 +296,8 @@ export { EnterpriseLicenseManager } from './enterprise/license.ts';
 export { SWECIEngine } from './enterprise/swe-ci.ts';
 export { LSCEngine } from './enterprise/lsc.ts';
 export { DistributedMeshEngine } from './enterprise/mesh.ts';
+export { TesseractSwarmCoordinator, TesseractSwarmCoordinator as HyperSwarmCoordinator } from './enterprise/swarm.ts';
+export { TesseractMutationEngine, TesseractMutationEngine as ASTMutationEngine } from './enterprise/mutation.ts';
+export { TesseractAtomicTransmuter, TesseractAtomicTransmuter as AtomicTransmuter } from './enterprise/transmute.ts';
 
 

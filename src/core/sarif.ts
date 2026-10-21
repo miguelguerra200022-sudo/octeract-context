@@ -204,6 +204,27 @@ export class SarifExporter {
       full: 'La versión semver declarada en package.json no coincide con las versiones estáticas o cadenas de versión en el código.',
       level: 'warning',
     },
+    SEMANTIC_RACE_FRACTURE: {
+      id: 'TESS-020',
+      name: 'SemanticRaceCondition',
+      short: 'Colisión semántica por concurrencia multi-agente en zonas de Voronoi solapadas',
+      full: 'Múltiples agentes o hilos concurrentes están modificando contratos compartidos o interfaces interdependientes sin sincronización previa, generando colisiones semánticas que escapan a Git.',
+      level: 'error',
+    },
+    MUTATION_RESILIENCE_FRACTURE: {
+      id: 'TESS-021',
+      name: 'BrittleMutationTest',
+      short: 'Suite de pruebas frágil o tautológica vulnerable a mutantes contrafactuales',
+      full: 'La suite de pruebas tiene una tasa de eliminación de mutantes inferior al 40%, lo que permite a agentes de IA aprobar pruebas mediante soluciones huecas o atajos que no garantizan la invariancia del dominio.',
+      level: 'warning',
+    },
+    ATOMIC_TRANSFORMATION_FRACTURE: {
+      id: 'TESS-022',
+      name: 'IncompleteClosedSubgraph',
+      short: 'Refactorización multiarchivo incompleta en subgrafo cerrado',
+      full: 'Se intentó modificar un contrato o firma raíz sin actualizar atómicamente todos los archivos del subgrafo cerrado transitivo, dejando consumidores rezagados y fracturas de cizallamiento.',
+      level: 'error',
+    },
   };
 
   /**

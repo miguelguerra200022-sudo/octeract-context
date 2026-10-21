@@ -26,6 +26,9 @@ import { LSCEngine } from '../enterprise/lsc.ts';
 import { DistributedMeshEngine } from '../enterprise/mesh.ts';
 import { TesseractPortfolioEngine } from '../enterprise/portfolio.ts';
 import { PreflightAuditor } from '../core/preflight.ts';
+import { TesseractSwarmCoordinator } from '../enterprise/swarm.ts';
+import { TesseractMutationEngine } from '../enterprise/mutation.ts';
+import { TesseractAtomicTransmuter } from '../enterprise/transmute.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -827,6 +830,72 @@ export class MCPServer {
           },
         },
       },
+      {
+        name: 'tesseract_swarm_coordinate',
+        description:
+          'Coordina agentes de IA concurrentes asignándoles zonas de Voronoi ortogonales en R^4. Detecta colisiones semánticas invisibles a Git, previene deadlocks y genera fachadas preventivas de sincronización.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            intents: {
+              type: 'array',
+              description: 'Lista de intenciones de los agentes concurrentes (agentId, taskDescription, targetFiles, priority)',
+              items: {
+                type: 'object',
+                properties: {
+                  agentId: { type: 'string' },
+                  taskDescription: { type: 'string' },
+                  targetFiles: { type: 'array', items: { type: 'string' } },
+                  priority: { type: 'number' },
+                },
+                required: ['agentId', 'targetFiles'],
+              },
+            },
+          },
+        },
+      },
+      {
+        name: 'tesseract_mutation_fuzz',
+        description:
+          'Ejecuta fuzzing de mutación contrafactual en RAM para certificar la dureza de la suite de pruebas. Detecta si la IA pasó las pruebas con soluciones huecas o si los tests son frágiles/tautológicos.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetFile: {
+              type: 'string',
+              description: 'Archivo de código a evaluar bajo mutaciones contrafactuales',
+            },
+            maxMutants: {
+              type: 'number',
+              description: 'Número máximo de mutantes a generar (por defecto: 20)',
+            },
+          },
+          required: ['targetFile'],
+        },
+      },
+      {
+        name: 'tesseract_atomic_transmute',
+        description:
+          'Genera la receta sincrónica atómica de refactorización multiarchivo calculando la clausura transitiva G* (subgrafo cerrado). Garantiza que no se dejen archivos rezagados.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            rootFile: {
+              type: 'string',
+              description: 'Archivo raíz que inicia la refactorización',
+            },
+            rootSymbol: {
+              type: 'string',
+              description: 'Nombre de la función, clase o interfaz que se modifica',
+            },
+            newSignature: {
+              type: 'string',
+              description: 'Nueva firma o contrato que deben adoptar los consumidores',
+            },
+          },
+          required: ['rootFile', 'rootSymbol', 'newSignature'],
+        },
+      },
     ];
   }
 
@@ -1362,6 +1431,45 @@ export class MCPServer {
           fractureCount: fractures.length,
           fractures,
         };
+      }
+
+      case 'tesseract_swarm_coordinate': {
+        const coordinator = new TesseractSwarmCoordinator(this.rootDir);
+        const vertices = this.space.getVertices();
+        const intents = args?.intents || [];
+        return coordinator.coordinateSwarm(intents, vertices);
+      }
+
+      case 'tesseract_mutation_fuzz': {
+        const engine = new TesseractMutationEngine(this.rootDir);
+        const targetFile = args?.targetFile;
+        const maxMutants = args?.maxMutants || 20;
+        const mutants = engine.generateMutants(targetFile, maxMutants);
+
+        const testDir = path.join(this.rootDir, 'tests');
+        const baseName = path.basename(targetFile).replace(/\.[^.]+$/, '');
+        const testFiles: string[] = [];
+        if (fs.existsSync(testDir)) {
+          const files = fs.readdirSync(testDir);
+          for (const f of files) {
+            if (f.includes(baseName) && (f.endsWith('.test.ts') || f.endsWith('.test.js'))) {
+              testFiles.push(path.join('tests', f));
+            }
+          }
+        }
+
+        return engine.evaluateMutationHardness(targetFile, mutants, testFiles);
+      }
+
+      case 'tesseract_atomic_transmute': {
+        const transmuter = new TesseractAtomicTransmuter(this.rootDir);
+        const vertices = this.space.getVertices();
+        return transmuter.planAtomicTransmutation(
+          args?.rootFile,
+          args?.rootSymbol,
+          args?.newSignature,
+          vertices
+        );
       }
 
       default:

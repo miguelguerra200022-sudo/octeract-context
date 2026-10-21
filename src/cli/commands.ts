@@ -24,6 +24,9 @@ import { SWECIEngine } from '../enterprise/swe-ci.ts';
 import { LSCEngine } from '../enterprise/lsc.ts';
 import { DistributedMeshEngine } from '../enterprise/mesh.ts';
 import { TesseractPortfolioEngine } from '../enterprise/portfolio.ts';
+import { TesseractSwarmCoordinator } from '../enterprise/swarm.ts';
+import { TesseractMutationEngine } from '../enterprise/mutation.ts';
+import { TesseractAtomicTransmuter } from '../enterprise/transmute.ts';
 
 export async function runInit(targetDir: string = '.'): Promise<void> {
   await runUniversalInit(targetDir);
@@ -546,5 +549,139 @@ export async function runPortfolio(targetDir: string = '.', mode: 'pro' | 'vibe'
     console.log('');
   }
 }
+
+export async function runSwarm(targetDir: string = '.', planPath?: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🤖 \x1b[1mTESSERACT SWARM: COORDINACIÓN DE AGENTES EN ZONAS DE VORONOI 4D\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+  const space = indexer.getSpace();
+  const vertices = space.getVertices();
+
+  let intents: any[] = [];
+  if (planPath && fs.existsSync(planPath)) {
+    try {
+      intents = JSON.parse(fs.readFileSync(planPath, 'utf-8'));
+    } catch {
+      console.log(`\x1b[33mNo se pudo parsear el plan JSON en ${planPath}. Usando simulación de agentes activos.\x1b[0m`);
+    }
+  }
+
+  if (intents.length === 0) {
+    intents = [
+      { agentId: 'Agent-Core', taskDescription: 'Refactorizar parsers base', targetFiles: ['src/parsers/base.ts'], priority: 10 },
+      { agentId: 'Agent-Mesh', taskDescription: 'Expandir microservicios mesh', targetFiles: ['src/enterprise/mesh.ts'], priority: 8 },
+      { agentId: 'Agent-Security', taskDescription: 'Auditar types del hipercubo', targetFiles: ['src/core/types.ts'], priority: 5 },
+    ];
+  }
+
+  const coordinator = new TesseractSwarmCoordinator(root);
+  const report = coordinator.coordinateSwarm(intents, vertices);
+
+  console.log(`  ● Agentes Evaluados: \x1b[1m${report.totalAgents}\x1b[0m`);
+  console.log(`  ● Agentes en Zonas Lock-Free (100% Paralelos): \x1b[1;32m${report.lockFreeAgentsCount}\x1b[0m`);
+  console.log(`  ● Pares con Colisión Semántica: \x1b[1;${report.collidingPairsCount > 0 ? '33' : '32'}m${report.collidingPairsCount}\x1b[0m`);
+  console.log(`  ● Veredicto Global: \x1b[1;32m${report.verdict}\x1b[0m\n`);
+
+  if (report.collisions.length > 0) {
+    console.log(`\x1b[1;33m⚠️  Colisiones Semánticas Detectadas:\x1b[0m`);
+    for (const c of report.collisions) {
+      console.log(`  • Agente '${c.agentA}' vs '${c.agentB}' en: [${c.overlapFiles.join(', ')}]`);
+      console.log(`    ➔ Ganador de precedencia: \x1b[1;32m${c.precedenceWinner}\x1b[0m`);
+      if (c.recommendedSyncFacade) {
+        console.log(`    ➔ Fachada preventiva generada para desacoplarlos.`);
+      }
+    }
+    console.log('');
+  }
+
+  if (report.deadlockCycles.length > 0) {
+    console.log(`\x1b[1;31m🚨 Deadlocks Semánticos Prevenidos:\x1b[0m`);
+    for (const cycle of report.deadlockCycles) {
+      console.log(`  • Ciclo: ${cycle.join(' ➔ ')}`);
+    }
+    console.log('');
+  }
+}
+
+export async function runMutate(targetDir: string = '.', targetFile: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🧬 \x1b[1mTESSERACT MUTATION FUZZING: AUDITORÍA DE DUREZA DE PRUEBAS EN RAM\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const engine = new TesseractMutationEngine(root);
+  const mutants = engine.generateMutants(targetFile);
+
+  const testDir = path.join(root, 'tests');
+  const baseName = path.basename(targetFile).replace(/\.[^.]+$/, '');
+  const testFiles: string[] = [];
+  if (fs.existsSync(testDir)) {
+    const files = fs.readdirSync(testDir);
+    for (const f of files) {
+      if (f.includes(baseName) && (f.endsWith('.test.ts') || f.endsWith('.test.js'))) {
+        testFiles.push(path.join('tests', f));
+      }
+    }
+  }
+
+  const report = engine.evaluateMutationHardness(targetFile, mutants, testFiles);
+
+  console.log(`  ● Archivo Auditado: \x1b[1m${report.targetFile}\x1b[0m`);
+  console.log(`  ● Mutantes Sintetizados en RAM: \x1b[1m${report.totalMutantsGenerated}\x1b[0m`);
+  console.log(`  ● Mutantes Eliminados (Killed): \x1b[1;32m${report.mutantsKilled}\x1b[0m`);
+  console.log(`  ● Mutantes Sobrevivientes: \x1b[1;${report.mutantsSurvived > 0 ? '33' : '32'}m${report.mutantsSurvived}\x1b[0m`);
+  console.log(`  ● Puntuación de Resiliencia: \x1b[1;32m${report.mutationScorePercent}%\x1b[0m`);
+  console.log(`  ● Veredicto de Dureza: \x1b[1;32m${report.hardnessVerdict}\x1b[0m\n`);
+  console.log(`  💡 Recomendación: ${report.recommendation}\n`);
+}
+
+export async function runTransmute(
+  targetDir: string = '.',
+  rootFile: string,
+  symbol: string,
+  newSig: string
+): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🔄 \x1b[1mTESSERACT ATOMIC TRANSMUTER: SUBGRAFO CERRADO MULTIARQUIVO (G*)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+  const space = indexer.getSpace();
+  const vertices = space.getVertices();
+
+  const transmuter = new TesseractAtomicTransmuter(root);
+  const report = transmuter.planAtomicTransmutation(rootFile, symbol, newSig, vertices);
+
+  console.log(`  ● Archivo Raíz: \x1b[1m${report.rootFile}\x1b[0m | Símbolo: \x1b[1m${report.rootSymbol}\x1b[0m`);
+  console.log(`  ● Nueva Firma Contratada: \x1b[36m${report.newSignature}\x1b[0m`);
+  console.log(`  ● Archivos en Subgrafo Cerrado G*: \x1b[1;32m${report.closedSubgraphFiles.length} archivos\x1b[0m`);
+  console.log(`  ● Sitios de Llamada Identificados: \x1b[1m${report.totalCallSites} llamadas\x1b[0m`);
+  console.log(`  ● Cizallamiento Predicho si se Aplica en Lote: \x1b[1;32m${report.predictedShearDistance} (<= 0.10)\x1b[0m`);
+  console.log(`  ● Veredicto: \x1b[1;32m${report.verdict}\x1b[0m\n`);
+
+  if (report.steps.length > 0) {
+    console.log(`\x1b[1;33mPaso a paso de la Receta Sincrónica:\x1b[0m`);
+    for (const step of report.steps.slice(0, 5)) {
+      console.log(`  • [${step.file}:${step.lineNumber}] ${step.rationale}`);
+      console.log(`    - ${step.oldCode}`);
+      console.log(`    + \x1b[32m${step.newCode}\x1b[0m`);
+    }
+    if (report.steps.length > 5) {
+      console.log(`    ... y ${report.steps.length - 5} llamadas adicionales sintetizadas.`);
+    }
+    console.log('');
+  }
+}
+
 
 

@@ -210,7 +210,10 @@ export type FractureType =
   | 'CI_WORKFLOW_FRACTURE'
   | 'DEPENDENCY_LEAK_FRACTURE'
   | 'CASE_SENSITIVITY_FRACTURE'
-  | 'RELEASE_SYNC_FRACTURE';
+  | 'RELEASE_SYNC_FRACTURE'
+  | 'SEMANTIC_RACE_FRACTURE'
+  | 'MUTATION_RESILIENCE_FRACTURE'
+  | 'ATOMIC_TRANSFORMATION_FRACTURE';
 
 /** Representación de una fractura topológica en el hipercubo */
 export interface TopologicalFracture {
@@ -308,3 +311,99 @@ export interface ArchitecturalLoop {
   classification: 'CONTRACTIBLE_BUG' | 'VALID_ARCHITECTURAL_LOOP';
   description?: string;
 }
+
+/** Registro de intención de un agente concurrente en el enjambre */
+export interface AgentSwarmIntent {
+  agentId: string;
+  taskDescription: string;
+  targetFiles: string[];
+  targetSymbols?: string[];
+  branchName?: string;
+  priority?: number;
+}
+
+/** Zona de Voronoi asignada a un agente en el hipercubo 4D */
+export interface VoronoiZone {
+  agentId: string;
+  centerCoordinate: Point4D;
+  hyperRadius: number;
+  ownedFiles: string[];
+  influenceBoundaryFiles: string[];
+  status: 'ISOLATED_LOCK_FREE' | 'POTENTIAL_COLLISION' | 'SEMANTIC_DEADLOCK_RISK';
+}
+
+/** Reporte de colisión y coordinación de agentes en el enjambre */
+export interface SwarmCoordinationReport {
+  timestamp: number;
+  totalAgents: number;
+  lockFreeAgentsCount: number;
+  collidingPairsCount: number;
+  zones: VoronoiZone[];
+  collisions: {
+    agentA: string;
+    agentB: string;
+    overlapFiles: string[];
+    sharedContracts: string[];
+    precedenceWinner: string;
+    recommendedSyncFacade?: string;
+  }[];
+  deadlockCycles: string[][];
+  verdict: 'ALL_CLEAR_PARALLEL' | 'SYNCHRONIZATION_REQUIRED' | 'DEADLOCK_PREVENTED';
+}
+
+/** Operadores AST de mutación contrafactual en RAM */
+export type MutationOperator =
+  | 'RELATIONAL_INVERSION'     // > <-> <=, === <-> !==
+  | 'ARITHMETIC_MUTATION'      // + <-> -, * <-> /
+  | 'CONDITIONAL_NEGATION'     // if (x) <-> if (!x)
+  | 'RETURN_MUTATION'          // return val <-> return null / false
+  | 'STATEMENT_DELETION';      // omite llamadas void
+
+/** Descriptor de un mutante individual evaluado */
+export interface MutantDescriptor {
+  id: string;
+  file: string;
+  operator: MutationOperator;
+  lineNumber: number;
+  originalSnippet: string;
+  mutatedSnippet: string;
+  status: 'KILLED' | 'SURVIVED' | 'TIMEOUT';
+  detectedByTest?: string;
+}
+
+/** Reporte de dureza y resiliencia de la suite de pruebas contra mutantes */
+export interface MutationFuzzReport {
+  targetFile: string;
+  totalMutantsGenerated: number;
+  mutantsKilled: number;
+  mutantsSurvived: number;
+  mutationScorePercent: number;    // (killed / total) * 100
+  hardnessVerdict: 'RESILIENT_SUITE' | 'MODERATE_COVERAGE' | 'BRITTLE_TAUTOLOGICAL_TESTS';
+  hollowAssertionLines: number[];
+  recommendation: string;
+  mutants: MutantDescriptor[];
+}
+
+/** Receta de un paso individual en una transmutación atómica multiarchivo */
+export interface TransmutationStep {
+  file: string;
+  lineNumber: number;
+  oldCode: string;
+  newCode: string;
+  rationale: string;
+}
+
+/** Reporte de transmutación atómica de subgrafo cerrado */
+export interface TransmutationReport {
+  rootFile: string;
+  rootSymbol: string;
+  newSignature: string;
+  closedSubgraphFiles: string[];
+  totalCallSites: number;
+  steps: TransmutationStep[];
+  atomicPatchSnippet: string;
+  predictedShearDistance: number;
+  isComplete: boolean;
+  verdict: 'ATOMIC_RECIPE_READY' | 'PARTIAL_COLLAPSE_DETECTED';
+}
+
