@@ -2,7 +2,7 @@ Business Source License 1.1 (BSL 1.1)
 
 Parameters:
 - Licensor: Miguel Guerra <miguelguerra200022@gmail.com>
-- Licensed Work: TESSERACT-CONTEXT (4D Hypercube Context Engine & Autonomous Shield)
+- Licensed Work: OCTERACT-CONTEXT (8D Hypercube Context Engine & Autonomous Shield)
 - Initial Effective Date: October 19, 2026
 - Change Date: October 19, 2029
 - Change License: Apache License, Version 2.0

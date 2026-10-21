@@ -1,6 +1,6 @@
 {
   "name": "octeract-context",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Octeract v4.0 8D Enterprise Suite: 8-Dimensional Context Engine with E8 Riemannian Torus (T^8), 256-ary Octeract Tree, Big-O Asymptotic Analyzer (Phi), Judea Pearl Causal SCM (Psi), Event Loop Async Flow (Omega), and Zero-Token Topological Shield",
   "type": "module",
   "main": "src/index.ts",
