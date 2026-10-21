@@ -7,3 +7,5 @@ credenciales/
 *.tmp
 tests/temp_*
 *.sarif
+.superpowers/
+.octeract/
