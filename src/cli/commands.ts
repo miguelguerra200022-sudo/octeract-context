@@ -50,6 +50,16 @@ import {
   OcteractEntropyGuard,
   OcteractCardanGrilleFuzzer,
 } from '../voynich/index.ts';
+import {
+  OcteractPaletteStorage,
+  OcteractMultiNoiseBiomes,
+  OcteractWorkingSetHorizon,
+  OcteractStarlightBlast,
+  OcteractAnvilContainer,
+  OcteractJigsawSynthesis,
+  OcteractGreedyContextCuller,
+  OcteractObserverPulse,
+} from '../voxel/index.ts';
 
 export async function runInit(targetDir: string = '.'): Promise<void> {
   await runUniversalInit(targetDir);
@@ -1362,6 +1372,259 @@ export async function runCardanFuzz(
     console.log(`    \x1b[32m+ ${m.mutatedSnippet}\x1b[0m\n`);
   }
 }
+
+export async function runVoxelPalette(targetDir: string = '.', filePath: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[1;31m✖ Error: Archivo '${fullPath}' no existe.\x1b[0m\n`);
+    return;
+  }
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🎨 \x1b[1mOCTERACT VOXEL PALETTE: COMPRESIÓN BITARRAY DE TOKENS (MINECRAFT)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const content = fs.readFileSync(fullPath, 'utf-8');
+  const engine = new OcteractPaletteStorage();
+  const start = performance.now();
+  const compressed = engine.compressCode(content);
+  const dur = (performance.now() - start).toFixed(2);
+
+  console.log(`  ● Archivo: \x1b[1m${filePath}\x1b[0m (${content.length} caracteres, ${dur} ms)`);
+  console.log(`  ● Paleta de Símbolos Únicos: \x1b[1;36m${compressed.palette.length} entradas\x1b[0m`);
+  console.log(`  ● Ancho de Bits por Token: \x1b[1;33m${compressed.bitWidth} bits\x1b[0m`);
+  console.log(`  ● Palabras de 64-bit Empaquetadas: \x1b[1m${compressed.words.length}\x1b[0m`);
+  console.log(`  ● Ratio de Compresión: \x1b[1;32m${compressed.compressionRatio.toFixed(2)}x\x1b[0m (${compressed.uncompressedBytes}B ➔ ${compressed.compressedBytes}B)\n`);
+}
+
+export async function runVoxelBiomes(targetDir: string = '.', filePath?: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🏔️ \x1b[1mOCTERACT MULTI-NOISE BIOMES: CLASIFICADOR DE CLIMA DE CÓDIGO 6D\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const classifier = new OcteractMultiNoiseBiomes();
+
+  if (filePath) {
+    const fullPath = path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+    if (!fs.existsSync(fullPath)) {
+      console.error(`\x1b[1;31m✖ Error: Archivo '${fullPath}' no existe.\x1b[0m\n`);
+      return;
+    }
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    const res = classifier.classify(filePath, content);
+    console.log(`  ● Archivo: \x1b[1m${filePath}\x1b[0m`);
+    console.log(`  ● Bioma: \x1b[1;32m${res.biome}\x1b[0m (${res.climateDescription})`);
+    console.log(`  ● Tolerancia Máxima de Cizallamiento: \x1b[1;33m${res.maxPermissibleShear}\x1b[0m`);
+    console.log(`  ● Equipo de Seguridad Recomendado: \x1b[36m${res.recommendedSafetyGear.join(', ')}\x1b[0m\n`);
+    return;
+  }
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+
+  const vertices = indexer.getSpace().getVertices();
+  const biomeCounts: Record<string, number> = {};
+
+  for (const v of vertices.slice(0, 50)) {
+    let content = '';
+    try { content = fs.readFileSync(path.join(root, v.path), 'utf-8'); } catch (_) {}
+    const res = classifier.classify(v.path, content, { centrality: (v.dependencies.length + v.dependents.length) / 10 });
+    biomeCounts[res.biome] = (biomeCounts[res.biome] || 0) + 1;
+  }
+
+  for (const [b, count] of Object.entries(biomeCounts)) {
+    console.log(`  ● Bioma \x1b[1;36m${b.padEnd(20)}\x1b[0m: \x1b[1;32m${count} archivos\x1b[0m`);
+  }
+  console.log('');
+}
+
+export async function runVoxelHorizon(targetDir: string = '.', focusFile: string, radius: number = 2): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🎫 \x1b[1mOCTERACT WORKING SET HORIZON: CHUNK TICKET MANAGER (LEVELS 31-44)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+
+  const space = indexer.getSpace();
+  const manager = new OcteractWorkingSetHorizon();
+
+  for (const v of space.getVertices()) {
+    manager.registerNeighbors(v.path, v.dependencies);
+  }
+
+  manager.addTicket('cli-focus-ticket', focusFile, 31, radius);
+
+  const horizon = manager.getHorizonSummary();
+  console.log(`  ● Archivo Foco: \x1b[1m${focusFile}\x1b[0m (Radio: ${radius})`);
+  console.log(`  ● Nivel 31 (ACTIVE - AST Completo en RAM):       \x1b[1;32m${horizon.activeCount} archivos\x1b[0m`);
+  console.log(`  ● Nivel 32 (CONTRACT_ONLY - Solo Firmas):        \x1b[1;36m${horizon.contractOnlyCount} archivos\x1b[0m`);
+  console.log(`  ● Nivel 33 (SKELETON_ONLY - Esqueleto de Tipos): \x1b[1;33m${horizon.skeletonOnlyCount} archivos\x1b[0m`);
+  console.log(`  ● Nivel 34+ (EVICTED - Liberados de RAM):        \x1b[31m${horizon.evictedCount} archivos\x1b[0m\n`);
+}
+
+export async function runVoxelStarlight(targetDir: string = '.', sourceFile: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`✨ \x1b[1mOCTERACT STARLIGHT BLAST: PROPAGACIÓN DE LUZ BFS (NIVEL 15 A 0)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+
+  const space = indexer.getSpace();
+  const starlight = new OcteractStarlightBlast();
+  const nodeMap = new Map<string, number>();
+
+  for (const v of space.getVertices()) {
+    const id = starlight.registerNode(v.path);
+    nodeMap.set(v.path, id);
+  }
+
+  for (const v of space.getVertices()) {
+    const fromId = nodeMap.get(v.path);
+    if (fromId === undefined) continue;
+    for (const dep of v.dependencies) {
+      const toId = nodeMap.get(dep);
+      if (toId !== undefined) {
+        starlight.addEdge(fromId, toId);
+      }
+    }
+  }
+
+  const sourceId = nodeMap.get(sourceFile);
+  if (sourceId === undefined) {
+    console.error(`\x1b[1;31m✖ Error: Archivo '${sourceFile}' no encontrado en el grafo topológico.\x1b[0m\n`);
+    return;
+  }
+
+  const start = performance.now();
+  const blast = starlight.propagateLight(sourceId, 15);
+  const dur = (performance.now() - start).toFixed(2);
+
+  console.log(`  ● Fuente de Luz: \x1b[1m${sourceFile}\x1b[0m (Nivel 15)`);
+  console.log(`  ● Nodos Iluminados: \x1b[1;32m${blast.illuminatedNodes.length}\x1b[0m en ${dur} ms (${blast.propagateTimeUs} µs de CPU)\n`);
+
+  for (const n of blast.illuminatedNodes.slice(0, 8)) {
+    console.log(`  • [Luz \x1b[1;33m${n.lightLevel.toString().padStart(2)}\x1b[0m] \x1b[1m${n.id}\x1b[0m`);
+  }
+  console.log('');
+}
+
+export async function runVoxelAnvil(targetDir: string = '.', action: 'pack' | 'inspect' = 'inspect'): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`📦 \x1b[1mOCTERACT ANVIL CONTAINER: CONTENEDOR REGIONAL .OAC (1024 CHUNKS)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const container = new OcteractAnvilContainer();
+  const sampleData = JSON.stringify({ cell: 'CoreLogic', symbols: ['Hypercube', 'Fracture', 'Voxel'] });
+
+  for (let x = 0; x < 8; x++) {
+    for (let z = 0; z < 8; z++) {
+      container.saveChunk(x, z, sampleData);
+    }
+  }
+
+  const metrics = container.getMetrics();
+  console.log(`  ● Modo: \x1b[1m${action.toUpperCase()}\x1b[0m`);
+  console.log(`  ● Chunks Almacenados: \x1b[1;32m${metrics.storedChunks}\x1b[0m`);
+  console.log(`  ● Sectores de 4KB Asignados: \x1b[1;36m${metrics.totalSectors}\x1b[0m (${metrics.totalBytes} bytes en disco)`);
+  console.log(`  ● Bytes Sin Comprimir: \x1b[1m${metrics.uncompressedBytes}B\x1b[0m ➔ Comprimidos: \x1b[1;32m${metrics.compressedBytes}B\x1b[0m\n`);
+}
+
+export async function runVoxelJigsaw(targetDir: string = '.', rootPieceId: string = 'root-entrypoint'): Promise<void> {
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🧩 \x1b[1mOCTERACT JIGSAW SYNTHESIS: ENSAMBLADO POR SOCKETS TIPADOS\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const jigsaw = new OcteractJigsawSynthesis();
+
+  jigsaw.registerPiece({
+    id: rootPieceId,
+    template: `export class ApplicationServer {\n  constructor(private auth: {{auth_socket}}, private db: {{db_socket}}) {}\n}`,
+    sockets: [
+      { name: 'auth_socket', type: 'plug', contract: 'IAuthService', jointType: 'rigid' },
+      { name: 'db_socket', type: 'plug', contract: 'IDatabaseConnection', jointType: 'rigid' },
+    ],
+  });
+
+  jigsaw.registerPiece({
+    id: 'auth-jwt-provider',
+    template: `export class JwtAuthService implements IAuthService {\n  verify(token: string) { return true; }\n}`,
+    sockets: [
+      { name: 'auth_socket', type: 'jack', contract: 'IAuthService', jointType: 'rigid' },
+    ],
+  });
+
+  jigsaw.registerPiece({
+    id: 'db-postgres-pool',
+    template: `export class PostgresPool implements IDatabaseConnection {\n  query(sql: string) { return []; }\n}`,
+    sockets: [
+      { name: 'db_socket', type: 'jack', contract: 'IDatabaseConnection', jointType: 'rigid' },
+    ],
+  });
+
+  const assembly = jigsaw.assemble(rootPieceId);
+  console.log(`  ● Ensamblado de Raíz: \x1b[1m${rootPieceId}\x1b[0m`);
+  console.log(`  ● Éxito de Ensamblado: ${assembly.success ? '\x1b[1;32mSÍ (COMPLETO)\x1b[0m' : '\x1b[1;31mINCOMPLETO\x1b[0m'}`);
+  console.log(`  ● Piezas Conectadas: \x1b[1;36m${assembly.connectedPieces.join(' ➔ ')}\x1b[0m`);
+  console.log(`  ● Sockets Sin Satisfacer: \x1b[1;33m${assembly.unmatchedSockets.length}\x1b[0m\n`);
+}
+
+export async function runVoxelCuller(targetDir: string = '.', filePath: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[1;31m✖ Error: Archivo '${fullPath}' no existe.\x1b[0m\n`);
+    return;
+  }
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🧱 \x1b[1mOCTERACT CONTEXT CULLER: OCLUSIÓN Y MALLADO CODICIOSO (GREEDY MESH)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const content = fs.readFileSync(fullPath, 'utf-8');
+  const culler = new OcteractGreedyContextCuller();
+  const start = performance.now();
+  const result = culler.cullAndMesh(content);
+  const dur = (performance.now() - start).toFixed(2);
+
+  console.log(`  ● Archivo: \x1b[1m${filePath}\x1b[0m (${dur} ms)`);
+  console.log(`  ● Líneas Originales: \x1b[1m${result.originalLines}\x1b[0m ➔ Líneas Malladas: \x1b[1;32m${result.culledLines}\x1b[0m`);
+  console.log(`  ● Tokens Estimados Iniciales: \x1b[31m${result.originalEstimatedTokens}\x1b[0m ➔ Tokens Mallados: \x1b[1;32m${result.compressedEstimatedTokens}\x1b[0m`);
+  console.log(`  ● Ahorro de Tokens: \x1b[1;32m${result.tokenSavingsPercent}%\x1b[0m para Context Window LLM\n`);
+}
+
+export async function runVoxelObserver(targetDir: string = '.', targetFile: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🔴 \x1b[1mOCTERACT OBSERVER PULSE: SEÑAL REDSTONE REACTIVA DE 0-TICKS\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const observer = new OcteractObserverPulse();
+  const signals: any[] = [];
+  observer.onPulse((sig) => signals.push(sig));
+
+  observer.observeNode(targetFile, 'sha256_initial_hash_v1');
+  const pulse = observer.notifyStateChange(targetFile, 'sha256_mutated_hash_v2', { reason: 'AST mutation' });
+
+  console.log(`  ● Nodo Observado: \x1b[1m${targetFile}\x1b[0m`);
+  console.log(`  ● Detección de Mutación 0-Tick: \x1b[1;32mPULSO EMITIDO\x1b[0m`);
+  console.log(`  ● Potencia de Redstone: \x1b[1;31m${pulse?.power}/15\x1b[0m`);
+  console.log(`  ● Tick Actual: \x1b[1;36m${observer.getCurrentTick()}\x1b[0m`);
+  console.log(`  ● Listeners Notificados: \x1b[1;32m${signals.length}\x1b[0m\n`);
+}
+
 
 
 

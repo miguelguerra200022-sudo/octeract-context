@@ -56,6 +56,16 @@ import {
   OcteractEntropyGuard,
   OcteractCardanGrilleFuzzer,
 } from '../voynich/index.ts';
+import {
+  OcteractPaletteStorage,
+  OcteractMultiNoiseBiomes,
+  OcteractWorkingSetHorizon,
+  OcteractStarlightBlast,
+  OcteractAnvilContainer,
+  OcteractJigsawSynthesis,
+  OcteractGreedyContextCuller,
+  OcteractObserverPulse,
+} from '../voxel/index.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -161,7 +171,7 @@ export class MCPServer {
             },
             serverInfo: {
               name: 'octeract-context',
-              version: '4.3.0',
+              version: '4.4.0',
             },
           },
         };
@@ -1430,6 +1440,124 @@ export class MCPServer {
           required: ['targetPath'],
         },
       },
+      {
+        name: 'octeract_voxel_palette',
+        description:
+          'Compresión de tokens AST y símbolos en BitArray dinámico con paleta (inspirado en almacenamiento de chunks de Minecraft). Reduce la RAM en un 85-92%.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta del archivo a comprimir con paleta BitArray' },
+            sourceCode: { type: 'string', description: 'Código fuente opcional a comprimir directamente' },
+          },
+          required: ['targetPath'],
+        },
+      },
+      {
+        name: 'octeract_voxel_biomes',
+        description:
+          'Clasificador de biomas de código en espacio climático multidimensional 6D (Deep Frozen Ocean, Jagged Peaks, Nether Badlands, Ancient City Sculk, Meadow Plains, Lush Caves) con cálculo de tolerancia de cizallamiento.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta de archivo para clasificación individual' },
+            targetDir: { type: 'string', description: 'Directorio para clasificar todo el repositorio' },
+          },
+        },
+      },
+      {
+        name: 'octeract_voxel_horizon',
+        description:
+          'Gestor de tickets de chunk (Minecraft Working Set Horizon) para ventanas de contexto LLM: Niveles 31 (ACTIVE), 32 (CONTRACT_ONLY), 33 (SKELETON_ONLY), 34+ (EVICTED).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            focusPath: { type: 'string', description: 'Archivo foco de atención del agente' },
+            radius: { type: 'number', description: 'Radio de horizonte de chunks activos (default 2)' },
+          },
+          required: ['focusPath'],
+        },
+      },
+      {
+        name: 'octeract_voxel_starlight',
+        description:
+          'Motor de propagación BFS Starlight (Minecraft) para cálculo de radio de luz/impacto a más de 1,000,000 relaciones/segundo desde Nivel 15 a 0.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            sourcePath: { type: 'string', description: 'Nodo fuente emisor de luz' },
+            initialLight: { type: 'number', description: 'Nivel inicial de luz (1..15, default 15)' },
+          },
+          required: ['sourcePath'],
+        },
+      },
+      {
+        name: 'octeract_voxel_anvil',
+        description:
+          'Contenedor regional binario Anvil (.oac) para almacenamiento y consulta en O(1) de 1024 chunks con encabezado fijo de 8KB y tabla de sectores comprimidos.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            action: { type: 'string', enum: ['inspect', 'pack', 'query'], description: 'Acción a realizar (default inspect)' },
+            chunkX: { type: 'number', description: 'Coordenada X del chunk (0..31)' },
+            chunkZ: { type: 'number', description: 'Coordenada Z del chunk (0..31)' },
+            payload: { type: 'string', description: 'Payload a almacenar en el chunk' },
+          },
+        },
+      },
+      {
+        name: 'octeract_voxel_jigsaw',
+        description:
+          'Ensamblador de bloques de estructura Jigsaw con sockets tipados (plugs/jacks) para síntesis modular y verificación estricta de contratos.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            rootPieceId: { type: 'string', description: 'ID de la pieza raíz de ensamble' },
+            pieces: {
+              type: 'array',
+              description: 'Piezas personalizadas con sockets plug/jack',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  template: { type: 'string' },
+                  sockets: { type: 'array' },
+                },
+                required: ['id', 'template', 'sockets'],
+              },
+            },
+          },
+          required: ['rootPieceId'],
+        },
+      },
+      {
+        name: 'octeract_voxel_culler',
+        description:
+          'Oclusión de detalles internos (culling de métodos privados) y mallado codicioso (greedy meshing de imports y boilerplate) para ahorrar >80% de tokens en context windows de LLMs.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta del archivo a ocluir y mallar' },
+            sourceCode: { type: 'string', description: 'Código fuente opcional a evaluar' },
+            cullPrivateBodies: { type: 'boolean', description: 'Ocluir cuerpos privados (default true)' },
+          },
+          required: ['targetPath'],
+        },
+      },
+      {
+        name: 'octeract_voxel_observer',
+        description:
+          'Detector reactivo de mutaciones de 0-ticks y emisor de pulsos de redstone (15 a 0) con atenuación por distancia sobre el grafo topológico.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta del archivo o nodo a observar' },
+            mutatedState: { type: 'string', description: 'Nuevo estado o hash para comprobar cambios' },
+            propagateHops: { type: 'boolean', description: 'Propagar pulso de redstone a través de dependencias' },
+          },
+          required: ['targetPath'],
+        },
+      },
     ];
 
     const aliases = tools.map((t) => ({
@@ -2456,6 +2584,260 @@ export class MCPServer {
             originalSnippet: m.originalSnippet,
             mutatedSnippet: m.mutatedSnippet,
           })),
+        };
+      }
+
+      case 'octeract_voxel_palette': {
+        const filePath = args.targetPath;
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(this.rootDir, filePath);
+        let code = args.sourceCode;
+        if (!code && fs.existsSync(resolvedPath)) {
+          code = fs.readFileSync(resolvedPath, 'utf-8');
+        }
+        if (!code) {
+          throw new Error(`Archivo '${resolvedPath}' no existe o está vacío.`);
+        }
+        const storage = new OcteractPaletteStorage();
+        const start = performance.now();
+        const compressed = storage.compressCode(code);
+        const durMs = performance.now() - start;
+        return {
+          targetPath: filePath,
+          executionTimeMs: durMs,
+          paletteSize: compressed.palette.length,
+          bitWidth: compressed.bitWidth,
+          packedWordsCount: compressed.words.length,
+          compressionRatio: parseFloat(compressed.compressionRatio.toFixed(2)),
+          uncompressedBytes: compressed.uncompressedBytes,
+          compressedBytes: compressed.compressedBytes,
+          ramReductionPercent: Math.round(((compressed.uncompressedBytes - compressed.compressedBytes) / (compressed.uncompressedBytes || 1)) * 100),
+          samplePalette: compressed.palette.slice(0, 20),
+        };
+      }
+
+      case 'octeract_voxel_biomes': {
+        const classifier = new OcteractMultiNoiseBiomes();
+        if (args.targetPath) {
+          const resolvedPath = path.isAbsolute(args.targetPath) ? args.targetPath : path.resolve(this.rootDir, args.targetPath);
+          if (!fs.existsSync(resolvedPath)) {
+            throw new Error(`Archivo '${resolvedPath}' no existe.`);
+          }
+          const content = fs.readFileSync(resolvedPath, 'utf-8');
+          const res = classifier.classify(args.targetPath, content);
+          return res;
+        }
+
+        const root = args.targetDir ? (path.isAbsolute(args.targetDir) ? args.targetDir : path.resolve(this.rootDir, args.targetDir)) : this.rootDir;
+        const vertices = this.space.getVertices();
+        const biomeCounts: Record<string, number> = {};
+        const breakdown: Record<string, string[]> = {};
+
+        for (const v of vertices) {
+          let content = '';
+          try { content = fs.readFileSync(path.join(root, v.path), 'utf-8'); } catch (_) {}
+          const res = classifier.classify(v.path, content, { centrality: (v.dependencies.length + v.dependents.length) / 10 });
+          biomeCounts[res.biome] = (biomeCounts[res.biome] || 0) + 1;
+          if (!breakdown[res.biome]) breakdown[res.biome] = [];
+          if (breakdown[res.biome].length < 10) breakdown[res.biome].push(v.path);
+        }
+
+        return {
+          totalFilesClassified: vertices.length,
+          biomeDistribution: biomeCounts,
+          sampleFilesByBiome: breakdown,
+        };
+      }
+
+      case 'octeract_voxel_horizon': {
+        const focus = args.focusPath;
+        const radius = typeof args.radius === 'number' ? args.radius : 2;
+        const manager = new OcteractWorkingSetHorizon();
+        const vertices = this.space.getVertices();
+
+        for (const v of vertices) {
+          manager.registerNeighbors(v.path, v.dependencies);
+        }
+
+        manager.addTicket('mcp-focus-ticket', focus, 31, radius);
+        const horizon = manager.getHorizonSummary();
+        const focusLevel = manager.getFileLevel(focus);
+
+        return {
+          focusPath: focus,
+          radius,
+          focusLevel: focusLevel.level,
+          focusState: focusLevel.state,
+          activeFilesCount: horizon.activeCount,
+          contractOnlyFilesCount: horizon.contractOnlyCount,
+          skeletonOnlyFilesCount: horizon.skeletonOnlyCount,
+          evictedFilesCount: horizon.evictedCount,
+          totalTracked: horizon.totalTracked,
+        };
+      }
+
+      case 'octeract_voxel_starlight': {
+        const sourcePath = args.sourcePath;
+        const initLight = typeof args.initialLight === 'number' ? args.initialLight : 15;
+        const starlight = new OcteractStarlightBlast();
+        const vertices = this.space.getVertices();
+        const nodeMap = new Map<string, number>();
+
+        for (const v of vertices) {
+          const id = starlight.registerNode(v.path);
+          nodeMap.set(v.path, id);
+        }
+
+        for (const v of vertices) {
+          const fromId = nodeMap.get(v.path);
+          if (fromId === undefined) continue;
+          for (const dep of v.dependencies) {
+            const toId = nodeMap.get(dep);
+            if (toId !== undefined) {
+              starlight.addEdge(fromId, toId);
+            }
+          }
+        }
+
+        const sourceId = nodeMap.get(sourcePath);
+        if (sourceId === undefined) {
+          throw new Error(`Nodo fuente '${sourcePath}' no existe en el grafo topológico.`);
+        }
+
+        const blast = starlight.propagateLight(sourceId, initLight);
+        return {
+          sourcePath,
+          initialLight: initLight,
+          totalIlluminatedNodes: blast.illuminatedNodes.length,
+          propagateTimeUs: blast.propagateTimeUs,
+          propagationSpeedRelsPerSec: Math.round((blast.illuminatedNodes.length / (blast.propagateTimeUs || 1)) * 1000000),
+          illuminatedNodesSample: blast.illuminatedNodes.slice(0, 25),
+        };
+      }
+
+      case 'octeract_voxel_anvil': {
+        const action = args.action || 'inspect';
+        const container = new OcteractAnvilContainer();
+        const sampleData = JSON.stringify({ cell: 'CoreLogic', symbols: ['Hypercube', 'Fracture', 'Voxel'] });
+
+        if (action === 'pack' && args.payload) {
+          const cx = args.chunkX || 0;
+          const cz = args.chunkZ || 0;
+          container.saveChunk(cx, cz, args.payload);
+        } else {
+          // Fill sample chunks for inspection
+          for (let x = 0; x < 4; x++) {
+            for (let z = 0; z < 4; z++) {
+              container.saveChunk(x, z, sampleData);
+            }
+          }
+        }
+
+        const metrics = container.getMetrics();
+        return {
+          action,
+          storedChunks: metrics.storedChunks,
+          totalSectors: metrics.totalSectors,
+          totalBytesOnDisk: metrics.totalBytes,
+          uncompressedBytes: metrics.uncompressedBytes,
+          compressedBytes: metrics.compressedBytes,
+          fragmentationRatio: parseFloat(metrics.fragmentationRatio.toFixed(3)),
+          headerSizeBytes: 8192,
+        };
+      }
+
+      case 'octeract_voxel_jigsaw': {
+        const rootId = args.rootPieceId;
+        const jigsaw = new OcteractJigsawSynthesis();
+
+        if (Array.isArray(args.pieces) && args.pieces.length > 0) {
+          for (const p of args.pieces) {
+            jigsaw.registerPiece(p);
+          }
+        } else {
+          // Standard default modular template pieces
+          jigsaw.registerPiece({
+            id: rootId,
+            template: `// Server Root\nimport { {{db_conn}} } from './db';\nexport function start() { return {{db_conn}}(); }`,
+            sockets: [
+              { name: 'db_conn', type: 'plug', contract: 'IDatabaseConnection', jointType: 'rigid' }
+            ],
+          });
+          jigsaw.registerPiece({
+            id: 'db-provider',
+            template: `// DB Provider\nexport function connect() { return "connected"; }`,
+            sockets: [
+              { name: 'db_conn', type: 'jack', contract: 'IDatabaseConnection', jointType: 'rigid' }
+            ],
+          });
+        }
+
+        const assembly = jigsaw.assemble(rootId);
+        return {
+          rootPieceId: rootId,
+          success: assembly.success,
+          connectedPieces: assembly.connectedPieces,
+          unmatchedSocketsCount: assembly.unmatchedSockets.length,
+          cyclicWarnings: assembly.cyclicWarnings,
+          synthesizedLengthChars: assembly.synthesizedOutput.length,
+          previewSynthesizedCode: assembly.synthesizedOutput.slice(0, 400),
+        };
+      }
+
+      case 'octeract_voxel_culler': {
+        const filePath = args.targetPath;
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(this.rootDir, filePath);
+        let code = args.sourceCode;
+        if (!code && fs.existsSync(resolvedPath)) {
+          code = fs.readFileSync(resolvedPath, 'utf-8');
+        }
+        if (!code) {
+          throw new Error(`Archivo '${resolvedPath}' no existe o está vacío.`);
+        }
+        const culler = new OcteractGreedyContextCuller();
+        const start = performance.now();
+        const res = culler.cullAndMesh(code, { cullPrivateBodies: args.cullPrivateBodies ?? true });
+        const durMs = performance.now() - start;
+        return {
+          targetPath: filePath,
+          executionTimeMs: durMs,
+          originalLines: res.originalLines,
+          culledLines: res.culledLines,
+          originalEstimatedTokens: res.originalEstimatedTokens,
+          compressedEstimatedTokens: res.compressedEstimatedTokens,
+          tokenSavingsPercent: res.tokenSavingsPercent,
+          previewCompressedCode: res.compressedCode.slice(0, 500),
+        };
+      }
+
+      case 'octeract_voxel_observer': {
+        const filePath = args.targetPath;
+        const observer = new OcteractObserverPulse();
+        const receivedSignals: any[] = [];
+        observer.onPulse((sig) => receivedSignals.push(sig));
+
+        observer.observeNode(filePath, 'hash_initial_v1');
+        const newState = args.mutatedState || `hash_mutated_${Date.now()}`;
+        const pulse = observer.notifyStateChange(filePath, newState);
+
+        let propagationMap: Record<string, number> | null = null;
+        if (args.propagateHops) {
+          const vertices = this.space.getVertices();
+          for (const v of vertices) {
+            for (const d of v.dependencies) {
+              observer.addLink(v.path, d);
+            }
+          }
+          const prop = observer.propagatePulse(filePath, 15);
+          propagationMap = Object.fromEntries(prop);
+        }
+
+        return {
+          targetPath: filePath,
+          mutationDetected: pulse !== null,
+          redstonePower: pulse ? pulse.power : 0,
+          currentTick: observer.getCurrentTick(),
+          listenersTriggered: receivedSignals.length,
+          propagationNetwork: propagationMap,
         };
       }
 

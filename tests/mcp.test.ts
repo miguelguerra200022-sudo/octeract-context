@@ -190,3 +190,124 @@ test('MCPServer: Herramientas de la Suite Voynich & Código EVA', async () => {
   const cardanData = JSON.parse(cardanRes.result.content[0].text);
   assert.ok(cardanData.totalMutantsGenerated > 0);
 });
+
+test('MCPServer: handles Minecraft-Voxel tools seamlessly', async () => {
+  const server = new MCPServer({ rootDir: '.' });
+
+  // 1. octeract_voxel_palette
+  const paletteRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 101,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_voxel_palette',
+      arguments: { targetPath: 'src/voxel/palette-storage.ts' },
+    },
+  });
+  assert.strictEqual(paletteRes.id, 101);
+  const paletteData = JSON.parse(paletteRes.result.content[0].text);
+  assert.ok(paletteData.paletteSize > 0);
+  assert.ok(paletteData.compressionRatio > 1.0);
+
+  // 2. octeract_voxel_biomes
+  const biomesRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 102,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_voxel_biomes',
+      arguments: { targetPath: 'src/core/hypercube.ts' },
+    },
+  });
+  assert.strictEqual(biomesRes.id, 102);
+  const biomesData = JSON.parse(biomesRes.result.content[0].text);
+  assert.ok(biomesData.biome);
+
+  // 3. octeract_voxel_horizon
+  const horizonRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 103,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_voxel_horizon',
+      arguments: { focusPath: 'src/index.ts', radius: 2 },
+    },
+  });
+  assert.strictEqual(horizonRes.id, 103);
+  const horizonData = JSON.parse(horizonRes.result.content[0].text);
+  assert.strictEqual(horizonData.focusLevel, 31);
+  assert.strictEqual(horizonData.focusState, 'ACTIVE');
+
+  // 4. octeract_voxel_starlight
+  const starlightRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 104,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_voxel_starlight',
+      arguments: { sourcePath: 'src/index.ts', initialLight: 15 },
+    },
+  });
+  assert.strictEqual(starlightRes.id, 104);
+  const starlightData = JSON.parse(starlightRes.result.content[0].text);
+  assert.ok(starlightData.totalIlluminatedNodes > 0);
+
+  // 5. octeract_voxel_anvil
+  const anvilRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 105,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_voxel_anvil',
+      arguments: { action: 'inspect' },
+    },
+  });
+  assert.strictEqual(anvilRes.id, 105);
+  const anvilData = JSON.parse(anvilRes.result.content[0].text);
+  assert.ok(anvilData.storedChunks > 0);
+  assert.strictEqual(anvilData.headerSizeBytes, 8192);
+
+  // 6. octeract_voxel_jigsaw
+  const jigsawRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 106,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_voxel_jigsaw',
+      arguments: { rootPieceId: 'root-server' },
+    },
+  });
+  assert.strictEqual(jigsawRes.id, 106);
+  const jigsawData = JSON.parse(jigsawRes.result.content[0].text);
+  assert.strictEqual(jigsawData.success, true);
+
+  // 7. octeract_voxel_culler
+  const cullerRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 107,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_voxel_culler',
+      arguments: { targetPath: 'src/voxel/context-culler.ts' },
+    },
+  });
+  assert.strictEqual(cullerRes.id, 107);
+  const cullerData = JSON.parse(cullerRes.result.content[0].text);
+  assert.ok(cullerData.originalLines > 0);
+
+  // 8. octeract_voxel_observer
+  const observerRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 108,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_voxel_observer',
+      arguments: { targetPath: 'src/index.ts', propagateHops: true },
+    },
+  });
+  assert.strictEqual(observerRes.id, 108);
+  const observerData = JSON.parse(observerRes.result.content[0].text);
+  assert.strictEqual(observerData.mutationDetected, true);
+  assert.strictEqual(observerData.redstonePower, 15);
+});
+

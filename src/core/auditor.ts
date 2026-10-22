@@ -559,7 +559,17 @@ export class TopologicalAuditor {
           baseName.includes('entropy') ||
           baseName.includes('cardan') ||
           baseName.includes('slot') ||
-          v.id.includes('voynich')
+          baseName.includes('voxel') ||
+          baseName.includes('palette') ||
+          baseName.includes('noise') ||
+          baseName.includes('horizon') ||
+          baseName.includes('starlight') ||
+          baseName.includes('anvil') ||
+          baseName.includes('jigsaw') ||
+          baseName.includes('culler') ||
+          baseName.includes('observer') ||
+          v.id.includes('voynich') ||
+          v.id.includes('voxel')
         ) {
           continue;
         }

@@ -5,7 +5,7 @@ import * as fs from 'node:fs';
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
 
-import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats, runGrep, runOrchestrate, runFunSearch, runDeductive, runAlphaDev, runPairformer, runProgramSlice, runReproduce, runSpeculativePatch, runMcts, runEVAAST, runMontemurro, runSlotMachine, runCurrier, runEntropyH2, runCardanFuzz } from './cli/commands.ts';
+import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats, runGrep, runOrchestrate, runFunSearch, runDeductive, runAlphaDev, runPairformer, runProgramSlice, runReproduce, runSpeculativePatch, runMcts, runEVAAST, runMontemurro, runSlotMachine, runCurrier, runEntropyH2, runCardanFuzz, runVoxelPalette, runVoxelBiomes, runVoxelHorizon, runVoxelStarlight, runVoxelAnvil, runVoxelJigsaw, runVoxelCuller, runVoxelObserver } from './cli/commands.ts';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -449,6 +449,71 @@ async function main() {
       await runCardanFuzz(targetDir, targetFile, maxMutants);
       break;
     }
+    case 'voxel-palette': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      if (!targetFile) {
+        console.error('Uso: octeract voxel-palette <dir> <archivo>');
+        process.exit(1);
+      }
+      await runVoxelPalette(targetDir, targetFile);
+      break;
+    }
+    case 'voxel-biomes': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      await runVoxelBiomes(targetDir, targetFile);
+      break;
+    }
+    case 'voxel-horizon': {
+      const targetDir = args[1] || '.';
+      const focusFile = args[2];
+      const radius = args[3] ? parseInt(args[3], 10) : 2;
+      if (!focusFile) {
+        console.error('Uso: octeract voxel-horizon <dir> <focusFile> [radio]');
+        process.exit(1);
+      }
+      await runVoxelHorizon(targetDir, focusFile, radius);
+      break;
+    }
+    case 'voxel-starlight': {
+      const targetDir = args[1] || '.';
+      const sourceFile = args[2];
+      if (!sourceFile) {
+        console.error('Uso: octeract voxel-starlight <dir> <sourceFile>');
+        process.exit(1);
+      }
+      await runVoxelStarlight(targetDir, sourceFile);
+      break;
+    }
+    case 'voxel-anvil': {
+      const targetDir = args[1] || '.';
+      const action = (args[2] as 'pack' | 'inspect') || 'inspect';
+      await runVoxelAnvil(targetDir, action);
+      break;
+    }
+    case 'voxel-jigsaw': {
+      const targetDir = args[1] || '.';
+      const rootPieceId = args[2] || 'root-entrypoint';
+      await runVoxelJigsaw(targetDir, rootPieceId);
+      break;
+    }
+    case 'voxel-culler': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      if (!targetFile) {
+        console.error('Uso: octeract voxel-culler <dir> <archivo>');
+        process.exit(1);
+      }
+      await runVoxelCuller(targetDir, targetFile);
+      break;
+    }
+    case 'voxel-observer': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2] || 'src/index.ts';
+      await runVoxelObserver(targetDir, targetFile);
+      break;
+    }
     case 'octeract':
     case '8d': {
       const targetDir = args[1] || '.';
@@ -457,7 +522,7 @@ async function main() {
     }
     case '--version':
     case '-v': {
-      console.log('Octeract-Context v4.3.0 (8D Universal Suite - E8 Riemannian Torus T^8 & Voynich-EVA Engine)');
+      console.log('Octeract-Context v4.4.0 (8D Universal Suite - Minecraft Voxel & Voynich-EVA Engine)');
       break;
     }
     case 'help':
@@ -560,3 +625,4 @@ export { OcteractReproducer } from './core/reproducer.ts';
 export { OcteractSpeculativePatcher } from './core/patcher.ts';
 export { OcteractTreeSearch } from './core/mcts.ts';
 export * from './voynich/index.ts';
+export * from './voxel/index.ts';
