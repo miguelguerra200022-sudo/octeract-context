@@ -97,3 +97,96 @@ test('MCPServer: Protocolo JSON-RPC 2.0 y Herramientas 4D', async () => {
   assert.ok('rollbackExecuted' in trialData);
   assert.ok('richDossierForAI' in trialData);
 });
+
+test('MCPServer: Herramientas de la Suite Voynich & Código EVA', async () => {
+  const server = new MCPServer({ rootDir: '.' });
+  await server.init();
+
+  // 1. octeract_eva_ast
+  const evaRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 10,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_eva_ast',
+      arguments: { targetPath: 'src/voynich/eva-ast.ts' },
+    },
+  });
+  assert.strictEqual(evaRes.id, 10);
+  const evaData = JSON.parse(evaRes.result.content[0].text);
+  assert.ok(evaData.totalDeclarations > 0);
+  assert.ok(evaData.tokenReductionPercent > 50);
+
+  // 2. octeract_montemurro_cluster
+  const mmRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 11,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_montemurro_cluster',
+      arguments: { clusterCount: 3 },
+    },
+  });
+  assert.strictEqual(mmRes.id, 11);
+  const mmData = JSON.parse(mmRes.result.content[0].text);
+  assert.ok(mmData.totalFilesAnalyzed > 0);
+  assert.ok(mmData.clusters.length > 0);
+
+  // 3. octeract_slot_machine_validate
+  const slotRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 12,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_slot_machine_validate',
+      arguments: { statement: 'public async executeTask(id: string): Promise<boolean>' },
+    },
+  });
+  assert.strictEqual(slotRes.id, 12);
+  const slotData = JSON.parse(slotRes.result.content[0].text);
+  assert.strictEqual(slotData.valid, true);
+  assert.strictEqual(slotData.identifier, 'executeTask');
+
+  // 4. octeract_currier_classify
+  const currierRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 13,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_currier_classify',
+      arguments: { targetPath: 'src/voynich/currier.ts' },
+    },
+  });
+  assert.strictEqual(currierRes.id, 13);
+  const currierData = JSON.parse(currierRes.result.content[0].text);
+  assert.ok(currierData.dialect);
+
+  // 5. octeract_entropy_h2
+  const entropyRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 14,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_entropy_h2',
+      arguments: { targetPath: 'src/voynich/entropy-guard.ts' },
+    },
+  });
+  assert.strictEqual(entropyRes.id, 14);
+  const entropyData = JSON.parse(entropyRes.result.content[0].text);
+  assert.strictEqual(entropyData.isSafe, true);
+  assert.strictEqual(entropyData.verdict, 'HEALTHY');
+
+  // 6. octeract_cardan_fuzz
+  const cardanRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 15,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_cardan_fuzz',
+      arguments: { targetPath: 'src/voynich/cardan-grille.ts', maxMutants: 5 },
+    },
+  });
+  assert.strictEqual(cardanRes.id, 15);
+  const cardanData = JSON.parse(cardanRes.result.content[0].text);
+  assert.ok(cardanData.totalMutantsGenerated > 0);
+});

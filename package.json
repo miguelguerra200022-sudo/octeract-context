@@ -1,7 +1,7 @@
 {
   "name": "octeract-context",
-  "version": "4.2.1",
-  "description": "Octeract v4.2 Supreme Frontier Suite: 8-Dimensional Context Engine, Google DeepMind Neuro-Symbolic Suite (FunSearch, AlphaGeometry, AlphaDev, Pairformer, PRM), Weiser Program Slicing, Autonomous Test Reproducer, Speculative AST Patcher, MCTS Refactoring Engine, Supreme Agent Orchestrator, E8 Riemannian Torus (T^8), and Zero-Token Topological Shield",
+  "version": "4.3.0",
+  "description": "Octeract v4.3 Voynich-EVA & 8D Supreme Suite: Voynich Manuscript Linguistic Suite (Canonical EVA-AST Transliteration, Montemurro & Zanette Mutual Information Topic Clustering, Zattera Slot-Machine DFA Validator, Currier Dialect Partitioning, Bennett-Lindemann h2 Conditional Entropy Guard, Gordon Rugg Cardan Grille In-RAM Fuzzer), DeepMind Neuro-Symbolic Suite, 8-Dimensional Context Engine (E8 Riemannian Torus T^8), and Zero-Token Topological Shield",
   "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",

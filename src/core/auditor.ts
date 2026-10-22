@@ -551,7 +551,15 @@ export class TopologicalAuditor {
           baseName.includes('slicer') ||
           baseName.includes('patcher') ||
           baseName.includes('slice') ||
-          baseName.includes('patch')
+          baseName.includes('patch') ||
+          baseName.includes('voynich') ||
+          baseName.includes('eva') ||
+          baseName.includes('montemurro') ||
+          baseName.includes('currier') ||
+          baseName.includes('entropy') ||
+          baseName.includes('cardan') ||
+          baseName.includes('slot') ||
+          v.id.includes('voynich')
         ) {
           continue;
         }

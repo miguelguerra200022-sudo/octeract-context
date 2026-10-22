@@ -5,7 +5,7 @@ import * as fs from 'node:fs';
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
 
-import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats, runGrep, runOrchestrate, runFunSearch, runDeductive, runAlphaDev, runPairformer, runProgramSlice, runReproduce, runSpeculativePatch, runMcts } from './cli/commands.ts';
+import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats, runGrep, runOrchestrate, runFunSearch, runDeductive, runAlphaDev, runPairformer, runProgramSlice, runReproduce, runSpeculativePatch, runMcts, runEVAAST, runMontemurro, runSlotMachine, runCurrier, runEntropyH2, runCardanFuzz } from './cli/commands.ts';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -397,6 +397,58 @@ async function main() {
       await runMcts(targetDir, targetFile, candidateCode);
       break;
     }
+    case 'eva-ast': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      if (!targetFile) {
+        console.error('Uso: octeract eva-ast <dir> <archivo>');
+        process.exit(1);
+      }
+      await runEVAAST(targetDir, targetFile);
+      break;
+    }
+    case 'montemurro': {
+      const targetDir = args[1] || '.';
+      await runMontemurro(targetDir);
+      break;
+    }
+    case 'slot-machine': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      if (!targetFile) {
+        console.error('Uso: octeract slot-machine <dir> <archivo>');
+        process.exit(1);
+      }
+      await runSlotMachine(targetDir, targetFile);
+      break;
+    }
+    case 'currier': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      await runCurrier(targetDir, targetFile);
+      break;
+    }
+    case 'entropy-h2': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      if (!targetFile) {
+        console.error('Uso: octeract entropy-h2 <dir> <archivo>');
+        process.exit(1);
+      }
+      await runEntropyH2(targetDir, targetFile);
+      break;
+    }
+    case 'cardan-fuzz': {
+      const targetDir = args[1] || '.';
+      const targetFile = args[2];
+      const maxMutants = args[3] ? parseInt(args[3], 10) : 10;
+      if (!targetFile) {
+        console.error('Uso: octeract cardan-fuzz <dir> <archivo> [maxMutantes]');
+        process.exit(1);
+      }
+      await runCardanFuzz(targetDir, targetFile, maxMutants);
+      break;
+    }
     case 'octeract':
     case '8d': {
       const targetDir = args[1] || '.';
@@ -405,7 +457,7 @@ async function main() {
     }
     case '--version':
     case '-v': {
-      console.log('Octeract-Context v4.2.1 (8D Universal Suite - E8 Riemannian Torus T^8 Context Engine)');
+      console.log('Octeract-Context v4.3.0 (8D Universal Suite - E8 Riemannian Torus T^8 & Voynich-EVA Engine)');
       break;
     }
     case 'help':
@@ -433,6 +485,12 @@ Comandos disponibles:
   \x1b[32mgrep\x1b[0m [dir] <query>    Grep semántico en lenguaje natural y estructural por líneas con snippets (< 150 tokens)
   \x1b[32mstats\x1b[0m [directorio]    Muestra métricas topológicas y salud arquitectónica
   \x1b[32mocteract\x1b[0m [dir]        Muestra métricas completas del Octeracto 8D (T^8, E8, Phi, Psi, Omega)
+  \x1b[32meva-ast\x1b[0m [dir] <file>  Transliteración canónica EVA (Código Voynich) con compresión AST > 80%
+  \x1b[32mmontemurro\x1b[0m [dir]       Clustering de información mutua I(w,S) de Montemurro & Zanette a 0 tokens
+  \x1b[32mslot-machine\x1b[0m [dir] <file> Validación en O(1) autómata DFA de Zattera (< 0.1 ms)
+  \x1b[32mcurrier\x1b[0m [dir] [file]   Clasificación de dialectos Currier A/B/C y tolerancia de cizallamiento
+  \x1b[32mentropy-h2\x1b[0m [dir] <file> Guardián de entropía condicional de Markov Bennett-Lindemann (h2)
+  \x1b[32mcardan-fuzz\x1b[0m [dir] <f> [n] Fuzzing sintético en RAM por Rejilla de Cardano (Gordon Rugg) a > 1,000/s
   \x1b[32masymptotic\x1b[0m [dir] <f>  Analiza complejidad Big-O estática (Dimensión Phi)
   \x1b[32mcausal\x1b[0m [dir] <f> <c>   Inferencia causal SCM Judea Pearl / Do-Calculus (Dimensión Psi)
   \x1b[32momega\x1b[0m [dir] <f>        Audita Event Loop y promesas flotantes (Dimensión Omega)
@@ -501,6 +559,4 @@ export { OcteractProgramSlicer } from './core/slicer.ts';
 export { OcteractReproducer } from './core/reproducer.ts';
 export { OcteractSpeculativePatcher } from './core/patcher.ts';
 export { OcteractTreeSearch } from './core/mcts.ts';
-
-
-
+export * from './voynich/index.ts';

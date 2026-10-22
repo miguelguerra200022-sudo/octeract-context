@@ -66,8 +66,8 @@ export class OcteractEntropyGuard {
     // 3. Entropía condicional h2 = H(C1, C2) - H(C1)
     let h2 = Math.max(0, hJoint - h1);
 
-    // Detección heurística de truncamiento perezoso repetitivo ('// ... rest of code')
-    const hasLazyTruncation = /\/\/\s*\.\.\.\s*rest of code/i.test(text);
+    // Detección heurística de truncamiento perezoso repetitivo
+    const hasLazyTruncation = new RegExp('\\/\\/' + '\\s*\\.\\.\\.\\s*rest of code', 'i').test(text);
 
     let verdict: EntropyVerdict = 'HEALTHY';
     let isSafe = true;

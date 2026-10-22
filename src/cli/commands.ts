@@ -42,6 +42,14 @@ import { OcteractProgramSlicer } from '../core/slicer.ts';
 import { OcteractReproducer } from '../core/reproducer.ts';
 import { OcteractSpeculativePatcher } from '../core/patcher.ts';
 import { OcteractTreeSearch } from '../core/mcts.ts';
+import {
+  OcteractEVAAST,
+  OcteractMontemurroEngine,
+  OcteractSlotMachineValidator,
+  OcteractCurrierClassifier,
+  OcteractEntropyGuard,
+  OcteractCardanGrilleFuzzer,
+} from '../voynich/index.ts';
 
 export async function runInit(targetDir: string = '.'): Promise<void> {
   await runUniversalInit(targetDir);
@@ -1157,6 +1165,201 @@ export async function runMcts(
     const top = res.bestTrajectory[0];
     console.log(`  ● Mejor Rama Seleccionada: \x1b[1;32m${top.patchId}\x1b[0m`);
     console.log(`  ● Recompensa Topológica: \x1b[1;32m${top.rewardScore}\x1b[0m | Cizallamiento: \x1b[33m${top.shearDistance}\x1b[0m | Visitas: \x1b[35m${top.visits}\x1b[0m\n`);
+  }
+}
+
+export async function runEVAAST(targetDir: string = '.', filePath: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[1;31m✖ Error: Archivo '${fullPath}' no existe.\x1b[0m\n`);
+    return;
+  }
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`📜 \x1b[1mOCTERACT VOYNAST: TRANSLITERADOR CANÓNICO EVA-AST (VOYNICH)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const content = fs.readFileSync(fullPath, 'utf-8');
+  const eva = new OcteractEVAAST();
+  const res = eva.transliterate(content);
+
+  console.log(`  ● Archivo: \x1b[1m${filePath}\x1b[0m | Declaraciones: \x1b[36m${res.slots.length}\x1b[0m`);
+  console.log(`  ● Reducción de Tokens: \x1b[1;32m${res.tokenReductionPercent}%\x1b[0m (${res.originalTokens} tok ➔ ${res.evaTokens} tok)\n`);
+  console.log(`\x1b[33m--- [BLOQUE CANÓNICO DE GLIFOS EVA] ---\x1b[0m`);
+  console.log(res.evaGlyphBlock);
+  console.log('');
+}
+
+export async function runMontemurro(targetDir: string = '.'): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🌐 \x1b[1mOCTERACT MONTEMURRO: CLUSTERING SEMÁNTICO POR INFORMACIÓN MUTUA\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+
+  const space = indexer.getSpace();
+  const vertices = space.getVertices();
+  const corpus = vertices.slice(0, 50).map(v => {
+    const full = path.join(root, v.path);
+    let c = '';
+    try { c = fs.readFileSync(full, 'utf-8'); } catch (_) {}
+    return { id: v.path, content: c };
+  }).filter(d => d.content.length > 0);
+
+  const engine = new OcteractMontemurroEngine();
+  const analysis = engine.analyzeCorpus(corpus);
+  const clusters = engine.extractSemanticClusters(corpus, 4);
+
+  console.log(`  ● Documentos Analizados: \x1b[1m${analysis.sectionCount}\x1b[0m | Tokens Totales: \x1b[36m${analysis.totalTokensAnalyzed}\x1b[0m (${analysis.executionTimeMs} ms)`);
+  console.log(`  ● Entropía Global de Secciones H(S): \x1b[1;33m${analysis.overallSectionEntropy} bits\x1b[0m\n`);
+
+  console.log(`\x1b[33mTop Palabras Clave de Mayor Información Mutua I(w, S):\x1b[0m`);
+  for (const kw of analysis.keywords.slice(0, 8)) {
+    console.log(`  • \x1b[1;32m${kw.word.padEnd(18)}\x1b[0m [I(w,S)=${kw.mutualInformation.toFixed(3)} | total=${kw.totalCount}] ➔ Secc: ${kw.dominantSection}`);
+  }
+
+  console.log(`\n\x1b[33mClústeres Temáticos No Supervisados:\x1b[0m`);
+  for (const cl of clusters) {
+    console.log(`  ● \x1b[1;36m[${cl.label}]\x1b[0m (${cl.files.length} archivos) | Keywords: ${cl.topKeywords.join(', ')}`);
+  }
+  console.log('');
+}
+
+export async function runSlotMachine(targetDir: string = '.', filePath: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[1;31m✖ Error: Archivo '${fullPath}' no existe.\x1b[0m\n`);
+    return;
+  }
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🎰 \x1b[1mOCTERACT SLOT-MACHINE: VALIDADOR DE SINTAXIS EN O(1) (ZATTERA)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const content = fs.readFileSync(fullPath, 'utf-8');
+  const lines = content.split('\n').filter(l => /^(export|public|private|function|class|interface|type)\b/.test(l.trim()));
+  const validator = new OcteractSlotMachineValidator();
+
+  let validCount = 0;
+  let invalidCount = 0;
+
+  for (const line of lines.slice(0, 10)) {
+    const res = validator.validate(line);
+    if (res.valid) {
+      validCount++;
+      console.log(`  ✔ \x1b[1;32mVÁLIDO\x1b[0m [${res.executionTimeUs}µs] (${res.slots?.kind} \x1b[1m${res.identifier}\x1b[0m)`);
+    } else {
+      invalidCount++;
+      console.log(`  ✖ \x1b[1;31mRECHAZADO\x1b[0m [${res.violationReason}]`);
+    }
+  }
+
+  console.log(`\n  ● Total Evaluadas: \x1b[1m${validCount + invalidCount}\x1b[0m | Válidas: \x1b[1;32m${validCount}\x1b[0m | Rechazadas: \x1b[1;31m${invalidCount}\x1b[0m\n`);
+}
+
+export async function runCurrier(targetDir: string = '.', filePath?: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🌓 \x1b[1mOCTERACT CURRIER: CLASIFICADOR DE DIALECTOS DE SOFTWARE (A / B)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const classifier = new OcteractCurrierClassifier();
+
+  if (filePath) {
+    const fullPath = path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+    if (!fs.existsSync(fullPath)) {
+      console.error(`\x1b[1;31m✖ Error: Archivo '${fullPath}' no existe.\x1b[0m\n`);
+      return;
+    }
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    const res = classifier.classify(filePath, content);
+    console.log(`  ● Archivo: \x1b[1m${filePath}\x1b[0m`);
+    console.log(`  ● Dialecto: \x1b[1;32m${res.dialect}\x1b[0m (Confianza: \x1b[36m${(res.confidence * 100).toFixed(0)}%\x1b[0m)`);
+    console.log(`  ● Tolerancia de Cizallamiento Sugerida: \x1b[1;33m${res.recommendedShearTolerance}\x1b[0m\n`);
+    return;
+  }
+
+  const indexer = new ProjectIndexer();
+  if (!indexer.loadIndex(root)) {
+    indexer.indexDirectory({ rootDir: root });
+  }
+
+  const space = indexer.getSpace();
+  const vertices = space.getVertices();
+  const dialectCounts: Record<string, number> = {
+    DIALECT_A_DECLARATIVE_UI: 0,
+    DIALECT_B_IMPERATIVE_CORE: 0,
+    DIALECT_C_CONTRACT_TYPES: 0,
+  };
+
+  for (const v of vertices.slice(0, 60)) {
+    let content = '';
+    try { content = fs.readFileSync(path.join(root, v.path), 'utf-8'); } catch (_) {}
+    const res = classifier.classify(v.path, content);
+    dialectCounts[res.dialect] = (dialectCounts[res.dialect] || 0) + 1;
+  }
+
+  console.log(`  ● Dialecto A (Declarativo / React / UI):  \x1b[1;36m${dialectCounts.DIALECT_A_DECLARATIVE_UI} archivos\x1b[0m (Tolerancia 0.25)`);
+  console.log(`  ● Dialecto B (Imperativo / Async / Core): \x1b[1;32m${dialectCounts.DIALECT_B_IMPERATIVE_CORE} archivos\x1b[0m (Tolerancia 0.10)`);
+  console.log(`  ● Dialecto C (Tipos Puros / Contratos):   \x1b[1;35m${dialectCounts.DIALECT_C_CONTRACT_TYPES} archivos\x1b[0m (Tolerancia 0.05)\n`);
+}
+
+export async function runEntropyH2(targetDir: string = '.', filePath: string): Promise<void> {
+  const root = path.resolve(targetDir);
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[1;31m✖ Error: Archivo '${fullPath}' no existe.\x1b[0m\n`);
+    return;
+  }
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`📉 \x1b[1mOCTERACT ENTROPY GUARD: ENTROPÍA CONDICIONAL DE 2DO ORDEN (H2)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const content = fs.readFileSync(fullPath, 'utf-8');
+  const guard = new OcteractEntropyGuard();
+  const res = guard.computeSecondOrderEntropy(content);
+
+  console.log(`  ● Archivo: \x1b[1m${filePath}\x1b[0m | Longitud: \x1b[36m${res.charLength} caracteres\x1b[0m`);
+  console.log(`  ● Entropía de 1er Orden (H1): \x1b[1;33m${res.h1} bits/char\x1b[0m`);
+  console.log(`  ● Entropía Condicional de 2do Orden (h2): \x1b[1;32m${res.h2} bits/transición\x1b[0m`);
+  console.log(`  ● Veredicto: ${res.isSafe ? '\x1b[1;32m' : '\x1b[1;31m'}${res.verdict}\x1b[0m (${res.details})\n`);
+}
+
+export async function runCardanFuzz(
+  targetDir: string = '.',
+  filePath: string,
+  maxMutants: number = 10
+): Promise<void> {
+  const root = path.resolve(targetDir);
+  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[1;31m✖ Error: Archivo '${fullPath}' no existe.\x1b[0m\n`);
+    return;
+  }
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🎴 \x1b[1mOCTERACT CARDAN GRILLE: FUZZER SINTÉTICO EN RAM (GORDON RUGG)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const content = fs.readFileSync(fullPath, 'utf-8');
+  const fuzzer = new OcteractCardanGrilleFuzzer();
+  const start = performance.now();
+  const mutants = fuzzer.generateMutants(content, maxMutants);
+  const dur = (performance.now() - start).toFixed(2);
+
+  console.log(`  ● Archivo: \x1b[1m${filePath}\x1b[0m | Mutantes Generados: \x1b[1;32m${mutants.length}\x1b[0m (${dur} ms)\n`);
+
+  for (const m of mutants.slice(0, 5)) {
+    console.log(`  • [\x1b[36mLínea ${m.lineIndex}\x1b[0m] \x1b[1;33m${m.mutationDescription}\x1b[0m`);
+    console.log(`    \x1b[31m- ${m.originalSnippet}\x1b[0m`);
+    console.log(`    \x1b[32m+ ${m.mutatedSnippet}\x1b[0m\n`);
   }
 }
 

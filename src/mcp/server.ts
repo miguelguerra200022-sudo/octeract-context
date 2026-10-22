@@ -48,6 +48,14 @@ import { OcteractProgramSlicer } from '../core/slicer.ts';
 import { OcteractReproducer } from '../core/reproducer.ts';
 import { OcteractSpeculativePatcher } from '../core/patcher.ts';
 import { OcteractTreeSearch } from '../core/mcts.ts';
+import {
+  OcteractEVAAST,
+  OcteractMontemurroEngine,
+  OcteractSlotMachineValidator,
+  OcteractCurrierClassifier,
+  OcteractEntropyGuard,
+  OcteractCardanGrilleFuzzer,
+} from '../voynich/index.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -153,7 +161,7 @@ export class MCPServer {
             },
             serverInfo: {
               name: 'octeract-context',
-              version: '4.2.1',
+              version: '4.3.0',
             },
           },
         };
@@ -1347,6 +1355,81 @@ export class MCPServer {
           required: ['targetPath', 'candidatePatches'],
         },
       },
+      {
+        name: 'octeract_eva_ast',
+        description:
+          'Transliteración canónica EVA (Extensible Voynich Alphabet) del AST para reducción de tokens > 80% y decodificación determinista bidireccional a esqueletos TypeScript.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta relativa o absoluta del archivo a transliterar' },
+            sourceCode: { type: 'string', description: 'Código fuente opcional a transliterar directamente' },
+          },
+          required: ['targetPath'],
+        },
+      },
+      {
+        name: 'octeract_montemurro_cluster',
+        description:
+          'Clustering semántico no supervisado y extracción de palabras clave arquitectónicas por Información Mutua I(w, S) de Montemurro & Zanette a 0 tokens.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetDir: { type: 'string', description: 'Directorio raíz a analizar (por defecto el repositorio actual)' },
+            clusterCount: { type: 'number', description: 'Número de clústeres temáticos a agrupar (default 4)' },
+          },
+        },
+      },
+      {
+        name: 'octeract_slot_machine_validate',
+        description:
+          'Validador de sintaxis O(1) autómata DFA de Zattera: verifica ranuras posicionales de declaraciones en < 0.1 ms sin necesidad de compilar.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            statement: { type: 'string', description: 'Declaración o línea de código individual a validar' },
+            targetPath: { type: 'string', description: 'Ruta del archivo para validar todas sus firmas' },
+          },
+        },
+      },
+      {
+        name: 'octeract_currier_classify',
+        description:
+          'Particionador de dialectos Currier A (UI Declarativo), B (Imperativo Core Asíncrono) y C (Contratos de Tipos Puros) con tolerancias de cizallamiento hiperdimensional adaptativas.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta del archivo a clasificar' },
+            targetDir: { type: 'string', description: 'Directorio para clasificar todo el repositorio' },
+          },
+        },
+      },
+      {
+        name: 'octeract_entropy_h2',
+        description:
+          'Guardián de entropía condicional de Markov Bennett-Lindemann h2 = H(C1, C2) - H(C1). Detecta código IA colapsado (h2 < 1.4) o ruido caótico.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta del archivo a evaluar' },
+            sourceCode: { type: 'string', description: 'Código fuente opcional a evaluar directamente' },
+          },
+          required: ['targetPath'],
+        },
+      },
+      {
+        name: 'octeract_cardan_fuzz',
+        description:
+          'Fuzzer sintético en RAM por Rejilla de Cardano (Gordon Rugg) a más de 1,000 mutaciones sintéticas/segundo para evaluar la solidez de las aserciones de tests.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta del archivo a mutar con rejilla de Cardano' },
+            maxMutants: { type: 'number', description: 'Número máximo de mutantes sintéticos a generar (default 10)' },
+          },
+          required: ['targetPath'],
+        },
+      },
     ];
 
     const aliases = tools.map((t) => ({
@@ -2201,6 +2284,178 @@ export class MCPServer {
           treeSize: res.treeSize,
           executionTimeMs: res.executionTimeMs,
           bestTrajectory: res.bestTrajectory,
+        };
+      }
+
+      case 'octeract_eva_ast': {
+        const filePath = args.targetPath;
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(this.rootDir, filePath);
+        let code = args.sourceCode;
+        if (!code && fs.existsSync(resolvedPath)) {
+          code = fs.readFileSync(resolvedPath, 'utf-8');
+        }
+        if (!code) {
+          throw new Error(`Archivo '${resolvedPath}' no existe o está vacío.`);
+        }
+        const eva = new OcteractEVAAST();
+        const res = eva.transliterate(code);
+        return {
+          targetPath: filePath,
+          totalDeclarations: res.slots.length,
+          originalTokens: res.originalTokens,
+          evaTokens: res.evaTokens,
+          tokenReductionPercent: res.tokenReductionPercent,
+          evaGlyphBlock: res.evaGlyphBlock,
+          slots: res.slots,
+        };
+      }
+
+      case 'octeract_montemurro_cluster': {
+        const root = args.targetDir ? (path.isAbsolute(args.targetDir) ? args.targetDir : path.resolve(this.rootDir, args.targetDir)) : this.rootDir;
+        const vertices = this.space.getVertices();
+        const corpus = vertices.slice(0, 50).map(v => {
+          const full = path.join(root, v.path);
+          let c = '';
+          try { c = fs.readFileSync(full, 'utf-8'); } catch (_) {}
+          return { id: v.path, content: c };
+        }).filter(d => d.content.length > 0);
+
+        const engine = new OcteractMontemurroEngine();
+        const analysis = engine.analyzeCorpus(corpus);
+        const clusters = engine.extractSemanticClusters(corpus, args.clusterCount || 4);
+        return {
+          totalFilesAnalyzed: analysis.sectionCount,
+          totalTokensAnalyzed: analysis.totalTokensAnalyzed,
+          overallSectionEntropy: analysis.overallSectionEntropy,
+          executionTimeMs: analysis.executionTimeMs,
+          topKeywords: analysis.keywords.slice(0, 10),
+          clusters,
+        };
+      }
+
+      case 'octeract_slot_machine_validate': {
+        const validator = new OcteractSlotMachineValidator();
+        if (args.statement) {
+          const res = validator.validate(args.statement);
+          return {
+            mode: 'single_statement',
+            statement: args.statement,
+            valid: res.valid,
+            identifier: res.identifier,
+            slots: res.slots,
+            violationReason: res.violationReason,
+            executionTimeUs: res.executionTimeUs,
+          };
+        }
+        const filePath = args.targetPath;
+        if (!filePath) {
+          throw new Error('Debe especificar "statement" o "targetPath".');
+        }
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(this.rootDir, filePath);
+        if (!fs.existsSync(resolvedPath)) {
+          throw new Error(`Archivo '${resolvedPath}' no existe.`);
+        }
+        const content = fs.readFileSync(resolvedPath, 'utf-8');
+        const lines = content.split('\n').filter(l => /^(export|public|private|function|class|interface|type)\b/.test(l.trim()));
+        const results = lines.map(line => validator.validate(line));
+        const validCount = results.filter(r => r.valid).length;
+        const rejectedCount = results.filter(r => !r.valid).length;
+        return {
+          mode: 'file_scan',
+          targetPath: filePath,
+          totalDeclarationsEvaluated: results.length,
+          validDeclarations: validCount,
+          rejectedDeclarations: rejectedCount,
+          isFullyValid: rejectedCount === 0,
+          sampleEvaluations: results.slice(0, 15),
+        };
+      }
+
+      case 'octeract_currier_classify': {
+        const classifier = new OcteractCurrierClassifier();
+        if (args.targetPath) {
+          const resolvedPath = path.isAbsolute(args.targetPath) ? args.targetPath : path.resolve(this.rootDir, args.targetPath);
+          if (!fs.existsSync(resolvedPath)) {
+            throw new Error(`Archivo '${resolvedPath}' no existe.`);
+          }
+          const content = fs.readFileSync(resolvedPath, 'utf-8');
+          const res = classifier.classify(args.targetPath, content);
+          return res;
+        }
+        const root = args.targetDir ? (path.isAbsolute(args.targetDir) ? args.targetDir : path.resolve(this.rootDir, args.targetDir)) : this.rootDir;
+        const vertices = this.space.getVertices();
+        const dialectBreakdown: Record<string, string[]> = {
+          DIALECT_A_DECLARATIVE_UI: [],
+          DIALECT_B_IMPERATIVE_CORE: [],
+          DIALECT_C_CONTRACT_TYPES: [],
+        };
+        for (const v of vertices) {
+          let content = '';
+          try { content = fs.readFileSync(path.join(root, v.path), 'utf-8'); } catch (_) {}
+          const res = classifier.classify(v.path, content);
+          dialectBreakdown[res.dialect].push(v.path);
+        }
+        return {
+          totalFilesClassified: vertices.length,
+          dialectA_DeclarativeUI: dialectBreakdown.DIALECT_A_DECLARATIVE_UI.length,
+          dialectB_ImperativeCore: dialectBreakdown.DIALECT_B_IMPERATIVE_CORE.length,
+          dialectC_ContractTypes: dialectBreakdown.DIALECT_C_CONTRACT_TYPES.length,
+          recommendedShearTolerances: {
+            dialectA: 0.25,
+            dialectB: 0.10,
+            dialectC: 0.05,
+          },
+          breakdown: dialectBreakdown,
+        };
+      }
+
+      case 'octeract_entropy_h2': {
+        const filePath = args.targetPath;
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(this.rootDir, filePath);
+        let code = args.sourceCode;
+        if (!code && fs.existsSync(resolvedPath)) {
+          code = fs.readFileSync(resolvedPath, 'utf-8');
+        }
+        if (!code) {
+          throw new Error(`Archivo '${resolvedPath}' no existe o está vacío.`);
+        }
+        const guard = new OcteractEntropyGuard();
+        const res = guard.computeSecondOrderEntropy(code);
+        return {
+          targetPath: filePath,
+          charLength: res.charLength,
+          uniqueBigrams: res.uniqueBigrams,
+          h1: res.h1,
+          h2: res.h2,
+          verdict: res.verdict,
+          isSafe: res.isSafe,
+          details: res.details,
+        };
+      }
+
+      case 'octeract_cardan_fuzz': {
+        const filePath = args.targetPath;
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(this.rootDir, filePath);
+        if (!fs.existsSync(resolvedPath)) {
+          throw new Error(`Archivo '${resolvedPath}' no existe.`);
+        }
+        const code = fs.readFileSync(resolvedPath, 'utf-8');
+        const fuzzer = new OcteractCardanGrilleFuzzer();
+        const start = performance.now();
+        const mutants = fuzzer.generateMutants(code, args.maxMutants || 10);
+        const durationMs = performance.now() - start;
+        return {
+          targetPath: filePath,
+          totalMutantsGenerated: mutants.length,
+          fuzzingDurationMs: durationMs,
+          mutantsPerHourRate: Math.round((mutants.length / (durationMs || 1)) * 3600000),
+          mutants: mutants.map(m => ({
+            id: m.id,
+            lineIndex: m.lineIndex,
+            mutationDescription: m.mutationDescription,
+            originalSnippet: m.originalSnippet,
+            mutatedSnippet: m.mutatedSnippet,
+          })),
         };
       }
 
