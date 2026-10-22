@@ -66,6 +66,14 @@ import {
   OcteractGreedyContextCuller,
   OcteractObserverPulse,
 } from '../voxel/index.ts';
+import {
+  OcteractTargetArmor,
+  OcteractEvidenceLedger,
+  OcteractReverseBundle,
+  OcteractSourceToBundleAttribution,
+  OcteractNativeBoundaryInspector,
+  OcteractFacetMatrix,
+} from '../rea/index.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -1558,6 +1566,72 @@ export class MCPServer {
           required: ['targetPath'],
         },
       },
+      {
+        name: 'octeract_reverse_bundle',
+        description:
+          'Ingeniería inversa estática de bundles JS/TS minificados o empaquetados (Webpack, Rollup, esbuild, CJS, ESM). Extrae límites de módulos, símbolos exportados y grafo de llamadas, proyectándolos en el hipercubo 8D con blindaje de procedencia.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            bundlePath: { type: 'string', description: 'Ruta al archivo bundle a descompilar/analizar' },
+            bundleCode: { type: 'string', description: 'Código fuente opcional del bundle' },
+            bundleName: { type: 'string', description: 'Nombre descriptivo del bundle (default: bundle.js)' },
+          },
+        },
+      },
+      {
+        name: 'octeract_compare_source_to_bundle',
+        description:
+          'Auditoría forense de cadena de suministro (Supply Chain Integrity). Compara el directorio fuente (src/) contra un artefacto compilado (dist/), detectando inyecciones de código fantasma (backdoors), drift y discrepancias criptográficas.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            sourceDirectory: { type: 'string', description: 'Directorio de código fuente (default: src)' },
+            bundlePath: { type: 'string', description: 'Ruta al bundle compilado a contrastar' },
+            bundleCode: { type: 'string', description: 'Código fuente opcional del bundle a contrastar' },
+          },
+        },
+      },
+      {
+        name: 'octeract_inspect_evidence_view',
+        description:
+          'Navegación paginada por vistas de evidencia retenida en el Canonical Evidence Ledger (protección contra desbordamiento de búfer stdio de 10 MiB en MCP). Vistas: summary, modules, edges, voxels, functions, anomalies, facets.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            evidenceId: { type: 'string', description: 'Identificador SHA-256 de la evidencia retenida' },
+            view: { type: 'string', description: 'Nombre de la vista a inspeccionar (default: summary)' },
+            page: { type: 'number', description: 'Número de página 1-indexada (default: 1)' },
+            pageSize: { type: 'number', description: 'Cantidad de elementos por página (default: 25)' },
+          },
+          required: ['evidenceId'],
+        },
+      },
+      {
+        name: 'octeract_inspect_native_boundaries',
+        description:
+          'Inspección estática offline de binarios nativos Node.js (.node / ELF / Mach-O / PE). Descubre métodos N-API exportados, inicializadores de módulo y mitigaciones estáticas sin ejecutar código binario.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            binaryPath: { type: 'string', description: 'Ruta al archivo binario nativo (.node, .so, .dylib, .dll)' },
+          },
+          required: ['binaryPath'],
+        },
+      },
+      {
+        name: 'octeract_audit_provenance_armor',
+        description:
+          'Auditoría y blindaje de procedencia contra inyecciones indirectas de prompts en el código objetivo (comentarios maliciosos, overrides de instrucciones de sistema, tokens especiales de LLMs). Genera envoltura sanitizada untrusted_content.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta del archivo a auditar' },
+            code: { type: 'string', description: 'Código o texto plano opcional a auditar' },
+            sanitize: { type: 'boolean', description: 'Defangar y neutralizar patrones detectados (default: true)' },
+          },
+        },
+      },
     ];
 
     const aliases = tools.map((t) => ({
@@ -2839,6 +2913,168 @@ export class MCPServer {
           listenersTriggered: receivedSignals.length,
           propagationNetwork: propagationMap,
         };
+      }
+
+      case 'octeract_reverse_bundle': {
+        let code = args.bundleCode;
+        let bundleName = args.bundleName || 'bundle.js';
+        if (!code && args.bundlePath) {
+          const resolvedPath = path.isAbsolute(args.bundlePath)
+            ? args.bundlePath
+            : path.resolve(this.rootDir, args.bundlePath);
+          if (fs.existsSync(resolvedPath)) {
+            code = fs.readFileSync(resolvedPath, 'utf-8');
+            bundleName = path.basename(resolvedPath);
+          } else {
+            throw new Error(`Archivo de bundle '${resolvedPath}' no encontrado.`);
+          }
+        }
+        if (!code) {
+          throw new Error('Debe proporcionar bundleCode o bundlePath.');
+        }
+
+        const report = OcteractReverseBundle.analyzeBundle(code, bundleName);
+
+        const dossiers = report.modules.map((m) =>
+          OcteractFacetMatrix.evaluateVertex({
+            vertexId: m.moduleId,
+            name: m.name,
+            cell: m.cell,
+            codeSnippet: m.snippet,
+          })
+        );
+        const facetMatrix = OcteractFacetMatrix.generateMatrixReport(dossiers);
+
+        const payload = {
+          ...report,
+          facetMatrix,
+        };
+        const enveloped = OcteractTargetArmor.wrapWithProvenance(payload, `rea:${bundleName}`, true);
+
+        const ledger = OcteractEvidenceLedger.getInstance();
+        const bounded = ledger.boundOutput({
+          target: bundleName,
+          data: enveloped,
+          summary: {
+            bundleName,
+            bundleSize: report.bundleSize,
+            format: report.format,
+            totalModulesFound: report.totalModulesFound,
+            cellDistribution: report.cellDistribution,
+            securityFlagsCount: report.securityFlags.length,
+            averageCompleteness: facetMatrix.averageCompleteness,
+          },
+          views: {
+            modules: report.modules,
+            callGraph: report.callGraph,
+            securityFlags: report.securityFlags,
+            facets: dossiers,
+          },
+        });
+
+        return bounded;
+      }
+
+      case 'octeract_compare_source_to_bundle': {
+        const sourceDir = args.sourceDirectory
+          ? (path.isAbsolute(args.sourceDirectory) ? args.sourceDirectory : path.resolve(this.rootDir, args.sourceDirectory))
+          : path.resolve(this.rootDir, 'src');
+
+        const sourceMap: Record<string, string> = {};
+        if (fs.existsSync(sourceDir)) {
+          const readSourceFiles = (dir: string) => {
+            const entries = fs.readdirSync(dir, { withFileTypes: true });
+            for (const entry of entries) {
+              const fullPath = path.join(dir, entry.name);
+              if (entry.isDirectory() && entry.name !== 'node_modules' && !entry.name.startsWith('.')) {
+                readSourceFiles(fullPath);
+              } else if (entry.isFile() && /\.(ts|tsx|js|jsx|mjs|cjs)$/.test(entry.name)) {
+                const relPath = path.relative(this.rootDir, fullPath);
+                sourceMap[relPath] = fs.readFileSync(fullPath, 'utf-8');
+              }
+            }
+          };
+          readSourceFiles(sourceDir);
+        }
+
+        let bundleCode = args.bundleCode;
+        let bundleName = 'bundle.js';
+        if (!bundleCode && args.bundlePath) {
+          const resolvedPath = path.isAbsolute(args.bundlePath)
+            ? args.bundlePath
+            : path.resolve(this.rootDir, args.bundlePath);
+          if (fs.existsSync(resolvedPath)) {
+            bundleCode = fs.readFileSync(resolvedPath, 'utf-8');
+            bundleName = path.basename(resolvedPath);
+          } else {
+            throw new Error(`Archivo de bundle '${resolvedPath}' no encontrado.`);
+          }
+        }
+        if (!bundleCode) {
+          throw new Error('Debe proporcionar bundleCode o bundlePath.');
+        }
+
+        const report = OcteractSourceToBundleAttribution.compare(sourceMap, bundleCode, bundleName);
+        return OcteractTargetArmor.wrapWithProvenance(report, `attribution:${bundleName}`, true);
+      }
+
+      case 'octeract_inspect_evidence_view': {
+        const evidenceId = args.evidenceId;
+        if (!evidenceId) {
+          throw new Error('Parámetro evidenceId es requerido.');
+        }
+        const view = args.view || 'summary';
+        const page = args.page || 1;
+        const pageSize = args.pageSize || 25;
+
+        const ledger = OcteractEvidenceLedger.getInstance();
+        return ledger.inspectView(evidenceId, view, page, pageSize);
+      }
+
+      case 'octeract_inspect_native_boundaries': {
+        const binPath = args.binaryPath;
+        if (!binPath) {
+          throw new Error('Parámetro binaryPath es requerido.');
+        }
+        const resolvedPath = path.isAbsolute(binPath) ? binPath : path.resolve(this.rootDir, binPath);
+        return OcteractNativeBoundaryInspector.inspectBinary(resolvedPath);
+      }
+
+      case 'octeract_audit_provenance_armor': {
+        let code = args.code;
+        let targetName = 'raw_input';
+        if (!code && args.targetPath) {
+          const resolvedPath = path.isAbsolute(args.targetPath)
+            ? args.targetPath
+            : path.resolve(this.rootDir, args.targetPath);
+          if (fs.existsSync(resolvedPath)) {
+            code = fs.readFileSync(resolvedPath, 'utf-8');
+            targetName = path.relative(this.rootDir, resolvedPath);
+          } else {
+            throw new Error(`Archivo '${resolvedPath}' no existe.`);
+          }
+        }
+        if (!code) {
+          throw new Error('Debe proporcionar code o targetPath.');
+        }
+
+        const sanitize = args.sanitize ?? true;
+        const scanResult = OcteractTargetArmor.scan(code);
+        const enveloped = OcteractTargetArmor.wrapWithProvenance(
+          {
+            targetName,
+            isClean: scanResult.isClean,
+            riskScore: scanResult.riskScore,
+            threatLevel: scanResult.threatLevel,
+            threatsCount: scanResult.threats.length,
+            threats: scanResult.threats,
+            previewSanitized: sanitize ? scanResult.sanitizedCode.slice(0, 500) : undefined,
+          },
+          targetName,
+          sanitize
+        );
+
+        return enveloped;
       }
 
       default:

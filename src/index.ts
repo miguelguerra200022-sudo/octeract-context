@@ -5,7 +5,7 @@ import * as fs from 'node:fs';
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
 
-import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats, runGrep, runOrchestrate, runFunSearch, runDeductive, runAlphaDev, runPairformer, runProgramSlice, runReproduce, runSpeculativePatch, runMcts, runEVAAST, runMontemurro, runSlotMachine, runCurrier, runEntropyH2, runCardanFuzz, runVoxelPalette, runVoxelBiomes, runVoxelHorizon, runVoxelStarlight, runVoxelAnvil, runVoxelJigsaw, runVoxelCuller, runVoxelObserver } from './cli/commands.ts';
+import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats, runGrep, runOrchestrate, runFunSearch, runDeductive, runAlphaDev, runPairformer, runProgramSlice, runReproduce, runSpeculativePatch, runMcts, runEVAAST, runMontemurro, runSlotMachine, runCurrier, runEntropyH2, runCardanFuzz, runVoxelPalette, runVoxelBiomes, runVoxelHorizon, runVoxelStarlight, runVoxelAnvil, runVoxelJigsaw, runVoxelCuller, runVoxelObserver, runReaBundle, runReaCompare, runReaArmor, runReaNative } from './cli/commands.ts';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -520,9 +520,42 @@ async function main() {
       await runOcteractStats(targetDir);
       break;
     }
+    case 'rea-bundle': {
+      const bundlePath = args[1];
+      if (!bundlePath) {
+        console.error('Uso: octeract rea-bundle <archivoBundle>');
+        process.exit(1);
+      }
+      await runReaBundle(bundlePath);
+      break;
+    }
+    case 'rea-compare': {
+      const sourceDir = args[1] || 'src';
+      const bundlePath = args[2] || 'dist/bundle.js';
+      await runReaCompare(sourceDir, bundlePath);
+      break;
+    }
+    case 'rea-armor': {
+      const filePath = args[1];
+      if (!filePath) {
+        console.error('Uso: octeract rea-armor <archivo>');
+        process.exit(1);
+      }
+      await runReaArmor(filePath);
+      break;
+    }
+    case 'rea-native': {
+      const binaryPath = args[1];
+      if (!binaryPath) {
+        console.error('Uso: octeract rea-native <archivo.node>');
+        process.exit(1);
+      }
+      await runReaNative(binaryPath);
+      break;
+    }
     case '--version':
     case '-v': {
-      console.log('Octeract-Context v4.4.0 (8D Universal Suite - Minecraft Voxel & Voynich-EVA Engine)');
+      console.log('Octeract-Context v4.5.0 (8D Universal Suite - REA Reverse Engineering, Minecraft Voxel & Voynich-EVA Engine)');
       break;
     }
     case 'help':
@@ -626,3 +659,4 @@ export { OcteractSpeculativePatcher } from './core/patcher.ts';
 export { OcteractTreeSearch } from './core/mcts.ts';
 export * from './voynich/index.ts';
 export * from './voxel/index.ts';
+export * from './rea/index.ts';

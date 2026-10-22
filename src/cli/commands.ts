@@ -60,6 +60,14 @@ import {
   OcteractGreedyContextCuller,
   OcteractObserverPulse,
 } from '../voxel/index.ts';
+import {
+  OcteractTargetArmor,
+  OcteractEvidenceLedger,
+  OcteractReverseBundle,
+  OcteractSourceToBundleAttribution,
+  OcteractNativeBoundaryInspector,
+  OcteractFacetMatrix,
+} from '../rea/index.ts';
 
 export async function runInit(targetDir: string = '.'): Promise<void> {
   await runUniversalInit(targetDir);
@@ -1623,6 +1631,122 @@ export async function runVoxelObserver(targetDir: string = '.', targetFile: stri
   console.log(`  ● Potencia de Redstone: \x1b[1;31m${pulse?.power}/15\x1b[0m`);
   console.log(`  ● Tick Actual: \x1b[1;36m${observer.getCurrentTick()}\x1b[0m`);
   console.log(`  ● Listeners Notificados: \x1b[1;32m${signals.length}\x1b[0m\n`);
+}
+
+export async function runReaBundle(bundlePath: string): Promise<void> {
+  const fullPath = path.resolve(bundlePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[31mError: Archivo bundle no encontrado:\x1b[0m ${fullPath}`);
+    process.exit(1);
+  }
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🔬 \x1b[1mOCTERACT REA BUNDLE: INGENIERÍA INVERSA Y DE-BUNDLING ESTÁTICO\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const code = fs.readFileSync(fullPath, 'utf-8');
+  const start = performance.now();
+  const report = OcteractReverseBundle.analyzeBundle(code, path.basename(fullPath));
+  const dur = (performance.now() - start).toFixed(2);
+
+  console.log(`  ● Bundle: \x1b[1m${report.bundleName}\x1b[0m (${Math.round(report.bundleSize / 1024)} KB, ${dur} ms)`);
+  console.log(`  ● Formato Bundler Detectado: \x1b[1;36m${report.format.toUpperCase()}\x1b[0m`);
+  console.log(`  ● Módulos Extraídos: \x1b[1;32m${report.totalModulesFound}\x1b[0m`);
+  console.log(`  ● Confianza de Reconstrucción: \x1b[1;32m${report.reconstructionConfidence}%\x1b[0m`);
+  console.log(`  ● Banderas de Seguridad: \x1b[1;${report.securityFlags.length > 0 ? '31' : '32'}m${report.securityFlags.length}\x1b[0m`);
+  console.log(`\n  Proyección en Hipercubo 8D:`);
+  for (const [cell, count] of Object.entries(report.cellDistribution)) {
+    if (count > 0) {
+      console.log(`    - [${cell}]: \x1b[1m${count}\x1b[0m módulos`);
+    }
+  }
+  console.log();
+}
+
+export async function runReaCompare(sourceDir: string, bundlePath: string): Promise<void> {
+  const fullSrc = path.resolve(sourceDir);
+  const fullBundle = path.resolve(bundlePath);
+
+  if (!fs.existsSync(fullBundle)) {
+    console.error(`\x1b[31mError: Archivo bundle no encontrado:\x1b[0m ${fullBundle}`);
+    process.exit(1);
+  }
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🛡️ \x1b[1mOCTERACT SOURCE-TO-BUNDLE: AUDITORÍA FORENSE DE CADENA DE SUMINISTRO\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const sourceMap: Record<string, string> = {};
+  if (fs.existsSync(fullSrc)) {
+    const scanDir = (dir: string) => {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const p = path.join(dir, entry.name);
+        if (entry.isDirectory() && entry.name !== 'node_modules' && !entry.name.startsWith('.')) {
+          scanDir(p);
+        } else if (entry.isFile() && /\.(ts|tsx|js|jsx)$/.test(entry.name)) {
+          sourceMap[path.relative(fullSrc, p)] = fs.readFileSync(p, 'utf-8');
+        }
+      }
+    };
+    scanDir(fullSrc);
+  }
+
+  const bundleCode = fs.readFileSync(fullBundle, 'utf-8');
+  const report = OcteractSourceToBundleAttribution.compare(sourceMap, bundleCode, path.basename(fullBundle));
+
+  console.log(`  ● Archivos Fuente Evaluados: \x1b[1m${report.sourceFilesCount}\x1b[0m`);
+  console.log(`  ● Símbolos Fuente Declarados: \x1b[1m${report.totalSourceSymbols}\x1b[0m`);
+  console.log(`  ● Módulos en Bundle: \x1b[1m${report.bundleModulesCount}\x1b[0m`);
+  console.log(`  ● Puntuación de Integridad: \x1b[1;${report.integrityScore >= 90 ? '32' : '31'}m${report.integrityScore}/100\x1b[0m`);
+  console.log(`  ● Veredicto Criptográfico: \x1b[1;${report.verdict === 'CRYPTO_VERIFIED_CLEAN' ? '32' : '31'}m${report.verdict}\x1b[0m`);
+  console.log(`  ● Coincidencias Exactas: \x1b[1;32m${report.summary.exactMatches}\x1b[0m`);
+  console.log(`  ● Anomalías Fantasma (Ghost Injections): \x1b[1;${report.summary.ghostInjections > 0 ? '31' : '32'}m${report.summary.ghostInjections}\x1b[0m\n`);
+}
+
+export async function runReaArmor(filePath: string): Promise<void> {
+  const fullPath = path.resolve(filePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[31mError: Archivo no encontrado:\x1b[0m ${fullPath}`);
+    process.exit(1);
+  }
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🛡️ \x1b[1mOCTERACT TARGET ARMOR: BLINDAJE CONTRA INYECCIÓN DE PROMPTS\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const code = fs.readFileSync(fullPath, 'utf-8');
+  const result = OcteractTargetArmor.scan(code);
+
+  console.log(`  ● Archivo: \x1b[1m${path.basename(fullPath)}\x1b[0m`);
+  console.log(`  ● Estado: \x1b[1;${result.isClean ? '32' : '31'}m${result.isClean ? 'LIMPIO Y SEGURO' : 'VECTORES DETECTADOS'}\x1b[0m`);
+  console.log(`  ● Puntuación de Riesgo: \x1b[1;${result.riskScore === 0 ? '32' : '31'}m${result.riskScore}/100\x1b[0m (${result.threatLevel})`);
+  console.log(`  ● Amenazas Detectadas: \x1b[1m${result.threats.length}\x1b[0m`);
+  for (const t of result.threats) {
+    console.log(`    - Línea ${t.line}: [${t.severity}] ${t.rule} -> "${t.matched.slice(0, 50)}..."`);
+  }
+  console.log();
+}
+
+export async function runReaNative(binaryPath: string): Promise<void> {
+  const fullPath = path.resolve(binaryPath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[31mError: Binario no encontrado:\x1b[0m ${fullPath}`);
+    process.exit(1);
+  }
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🔌 \x1b[1mOCTERACT NATIVE INSPECTOR: ANÁLISIS OFFLINE DE ADDONS .NODE\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const report = OcteractNativeBoundaryInspector.inspectBinary(fullPath);
+  console.log(`  ● Archivo: \x1b[1m${report.fileName}\x1b[0m (${Math.round(report.fileSizeBytes / 1024)} KB)`);
+  console.log(`  ● Formato: \x1b[1;36m${report.format} (${report.architecture})\x1b[0m`);
+  console.log(`  ● Node-API Compatible: \x1b[1;${report.isNapiAddon ? '32' : '33'}m${report.isNapiAddon ? 'SÍ (' + report.napiVersionDetected + ')' : 'NO'}\x1b[0m`);
+  console.log(`  ● Punto de Entrada: \x1b[1m${report.entryPoint || 'Ninguno'}\x1b[0m`);
+  console.log(`  ● Métodos Nativos Detectados: \x1b[1;32m${report.exportedMethods.length}\x1b[0m`);
+  console.log(`  ● Celda 8D Asignada: \x1b[1;35m${report.projectedCell}\x1b[0m`);
+  console.log(`  ● Mitigaciones: Stack Canary=${report.staticMitigations.stackCanaryFound}, RELRO=${report.staticMitigations.relroIndicated}\n`);
 }
 
 
