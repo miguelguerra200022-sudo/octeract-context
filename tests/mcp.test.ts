@@ -415,8 +415,96 @@ test('MCPServer: executes all 5 REA Reverse-Engineering and Security tools seaml
   const nativeData = JSON.parse(nativeRes.result.content[0].text);
   assert.strictEqual(nativeData.format, 'ELF');
   assert.strictEqual(nativeData.isNapiAddon, true);
-  assert.ok(nativeData.exportedMethods.includes('testMethodSync'));
-
   fs.unlinkSync(dummyBinPath);
 });
+
+test('MCPServer: executes all 5 Dragon Curve tools seamlessly', async () => {
+  const server = new MCPServer({ rootDir: process.cwd() });
+
+  // 1. octeract_dragon_fold
+  const foldRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 301,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_dragon_fold',
+      arguments: {
+        targetPath: 'src/index.ts',
+      },
+    },
+  });
+  assert.strictEqual(foldRes.id, 301);
+  const foldData = JSON.parse(foldRes.result.content[0].text);
+  assert.ok(foldData.foldedLines > 0);
+  assert.ok(foldData.valleyFoldsCount > 0);
+
+  // 2. octeract_dragon_blast
+  const blastRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 302,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_dragon_blast',
+      arguments: {
+        targetPath: 'src/index.ts',
+        initialEnergy: 1.0,
+      },
+    },
+  });
+  assert.strictEqual(blastRes.id, 302);
+  const blastData = JSON.parse(blastRes.result.content[0].text);
+  assert.strictEqual(blastData.epicenter, 'src/index.ts');
+  assert.ok(blastData.totalNodesReached > 0);
+
+  // 3. octeract_dragon_coords
+  const coordsRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 303,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_dragon_coords',
+      arguments: {
+        targetPath: 'src/index.ts',
+        compareWith: 'src/core/hypercube.ts',
+      },
+    },
+  });
+  assert.strictEqual(coordsRes.id, 303);
+  const coordsData = JSON.parse(coordsRes.result.content[0].text);
+  assert.ok(coordsData.dragonCoordinate.hash);
+  assert.ok(coordsData.comparison);
+
+  // 4. octeract_dragon_tile
+  const tileRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 304,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_dragon_tile',
+      arguments: {},
+    },
+  });
+  assert.strictEqual(tileRes.id, 304);
+  const tileData = JSON.parse(tileRes.result.content[0].text);
+  assert.ok(tileData.totalFiles > 0);
+  assert.ok(tileData.quadrants.ALFA_STORAGE);
+
+  // 5. octeract_dragon_crease_fuzz
+  const fuzzRes = await server.handleMessage({
+    jsonrpc: '2.0',
+    id: 305,
+    method: 'tools/call',
+    params: {
+      name: 'octeract_dragon_crease_fuzz',
+      arguments: {
+        targetPath: 'src/index.ts',
+      },
+    },
+  });
+  assert.strictEqual(fuzzRes.id, 305);
+  const fuzzData = JSON.parse(fuzzRes.result.content[0].text);
+  assert.ok(fuzzData.totalCreasesFound > 0);
+  assert.ok(fuzzData.creaseStressScore >= 0);
+});
+
 

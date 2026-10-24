@@ -74,6 +74,13 @@ import {
   OcteractNativeBoundaryInspector,
   OcteractFacetMatrix,
 } from '../rea/index.ts';
+import {
+  OcteractDragonIndex,
+  OcteractDragonBlast,
+  OcteractDragonFold,
+  OcteractDragonTile,
+  OcteractDragonCreaseFuzz,
+} from '../dragon/index.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
@@ -1632,6 +1639,71 @@ export class MCPServer {
           },
         },
       },
+      {
+        name: 'octeract_dragon_fold',
+        description:
+          'Plegado arquitectónico Origami del AST (Curva del Dragón): preserva contratos de superficie visibles (pliegues valle) y pliega cuerpos privados (pliegues cresta) ahorrando >85% de tokens en el context window con capacidad de desdoble a demanda.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta del archivo a plegar' },
+            sourceCode: { type: 'string', description: 'Código fuente opcional a evaluar directamente' },
+            unfoldTarget: { type: 'string', description: 'Nombre de método o clase específica a desdoblar' },
+          },
+          required: ['targetPath'],
+        },
+      },
+      {
+        name: 'octeract_dragon_blast',
+        description:
+          'Propagación de onda de choque fractal por pliegues del Dragón de Heighway con factor de amortiguamiento de Hausdorff (dH/2 ≈ 0.7618) para focalizar el radio de explosión en cascadas arquitectónicas reales sin explosión combinatoria.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Nodo o archivo epicentro de la mutación' },
+            initialEnergy: { type: 'number', description: 'Energía inicial de la onda (default: 1.0)' },
+            maxCreases: { type: 'number', description: 'Profundidad máxima de pliegues fractales (default: 8)' },
+          },
+          required: ['targetPath'],
+        },
+      },
+      {
+        name: 'octeract_dragon_coords',
+        description:
+          'Indexación y direccionamiento continuo en base octoniónica de Knuth (1+O). Convierte coordenadas 8D a un hash fractal de pliegues y calcula distancias de cizallamiento en tiempo constante O(1) vía bitwise XOR.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta del archivo a consultar/indexar' },
+            point8D: { type: 'array', items: { type: 'number' }, description: 'Vector de coordenadas 8D opcional' },
+            compareWith: { type: 'string', description: 'Ruta de otro archivo o hash para calcular cizallamiento fractal O(1)' },
+          },
+        },
+      },
+      {
+        name: 'octeract_dragon_tile',
+        description:
+          'Teselación aperiódica 4-Dragon de Heighway (0°, 90°, 180°, 270°): particiona monorrepos en 4 cuadrantes entrelazados (Alfa=Storage, Beta=Core, Gamma=Surface, Delta=Governance) con cero huecos y eliminación de fracturas falsas de borde.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetDir: { type: 'string', description: 'Directorio raíz a teselar (por defecto el repositorio actual)' },
+          },
+        },
+      },
+      {
+        name: 'octeract_dragon_crease_fuzz',
+        description:
+          'Pruebas de estrés y fatiga arquitectónica focalizadas en líneas de pliegue mecánico (bifurcaciones if/else, límites numéricos, nullish guards) en tiempo O(log N) para descubrir fallas críticas de propagación.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: { type: 'string', description: 'Ruta del archivo a someter a estrés de pliegues' },
+            sourceCode: { type: 'string', description: 'Código fuente opcional a evaluar directamente' },
+          },
+          required: ['targetPath'],
+        },
+      },
     ];
 
     const aliases = tools.map((t) => ({
@@ -3075,6 +3147,103 @@ export class MCPServer {
         );
 
         return enveloped;
+      }
+
+      case 'octeract_dragon_fold': {
+        const filePath = args.targetPath;
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(this.rootDir, filePath);
+        let code = args.sourceCode;
+        if (!code && fs.existsSync(resolvedPath)) {
+          code = fs.readFileSync(resolvedPath, 'utf-8');
+        }
+        if (!code) {
+          throw new Error(`Archivo '${resolvedPath}' no existe o está vacío.`);
+        }
+
+        if (args.unfoldTarget) {
+          const unfolded = OcteractDragonFold.unfoldTarget(code, args.unfoldTarget);
+          return {
+            targetPath: filePath,
+            unfoldedTarget: args.unfoldTarget,
+            found: unfolded !== null,
+            unfoldedCode: unfolded || 'Target declaration not found',
+          };
+        }
+
+        const foldResult = OcteractDragonFold.foldCode(code, filePath);
+        return foldResult;
+      }
+
+      case 'octeract_dragon_blast': {
+        const epicenter = args.targetPath;
+        const graph = new Map<string, string[]>();
+        const vertices = this.space.getVertices();
+        for (const v of vertices) {
+          graph.set(v.path, v.dependencies);
+        }
+
+        const initialEnergy = args.initialEnergy || 1.0;
+        const maxCreases = args.maxCreases || 8;
+        const report = OcteractDragonBlast.propagateWavefront(epicenter, graph, initialEnergy, maxCreases);
+        return report;
+      }
+
+      case 'octeract_dragon_coords': {
+        let point8D = args.point8D;
+        if (!point8D && args.targetPath) {
+          const v = this.space.getVertex(args.targetPath);
+          if (v) point8D = v.coordinate;
+        }
+        if (!point8D) {
+          point8D = [0, 0, 0, 0, 0, 0, 0, 0];
+        }
+
+        const dragonCoord = OcteractDragonIndex.encode8DToDragon(point8D);
+
+        let comparison: any = null;
+        if (args.compareWith) {
+          let compareHash = args.compareWith;
+          if (!compareHash.startsWith('0x')) {
+            const v2 = this.space.getVertex(args.compareWith);
+            const pt2 = v2 ? v2.coordinate : [0, 0, 0, 0, 0, 0, 0, 0];
+            compareHash = OcteractDragonIndex.encode8DToDragon(pt2).hash;
+          }
+          comparison = OcteractDragonIndex.computeFractalDistance(dragonCoord.hash, compareHash);
+        }
+
+        return {
+          targetPath: args.targetPath || 'custom_point',
+          point8D,
+          dragonCoordinate: dragonCoord,
+          comparison,
+        };
+      }
+
+      case 'octeract_dragon_tile': {
+        const vertices = this.space.getVertices().map((v) => ({
+          id: v.path,
+          cell: v.cell,
+          dependencies: v.dependencies,
+          complexity: v.tokenCount ? Math.round(v.tokenCount / 50) : 1,
+        }));
+
+        const report = OcteractDragonTile.partitionRepository(vertices, args.targetDir || this.rootDir);
+        return report;
+      }
+
+      case 'octeract_dragon_crease_fuzz': {
+        const filePath = args.targetPath;
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(this.rootDir, filePath);
+        let code = args.sourceCode;
+        if (!code && fs.existsSync(resolvedPath)) {
+          code = fs.readFileSync(resolvedPath, 'utf-8');
+        }
+        if (!code) {
+          throw new Error(`Archivo '${resolvedPath}' no existe o está vacío.`);
+        }
+
+        const report = OcteractDragonCreaseFuzz.evaluateStress(code, filePath);
+        return report;
       }
 
       default:

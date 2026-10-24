@@ -68,6 +68,13 @@ import {
   OcteractNativeBoundaryInspector,
   OcteractFacetMatrix,
 } from '../rea/index.ts';
+import {
+  OcteractDragonIndex,
+  OcteractDragonBlast,
+  OcteractDragonFold,
+  OcteractDragonTile,
+  OcteractDragonCreaseFuzz,
+} from '../dragon/index.ts';
 
 export async function runInit(targetDir: string = '.'): Promise<void> {
   await runUniversalInit(targetDir);
@@ -1747,6 +1754,177 @@ export async function runReaNative(binaryPath: string): Promise<void> {
   console.log(`  ● Métodos Nativos Detectados: \x1b[1;32m${report.exportedMethods.length}\x1b[0m`);
   console.log(`  ● Celda 8D Asignada: \x1b[1;35m${report.projectedCell}\x1b[0m`);
   console.log(`  ● Mitigaciones: Stack Canary=${report.staticMitigations.stackCanaryFound}, RELRO=${report.staticMitigations.relroIndicated}\n`);
+}
+
+export async function runDragonFold(filePath: string, targetSymbol?: string): Promise<void> {
+  const fullPath = path.resolve(filePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[31mError: Archivo no encontrado:\x1b[0m ${fullPath}`);
+    process.exit(1);
+  }
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🐉 \x1b[1mOCTERACT DRAGON FOLD: COMPRESIÓN FRACTAL ORIGAMI DEL AST\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const code = fs.readFileSync(fullPath, 'utf-8');
+  if (targetSymbol) {
+    const unfolded = OcteractDragonFold.unfoldTarget(code, targetSymbol);
+    console.log(`  ● Despliegue Selectivo (Unfold) del Símbolo: \x1b[1;32m${targetSymbol}\x1b[0m`);
+    if (unfolded) {
+      console.log(`\x1b[36m--- Código Desplegado ---\x1b[0m\n${unfolded}\n\x1b[36m-------------------------\x1b[0m\n`);
+    } else {
+      console.log(`\x1b[33mNo se encontró la declaración '${targetSymbol}' en el archivo.\x1b[0m\n`);
+    }
+    return;
+  }
+
+  const result = OcteractDragonFold.foldCode(code, path.relative(process.cwd(), fullPath));
+  console.log(`  ● Archivo: \x1b[1m${result.filePath}\x1b[0m`);
+  console.log(`  ● Líneas Originales: \x1b[1m${result.originalLines}\x1b[0m -> Líneas Plegadas: \x1b[1;32m${result.foldedLines}\x1b[0m`);
+  console.log(`  ● Reducción de Tokens: \x1b[1;32m${result.tokenSavingsPercent}%\x1b[0m`);
+  console.log(`  ● Pliegues de Valle (Superficie Pública): \x1b[1;34m${result.valleyFoldsCount}\x1b[0m`);
+  console.log(`  ● Pliegues de Montaña (Cuerpo Oculto): \x1b[1;35m${result.mountainFoldsCount}\x1b[0m\n`);
+  console.log(`\x1b[36m--- Vista Origami Plegada ---\x1b[0m\n${result.foldedCode}\n\x1b[36m-----------------------------\x1b[0m\n`);
+}
+
+export async function runDragonBlast(filePath: string, initialEnergy: number = 1.0): Promise<void> {
+  const rootDir = process.cwd();
+  const relPath = path.relative(rootDir, path.resolve(filePath));
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`💥 \x1b[1mOCTERACT DRAGON BLAST: ONDA DE CHOQUE FRACTAL CON AMORTIGUACIÓN HAUSDORFF\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  const space = indexer.indexDirectory({ rootDir });
+  const graph = new Map<string, string[]>();
+  for (const v of space.getVertices()) {
+    graph.set(v.path, v.dependencies);
+  }
+
+  const report = OcteractDragonBlast.propagateWavefront(relPath, graph, initialEnergy, 8);
+
+  console.log(`  ● Epicentro de Onda: \x1b[1m${report.epicenter}\x1b[0m`);
+  console.log(`  ● Energía Inicial: \x1b[1m${report.initialEnergy}\x1b[0m | Factor Hausdorff: \x1b[1;36m${report.fractalDampingFactor.toFixed(4)}\x1b[0m`);
+  console.log(`  ● Vértices Alcanzados: \x1b[1;32m${report.totalNodesReached}\x1b[0m | Nodos Podados por Fractal: \x1b[1;33m${report.nodesPrunedByFractalDamping}\x1b[0m`);
+  console.log(`  ● Ahorro Estimado de Tokens: \x1b[1;32m${report.tokenSavingsPercent}%\x1b[0m | Energía Residual: \x1b[1m${report.finalResidualEnergy.toFixed(4)}\x1b[0m\n`);
+  console.log(`  ● Niveles de Onda Origami:`);
+  for (const tier of report.tiers) {
+    console.log(`    - [Pliegue ${tier.creaseLevel} | Giro ${tier.turnDirection}] ${tier.nodes.length} archivos | Energía: \x1b[33m${tier.attenuatedEnergy.toFixed(4)}\x1b[0m`);
+    for (const n of tier.nodes.slice(0, 3)) {
+      console.log(`        * ${n}`);
+    }
+    if (tier.nodes.length > 3) {
+      console.log(`        ... y ${tier.nodes.length - 3} más`);
+    }
+  }
+  console.log();
+}
+
+export async function runDragonCoords(filePath: string, compareWith?: string): Promise<void> {
+  const rootDir = process.cwd();
+  const indexer = new ProjectIndexer();
+  const space = indexer.indexDirectory({ rootDir });
+
+  const relPath = path.relative(rootDir, path.resolve(filePath));
+  const vertex = space.getVertex(relPath);
+  const point8D = vertex ? vertex.coordinate : [0, 0, 0, 0, 0, 0, 0, 0];
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🧭 \x1b[1mOCTERACT DRAGON COORDS: LOCALIZADOR ESPACIAL BASE-(1+i) / (1+O)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const coord = OcteractDragonIndex.encode8DToDragon(point8D);
+
+  console.log(`  ● Archivo: \x1b[1m${relPath}\x1b[0m`);
+  console.log(`  ● Hash Fractal: \x1b[1;36m${coord.hash}\x1b[0m`);
+  console.log(`  ● Paso Fractal (Step): \x1b[1;32m${coord.step}\x1b[0m (Profundidad: ${coord.depth})`);
+  console.log(`  ● Secuencia de Giro Heighway: \x1b[1;33m${coord.turnsSequence}\x1b[0m (R=Derecha, L=Izquierda)`);
+  console.log(`  ● Vector Octoniónico 8D (1+O): \x1b[1m[${coord.octonionicVector.map((v) => v.toFixed(3)).join(', ')}]\x1b[0m`);
+
+  if (compareWith) {
+    const relComp = path.relative(rootDir, path.resolve(compareWith));
+    const compVertex = space.getVertex(relComp);
+    const compPoint8D = compVertex ? compVertex.coordinate : [0, 0, 0, 0, 0, 0, 0, 0];
+    const compCoord = OcteractDragonIndex.encode8DToDragon(compPoint8D);
+    const fractalDist = OcteractDragonIndex.computeFractalDistance(coord.hash, compCoord.hash);
+
+    console.log(`\n  ● Comparación con: \x1b[1m${relComp}\x1b[0m (${compCoord.hash})`);
+    console.log(`  ● Distancia Hamming Fractal: \x1b[1;35m${fractalDist.hammingDistance} bits\x1b[0m`);
+    console.log(`  ● Cizallamiento Fractal Normalizado: \x1b[1;36m${fractalDist.normalizedFractalShear}\x1b[0m`);
+    console.log(`  ● Prefijo Fractal Compartido: \x1b[1;32m${fractalDist.sharedFractalPrefix || 'ninguno'}\x1b[0m (Profundidad de pliegue: ${fractalDist.creaseDepth})\n`);
+  } else {
+    console.log();
+  }
+}
+
+export async function runDragonTile(rootDir: string = '.'): Promise<void> {
+  const root = path.resolve(rootDir);
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`🧩 \x1b[1mOCTERACT DRAGON TILE: TESELACIÓN PERIÓDICA EN 4 DRAGONES\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const indexer = new ProjectIndexer();
+  const space = indexer.indexDirectory({ rootDir: root });
+  const vertices = space.getVertices().map((v) => ({
+    id: v.path,
+    cell: v.cell,
+    dependencies: v.dependencies,
+    complexity: v.loc,
+  }));
+  const tiling = OcteractDragonTile.partitionRepository(vertices, path.basename(root));
+
+  console.log(`  ● Total Archivos Teselados: \x1b[1m${tiling.totalFiles}\x1b[0m`);
+  console.log(`  ● Cuadrante ALFA (Storage): \x1b[1;34m${tiling.quadrants.ALFA_STORAGE.files.length} archivos\x1b[0m`);
+  console.log(`  ● Cuadrante BETA (Core): \x1b[1;32m${tiling.quadrants.BETA_CORE.files.length} archivos\x1b[0m`);
+  console.log(`  ● Cuadrante GAMMA (Surface/UI): \x1b[1;33m${tiling.quadrants.GAMMA_SURFACE.files.length} archivos\x1b[0m`);
+  console.log(`  ● Cuadrante DELTA (Governance/Sec): \x1b[1;35m${tiling.quadrants.DELTA_GOVERNANCE.files.length} archivos\x1b[0m`);
+  console.log(`  ● Pureza de Teselación: \x1b[1;32m${tiling.tessellationPurity}%\x1b[0m (Veredicto: ${tiling.verdict})`);
+  console.log(`  ● Fugas de Límite (Boundary Leaks): \x1b[1;${tiling.illegalBoundaryLeaks.length > 0 ? '31' : '32'}m${tiling.illegalBoundaryLeaks.length}\x1b[0m`);
+
+  if (tiling.illegalBoundaryLeaks.length > 0) {
+    console.log(`\n  ● Detalle de Fugas Inter-Cuadrante:`);
+    for (const leak of tiling.illegalBoundaryLeaks.slice(0, 5)) {
+      console.log(`    - [${leak.fromQuadrant} -> ${leak.toQuadrant}] ${leak.fromFile} -> ${leak.toFile}: ${leak.reason}`);
+    }
+  }
+  console.log();
+}
+
+export async function runDragonCreaseFuzz(filePath: string): Promise<void> {
+  const fullPath = path.resolve(filePath);
+  if (!fs.existsSync(fullPath)) {
+    console.error(`\x1b[31mError: Archivo no encontrado:\x1b[0m ${fullPath}`);
+    process.exit(1);
+  }
+
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`⚡ \x1b[1mOCTERACT CREASE FUZZ: FUZZER DE FATIGA EN LÍNEAS DE PLIEGUE ORIGAMI\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const code = fs.readFileSync(fullPath, 'utf-8');
+  const report = OcteractDragonCreaseFuzz.evaluateStress(code, path.relative(process.cwd(), fullPath));
+
+  console.log(`  ● Archivo: \x1b[1m${report.filePath}\x1b[0m (${report.totalLines} líneas)`);
+  console.log(`  ● Pliegues Analizados: \x1b[1m${report.totalCreasesFound}\x1b[0m`);
+  console.log(`  ● Puntuación de Resiliencia: \x1b[1;${report.creaseStressScore >= 80 ? '32' : '31'}m${report.creaseStressScore}/100\x1b[0m`);
+  console.log(`  ● Bifurcaciones Frágiles Detectadas: \x1b[1;${report.fragileCreasesCount > 0 ? '33' : '32'}m${report.fragileCreasesCount}\x1b[0m\n`);
+
+  if (report.fragileBifurcations.length > 0) {
+    console.log(`  ● Detalle de Puntos Débiles (Fragile Bifurcations):`);
+    for (const fb of report.fragileBifurcations.slice(0, 10)) {
+      console.log(`    - Línea ${fb.line}: ${fb.fragilityReason}`);
+      console.log(`        Endurecimiento recomendado: \x1b[36m${fb.suggestedHardening}\x1b[0m`);
+    }
+    if (report.fragileBifurcations.length > 10) {
+      console.log(`    ... y ${report.fragileBifurcations.length - 10} más.`);
+    }
+  } else {
+    console.log(`  ● Todas las líneas de pliegue superaron las pruebas de fatiga mecánica fractal.\n`);
+  }
+  console.log();
 }
 
 

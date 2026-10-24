@@ -5,7 +5,7 @@ import * as fs from 'node:fs';
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
 
-import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats, runGrep, runOrchestrate, runFunSearch, runDeductive, runAlphaDev, runPairformer, runProgramSlice, runReproduce, runSpeculativePatch, runMcts, runEVAAST, runMontemurro, runSlotMachine, runCurrier, runEntropyH2, runCardanFuzz, runVoxelPalette, runVoxelBiomes, runVoxelHorizon, runVoxelStarlight, runVoxelAnvil, runVoxelJigsaw, runVoxelCuller, runVoxelObserver, runReaBundle, runReaCompare, runReaArmor, runReaNative } from './cli/commands.ts';
+import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats, runGrep, runOrchestrate, runFunSearch, runDeductive, runAlphaDev, runPairformer, runProgramSlice, runReproduce, runSpeculativePatch, runMcts, runEVAAST, runMontemurro, runSlotMachine, runCurrier, runEntropyH2, runCardanFuzz, runVoxelPalette, runVoxelBiomes, runVoxelHorizon, runVoxelStarlight, runVoxelAnvil, runVoxelJigsaw, runVoxelCuller, runVoxelObserver, runReaBundle, runReaCompare, runReaArmor, runReaNative, runDragonFold, runDragonBlast, runDragonCoords, runDragonTile, runDragonCreaseFuzz } from './cli/commands.ts';
 
 async function main() {
   const args = process.argv.slice(2);
@@ -553,9 +553,53 @@ async function main() {
       await runReaNative(binaryPath);
       break;
     }
+    case 'dragon-fold': {
+      const filePath = args[1];
+      const targetSymbol = args[2];
+      if (!filePath) {
+        console.error('Uso: octeract dragon-fold <archivo> [símbolo]');
+        process.exit(1);
+      }
+      await runDragonFold(filePath, targetSymbol);
+      break;
+    }
+    case 'dragon-blast': {
+      const filePath = args[1];
+      const energy = args[2] ? parseFloat(args[2]) : 1.0;
+      if (!filePath) {
+        console.error('Uso: octeract dragon-blast <archivo> [energía]');
+        process.exit(1);
+      }
+      await runDragonBlast(filePath, energy);
+      break;
+    }
+    case 'dragon-coords': {
+      const filePath = args[1];
+      const compareWith = args[2];
+      if (!filePath) {
+        console.error('Uso: octeract dragon-coords <archivo> [archivoComparar]');
+        process.exit(1);
+      }
+      await runDragonCoords(filePath, compareWith);
+      break;
+    }
+    case 'dragon-tile': {
+      const rootDir = args[1] || '.';
+      await runDragonTile(rootDir);
+      break;
+    }
+    case 'dragon-fuzz': {
+      const filePath = args[1];
+      if (!filePath) {
+        console.error('Uso: octeract dragon-fuzz <archivo>');
+        process.exit(1);
+      }
+      await runDragonCreaseFuzz(filePath);
+      break;
+    }
     case '--version':
     case '-v': {
-      console.log('Octeract-Context v4.5.0 (8D Universal Suite - REA Reverse Engineering, Minecraft Voxel & Voynich-EVA Engine)');
+      console.log('Octeract-Context v4.6.0 (8D Universal Suite - Dragon Curve, REA Reverse Engineering, Minecraft Voxel & Voynich-EVA Engine)');
       break;
     }
     case 'help':
@@ -583,6 +627,11 @@ Comandos disponibles:
   \x1b[32mgrep\x1b[0m [dir] <query>    Grep semántico en lenguaje natural y estructural por líneas con snippets (< 150 tokens)
   \x1b[32mstats\x1b[0m [directorio]    Muestra métricas topológicas y salud arquitectónica
   \x1b[32mocteract\x1b[0m [dir]        Muestra métricas completas del Octeracto 8D (T^8, E8, Phi, Psi, Omega)
+  \x1b[32mdragon-fold\x1b[0m <file> [sym] Compresión Origami de AST fractal (superficie valle vs montaña 0 tokens)
+  \x1b[32mdragon-blast\x1b[0m <file> [e]   Onda de choque fractal Heighway con amortiguación Hausdorff
+  \x1b[32mdragon-coords\x1b[0m <f> [f2]    Mapeo espacial base-(1+i)/(1+O), giros y distancia XOR
+  \x1b[32mdragon-tile\x1b[0m [dir]        Teselación periódica en 4 dragones y detección de boundary leaks
+  \x1b[32mdragon-fuzz\x1b[0m <file>       Fuzzer de fatiga en líneas de pliegue origami (crease bifurcation)
   \x1b[32meva-ast\x1b[0m [dir] <file>  Transliteración canónica EVA (Código Voynich) con compresión AST > 80%
   \x1b[32mmontemurro\x1b[0m [dir]       Clustering de información mutua I(w,S) de Montemurro & Zanette a 0 tokens
   \x1b[32mslot-machine\x1b[0m [dir] <file> Validación en O(1) autómata DFA de Zattera (< 0.1 ms)
@@ -660,3 +709,4 @@ export { OcteractTreeSearch } from './core/mcts.ts';
 export * from './voynich/index.ts';
 export * from './voxel/index.ts';
 export * from './rea/index.ts';
+export * from './dragon/index.ts';
