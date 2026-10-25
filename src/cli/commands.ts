@@ -149,8 +149,8 @@ export async function runSlice(targetDir: string = '.', options: any = {}): Prom
 export async function runMCP(targetDir: string = '.'): Promise<void> {
   const root = path.resolve(targetDir);
   const server = new MCPServer({ rootDir: root });
-  await server.init();
   server.startStdio();
+  await server.init();
 }
 
 export async function runTUI(targetDir: string = '.'): Promise<void> {

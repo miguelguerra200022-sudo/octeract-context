@@ -807,11 +807,26 @@ Uso: octeract <comando> [opciones] (o 'octeract-context' / 'tesseract')
 }
 
 
-const isDirectRun = Boolean(process.argv[1] && (
-  fileURLToPath(import.meta.url) === path.resolve(process.argv[1]) ||
-  process.argv[1].endsWith("tesseract-context.js") ||
-  process.argv[1].endsWith("octeract-context.js")
-));
+let isDirectRun = false;
+try {
+  if (process.argv[1]) {
+    const scriptPath = fs.existsSync(process.argv[1]) ? fs.realpathSync(path.resolve(process.argv[1])) : path.resolve(process.argv[1]);
+    const currentPath = fs.realpathSync(fileURLToPath(import.meta.url));
+    isDirectRun = (
+      scriptPath === currentPath ||
+      process.argv[1].endsWith("tesseract-context.js") ||
+      process.argv[1].endsWith("octeract-context.js") ||
+      process.argv[1].endsWith("src/index.ts") ||
+      process.argv[1].endsWith("src/index.js")
+    );
+  }
+} catch {
+  isDirectRun = Boolean(process.argv[1] && (
+    process.argv[1].endsWith("index.ts") ||
+    process.argv[1].endsWith("tesseract-context.js") ||
+    process.argv[1].endsWith("octeract-context.js")
+  ));
+}
 
 if (isDirectRun) {
   main().catch((err) => {
