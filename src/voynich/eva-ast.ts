@@ -39,6 +39,10 @@ export class OcteractEVAAST {
   /**
    * Translitera código TypeScript/JavaScript a bloques canónicos EVA
    */
+  public static transliterate(sourceCode: string): EVATransliterateResult {
+    return new OcteractEVAAST().transliterate(sourceCode);
+  }
+
   public transliterate(sourceCode: string): EVATransliterateResult {
     const trimmed = sourceCode.trim();
     if (!trimmed) {

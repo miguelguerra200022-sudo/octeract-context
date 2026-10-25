@@ -65,16 +65,16 @@ export class OcteractSee {
     }
 
     if (mode === 'eva') {
-      const evaRes = OcteractEVAAST.transliterate(code, relPath);
+      const evaRes = OcteractEVAAST.transliterate(code);
       return {
         filePath: relPath,
         symbol: options.symbol,
         mode: 'eva',
-        lineCount: evaRes.totalGlyphs,
-        originalTokensApprox: origTokens,
-        compressedTokensApprox: Math.round(evaRes.evaCode.length / 3.8),
-        compressionSavingsPercent: evaRes.tokenSavingsPercent,
-        content: evaRes.evaCode,
+        lineCount: evaRes.slots.length,
+        originalTokensApprox: evaRes.originalTokens,
+        compressedTokensApprox: evaRes.evaTokens,
+        compressionSavingsPercent: evaRes.tokenReductionPercent,
+        content: evaRes.evaGlyphBlock,
       };
     }
 
