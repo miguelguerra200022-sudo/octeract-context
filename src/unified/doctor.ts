@@ -10,15 +10,16 @@ import { TopologicalAuditor } from '../core/auditor.ts';
 import { OcteractDragonTile } from '../dragon/dragonTile.ts';
 import { OcteractMultiNoiseBiomes } from '../voxel/multi-noise.ts';
 import { OcteractTargetArmor } from '../rea/targetArmor.ts';
+import { OcteractSieve } from '../core/sieve.ts';
 import type { OcteractDoctorReport } from './types.ts';
 
 export class OcteractDoctor {
   /**
-   * Ejecuta la auditoría unificada de salud de código, teselación fractal y armaduras
+   * Ejecuta la auditoría unificada de salud de código, teselación fractal, armaduras y filtro de logs
    */
   public static async diagnose(
     rootDir: string = '.',
-    options: { deep?: boolean; sarif?: boolean } = {}
+    options: { deep?: boolean; sarif?: boolean; logOrOutput?: string } = {}
   ): Promise<OcteractDoctorReport> {
     const root = path.resolve(rootDir);
     const indexer = new ProjectIndexer();
@@ -119,15 +120,30 @@ export class OcteractDoctor {
       recommendations.push('Estructura 8D y teselación fractal en estado impecable. Proceder normalmente.');
     }
 
-    // 6. Resumen Markdown Ultracompacto (< 250 tokens)
-    const summaryMarkdown = [
+    // 6. Procesamiento Sieve opcional de logs/terminales
+    let sieveSummary: string | undefined;
+    if (options.logOrOutput && options.logOrOutput.trim().length > 0) {
+      const sieveRes = OcteractSieve.sieve(options.logOrOutput);
+      sieveSummary = sieveRes.summary;
+      if (sieveRes.criticalFindings.length > 0) {
+        recommendations.unshift(`[Sieve] Atender ${sieveRes.criticalFindings.length} anomalías en log: "${sieveRes.criticalFindings[0]}"`);
+      }
+    }
+
+    // 7. Resumen Markdown Ultracompacto (< 250 tokens)
+    const summaryLines = [
       `### 🩺 Octeract Doctor Report: **${verdict}** (${finalScore}/100)`,
       `- **Archivos / Símbolos**: ${vertices.length} archivos | ${rawAudit.metrics?.totalFunctions || vertices.length * 3} símbolos`,
       `- **Fracturas**: ${mappedFractures.length} detectadas (${criticals.length} críticas)`,
       `- **Teselación 4D**: Pureza ${tiling.tessellationPurity}% | ${tiling.illegalBoundaryLeaks.length} fugas de límite`,
       `- **Biomas Dominantes**: ${dominantBiomes.map((b) => b.biome).join(', ') || 'Equilibrado'}`,
-      `- **Acción Recomendada**: ${recommendations[0]}`,
-    ].join('\n');
+    ];
+    if (sieveSummary) {
+      summaryLines.push(`- **Sieve Terminal**: ${sieveSummary}`);
+    }
+    summaryLines.push(`- **Acción Recomendada**: ${recommendations[0]}`);
+
+    const summaryMarkdown = summaryLines.join('\n');
 
     return {
       healthScore: finalScore,
@@ -150,6 +166,7 @@ export class OcteractDoctor {
         intactTargets,
         driftDetected,
       },
+      sieveSummary,
       topRecommendations: recommendations,
       summaryMarkdown,
     };

@@ -606,13 +606,17 @@ export class MCPServer {
               type: 'boolean',
               description: 'Si es true, fuerza una reindexación completa y profunda',
             },
+            logOrOutput: {
+              type: 'string',
+              description: 'Salida de terminal, tests o logs a filtrar con OcteractSieve (reducción determinista del 90%+)',
+            },
           },
         },
       },
       {
         name: 'octeract_see',
         description:
-          '👁️ APERTURA MAESTRA 2: Lente de lectura y compresión fractal de código (< 200 tokens). Aplica pliegues Origami (valle vs montaña), esqueleto AST o transliteración EVA. Despliega símbolos específicos manteniendo el resto plegado a 0 tokens.',
+          '👁️ APERTURA MAESTRA 2: Lente de lectura y compresión fractal de código (< 200 tokens). Aplica pliegues Origami (valle vs montaña), esqueleto AST, transliteración EVA o filtro Sieve para logs/datos. Despliega símbolos específicos manteniendo el resto plegado a 0 tokens.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -626,8 +630,8 @@ export class MCPServer {
             },
             mode: {
               type: 'string',
-              enum: ['origami', 'skeleton', 'full', 'eva'],
-              description: 'Modo de compresión: "origami" (valle/montaña default), "skeleton", "full", "eva"',
+              enum: ['origami', 'skeleton', 'full', 'eva', 'sieve'],
+              description: 'Modo de compresión: "origami" (valle/montaña default), "skeleton", "full", "eva", "sieve" (logs/datos)',
             },
             budget: {
               type: 'number',
@@ -712,6 +716,10 @@ export class MCPServer {
             maxResults: {
               type: 'number',
               description: 'Cantidad máxima de archivos sugeridos (default 5)',
+            },
+            terse: {
+              type: 'boolean',
+              description: 'Modo telegráfico Zero-Slop directo sin relleno (ahorro 60% de tokens de salida, default: true)',
             },
           },
         },
@@ -1941,7 +1949,10 @@ export class MCPServer {
 
     switch (toolName) {
       case 'octeract_doctor': {
-        const report = await OcteractDoctor.diagnose(args.targetDir || this.rootDir, { deep: args.deep });
+        const report = await OcteractDoctor.diagnose(args.targetDir || this.rootDir, {
+          deep: args.deep,
+          logOrOutput: args.logOrOutput,
+        });
         return report;
       }
 
@@ -1981,6 +1992,7 @@ export class MCPServer {
         const res = await OcteractAsk.query(q, {
           rootDir: args.targetDir || this.rootDir,
           maxResults: args.maxResults,
+          terse: args.terse,
         });
         return res;
       }

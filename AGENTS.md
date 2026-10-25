@@ -64,3 +64,14 @@ When you install Octeract, initialize, or are asked to set up the MCP:
 - **Octeract AlphaDev Optimizer (`octeract_alphadev_optimize`):** Reescritura algorítmica de micro-patrones en el AST estilo AlphaDev. Colapsa bucles cuadráticos $O(N^2)$ a búsquedas hash $O(1)$.
 - **Octeract Pairformer (`octeract_pairformer`):** Tensor relacional $N \times N$ con actualizaciones multiplicativas triangulares estilo AlphaFold 3, imponiendo la desigualdad triangular para prevenir tensiones arquitectónicas de 2º y 3º orden.
 - **Octeract Process Reward Model (`OcteractStepVerifier`):** Verificación atómica paso a paso (PRM) con veto inmediato ante mutaciones destructivas en cada micro-paso.
+
+## 5. PROTOCOLO ZERO-SLOP TELEMETRY (READ-LESS & SAY-LESS)
+Para maximizar velocidad y minimizar costes sin comprometer la seguridad:
+1. **Say-Less en Chat:** Responde siempre siguiendo la estructura directa: `[Hecho/Ubicación] [Causa raíz] [Acción quirúrgica inmediata]`. Elimina saludos, cortesías, preámbulos y recapitulaciones.
+2. **Read-Less en Entradas (OcteractSieve):**
+   - Para logs de consola, trazas de compilación o salidas de pruebas (`npm test`, `jest`, `vitest`, `pytest`), pásalos por `octeract_doctor({ logOrOutput: string })` para aislar únicamente el fallo y reducir entre un 85% y un 98% de tokens.
+   - Para archivos de datos (`.log`, `.csv`, `.tsv`, `.json` gigantes), usa `octeract_see({ targetFile, mode: 'sieve' })` para recibir una estructura plegada de alta densidad.
+3. **Cero Mutilación de Código (Garantía de Escudo):**
+   - Aunque las explicaciones sean telegráficas, el código fuente escrito mediante `octeract_safe_write` DEBE SER 100% COMPLETO y atómico.
+   - Cualquier comentario de elisión o truncamiento perezoso (`// ... rest of code`, `/* unchanged */`) será **rechazado físicamente** por el Escudo 4D con `BLOCKED_BY_4D_SHIELD`.
+

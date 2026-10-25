@@ -90,12 +90,24 @@ export class OcteractAsk {
 
     // 4. Sintetizar respuesta directa concisa (< 300 tokens)
     let answer = trace.directAnswerForAI;
+    const isTerse = options.terse !== false;
+
     if (!answer || answer.length < 20) {
       if (relevantFiles.length > 0) {
-        answer = `La funcionalidad consultada se gestiona principalmente en [${relevantFiles.map((f) => path.basename(f.path)).join(', ')}] mediante los símbolos ${keySymbols.slice(0, 4).join(', ')}.`;
+        if (isTerse) {
+          answer = `Ubicación: [${relevantFiles.map((f) => path.basename(f.path)).join(', ')}]. Símbolos: [${keySymbols.slice(0, 4).join(', ')}].`;
+        } else {
+          answer = `La funcionalidad consultada se gestiona principalmente en [${relevantFiles.map((f) => path.basename(f.path)).join(', ')}] mediante los símbolos ${keySymbols.slice(0, 4).join(', ')}.`;
+        }
       } else {
-        answer = `No se detectó un flujo causal explícito para "${question}". Intenta con términos arquitectónicos más específicos.`;
+        answer = isTerse
+          ? `Sin flujo causal para "${question}". Usa términos exactos.`
+          : `No se detectó un flujo causal explícito para "${question}". Intenta con términos arquitectónicos más específicos.`;
       }
+    } else if (isTerse && answer.length > 120) {
+      // Condensar respuestas verbosas en formato directo
+      const firstSentence = answer.split('.')[0];
+      answer = `${firstSentence}.`;
     }
 
     const topFile = relevantFiles[0]?.path;

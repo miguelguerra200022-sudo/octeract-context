@@ -2,7 +2,7 @@
  * OCTERACT UNIFIED FACADE: Tipos y Estructuras de Datos
  * Las 4 Grandes Aperturas Maestras + Motor Semántico de Preguntas
  */
-export const UNIFIED_FACADE_VERSION = '4.7.0';
+export const UNIFIED_FACADE_VERSION = '4.8.0';
 
 export interface OcteractDoctorReport {
   healthScore: number; // 0 a 100
@@ -35,6 +35,7 @@ export interface OcteractDoctorReport {
     intactTargets: number;
     driftDetected: boolean;
   };
+  sieveSummary?: string;
   topRecommendations: string[];
   summaryMarkdown: string;
 }
@@ -42,19 +43,20 @@ export interface OcteractDoctorReport {
 export interface OcteractSeeOptions {
   rootDir?: string;
   symbol?: string;
-  mode?: 'origami' | 'skeleton' | 'full' | 'eva';
+  mode?: 'origami' | 'skeleton' | 'full' | 'eva' | 'sieve';
   budget?: number; // Límite de tokens sugerido (default: 200)
 }
 
 export interface OcteractSeeResult {
   filePath: string;
   symbol?: string;
-  mode: 'origami' | 'skeleton' | 'full' | 'eva';
+  mode: 'origami' | 'skeleton' | 'full' | 'eva' | 'sieve';
   lineCount: number;
   originalTokensApprox: number;
   compressedTokensApprox: number;
   compressionSavingsPercent: number;
   content: string;
+  sieveSummary?: string;
   valleyFoldsCount?: number;
   mountainFoldsCount?: number;
 }
@@ -110,6 +112,7 @@ export interface OcteractSafeWriteResult {
 export interface OcteractAskOptions {
   rootDir?: string;
   maxResults?: number;
+  terse?: boolean; // Modo telegráfico Zero-Slop (default: true)
 }
 
 export interface OcteractAskResult {

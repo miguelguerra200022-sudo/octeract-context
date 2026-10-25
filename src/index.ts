@@ -22,11 +22,11 @@ async function main() {
     case 'see': {
       const targetFile = args[1];
       if (!targetFile) {
-        console.error('Uso: octeract see <archivo> [símbolo] [--mode=origami|skeleton|full|eva]');
+        console.error('Uso: octeract see <archivo> [símbolo] [--mode=origami|skeleton|full|eva|sieve]');
         process.exit(1);
       }
       let symbol: string | undefined;
-      let mode: 'origami' | 'skeleton' | 'full' | 'eva' = 'origami';
+      let mode: 'origami' | 'skeleton' | 'full' | 'eva' | 'sieve' = 'origami';
       for (let i = 2; i < args.length; i++) {
         if (args[i].startsWith('--mode=')) {
           mode = args[i].split('=')[1] as any;

@@ -1,7 +1,7 @@
 {
   "name": "octeract-context",
-  "version": "4.7.0",
-  "description": "Octeract v4.7.0: 5 Master Apertures Facade (doctor, see, impact, safe-write, ask), Adaptive MCP Profiles (90% schema reduction), Origami AST Folding, Heighway Dragon Shockwave, REA Reverse-Engineering, Minecraft Voxel, and Voynich EVA Suites",
+  "version": "4.8.0",
+  "description": "Octeract v4.8.0: 5 Master Apertures Facade (doctor, see, impact, safe-write, ask) with OcteractSieve Log/Test Shrinker, Zero-Slop Telemetry Protocol, Origami AST Folding, Heighway Dragon Shockwave, and REA Suites",
   "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",

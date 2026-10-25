@@ -9,11 +9,12 @@ import * as fs from 'node:fs';
 import { OcteractDragonFold } from '../dragon/dragonFold.ts';
 import { ASTSkeletonizer } from '../core/skeleton.ts';
 import { OcteractEVAAST } from '../voynich/eva-ast.ts';
+import { OcteractSieve } from '../core/sieve.ts';
 import type { OcteractSeeOptions, OcteractSeeResult } from './types.ts';
 
 export class OcteractSee {
   /**
-   * Inspecciona un archivo de código con compresión extrema origami o esqueleto
+   * Inspecciona un archivo de código con compresión extrema origami, esqueleto o sieve
    */
   public static async inspect(
     targetFile: string,
@@ -31,6 +32,24 @@ export class OcteractSee {
     const relPath = path.relative(root, fullPath);
     const lineCount = code.split('\n').length;
     const origTokens = Math.max(1, Math.round(code.length / 3.8));
+
+    const ext = path.extname(relPath).toLowerCase();
+    const isLogOrData = ['.log', '.csv', '.tsv'].includes(ext) || (ext === '.json' && lineCount > 40);
+
+    if (mode === 'sieve' || (mode === 'origami' && isLogOrData)) {
+      const sieveRes = OcteractSieve.sieve(code, relPath);
+      return {
+        filePath: relPath,
+        symbol: options.symbol,
+        mode: 'sieve',
+        lineCount: sieveRes.sievedContent.split('\n').length,
+        originalTokensApprox: sieveRes.originalTokensApprox,
+        compressedTokensApprox: sieveRes.compressedTokensApprox,
+        compressionSavingsPercent: sieveRes.reductionPercentage,
+        content: sieveRes.sievedContent,
+        sieveSummary: sieveRes.summary,
+      };
+    }
 
     if (mode === 'full') {
       return {

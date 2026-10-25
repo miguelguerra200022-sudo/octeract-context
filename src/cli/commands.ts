@@ -2075,7 +2075,7 @@ export async function runDoctor(targetDir: string = '.', options: { deep?: boole
 export async function runSee(
   filePath: string,
   symbol?: string,
-  mode: 'origami' | 'skeleton' | 'full' | 'eva' = 'origami'
+  mode: 'origami' | 'skeleton' | 'full' | 'eva' | 'sieve' = 'origami'
 ): Promise<void> {
   const result = await OcteractSee.inspect(filePath, { symbol, mode });
   console.log(`\x1b[1;36m========================================================================\x1b[0m`);

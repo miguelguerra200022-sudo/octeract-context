@@ -97,12 +97,12 @@ You do **not** need to memorize dozens of complicated commands. Octeract unifies
 ```
 
 ### 1. `octeract doctor [dir]` 🩺
-> **The Universal Codebase Health Scanner**  
-Runs a complete diagnostic across your entire project in $< 1\text{ second}$ without using any AI tokens. Delivers your project health score (0 to 100), detects all broken contracts, identifies dead ends, and gives you exact surgical recommendations in less than 250 tokens.
+> **The Universal Codebase Health & Failure Scanner**  
+Runs a complete diagnostic across your entire project in $< 1\text{ second}$ without using any AI tokens. Delivers your project health score (0 to 100), detects all broken contracts, identifies dead ends, and gives you exact surgical recommendations in less than 250 tokens. **Now includes OcteractSieve**: pass raw test outputs or compiler error logs via `logOrOutput` to isolate failing assertions and strip 90%+ terminal noise.
 
-### 2. `octeract see <file> [symbol] [--mode=origami]` 👁️
-> **The Origami Code Reading Lens**  
-Folds away private implementation details into zero-token markers while preserving 100% of public types, interfaces, and function headers. Slashes your LLM token consumption by **80% to 95%** while giving the AI everything it needs to understand the architecture.
+### 2. `octeract see <file> [symbol] [--mode=origami|sieve]` 👁️
+> **The Origami Code & Log Reading Lens**  
+Folds away private implementation details into zero-token markers while preserving 100% of public types, interfaces, and function headers. Slashes your LLM token consumption by **80% to 95%** while giving the AI everything it needs to understand the architecture. Supports `--mode=sieve` (and auto-detection) for compressing massive logs, CSV tables, and JSON dumps by 85-98%.
 
 ### 3. `octeract impact <file> [symbol]` 💥
 > **The Domino Effect Predictor**  
@@ -110,11 +110,11 @@ Visualizes the ripple effect of changing any file or function. Calculates the ri
 
 ### 4. `octeract safe-write <file> <code>` 🛡️
 > **The Active 4D Safety Write Shield**  
-The definitive defense against AI hallucinations. It tests the proposed code across 4 safety axes (syntax, contracts, execution, and security). If the code is broken or truncated, it returns `BLOCKED_BY_4D_SHIELD` and leaves your disk untouched. If the code is clean, it returns `WRITTEN_SAFELY` and writes it to disk.
+The definitive defense against AI hallucinations and lazy code deletions. It tests proposed code across 4 safety axes (syntax, contracts, execution, and security). Any lazy truncation comments (`// ... rest of code`) are strictly blocked with `BLOCKED_BY_4D_SHIELD`, leaving your disk untouched. Clean code is verified and safely written with `WRITTEN_SAFELY`.
 
 ### 5. `octeract ask "<question>"` 🧠
-> **The Causal Question Answering Engine**  
-Ask any natural language question about how your system works (e.g., `octeract ask "How does user authentication work?"`). Octeract traces the causal path through your codebase and gives you the direct answer with the exact files, line numbers, and symbols in $< 200\text{ tokens}$.
+> **The Causal Question & Zero-Slop Engine**  
+Ask any natural language question about how your system works (e.g., `octeract ask "How does user authentication work?"`). Octeract traces the causal path through your codebase and gives you the direct answer with the exact files, line numbers, and symbols in $< 200\text{ tokens}$ following the high-density **Zero-Slop Telemetry Protocol** (`terse: true`).
 
 ---
 
