@@ -1395,9 +1395,21 @@ export async function runCardanFuzz(
   }
 }
 
-export async function runVoxelPalette(targetDir: string = '.', filePath: string): Promise<void> {
-  const root = path.resolve(targetDir);
-  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+export async function runVoxelPalette(targetDirOrFile: string = '.', filePath?: string): Promise<void> {
+  let root = '.';
+  let target = filePath;
+  if (!target) {
+    if (fs.existsSync(targetDirOrFile) && !fs.statSync(targetDirOrFile).isDirectory()) {
+      target = targetDirOrFile;
+      root = '.';
+    } else {
+      root = targetDirOrFile;
+      target = 'src/index.ts';
+    }
+  } else {
+    root = targetDirOrFile;
+  }
+  const fullPath = path.isAbsolute(target) ? target : path.join(path.resolve(root), target);
   if (!fs.existsSync(fullPath)) {
     console.error(`\x1b[1;31m✖ Error: Archivo '${fullPath}' no existe.\x1b[0m\n`);
     return;
@@ -1413,7 +1425,7 @@ export async function runVoxelPalette(targetDir: string = '.', filePath: string)
   const compressed = engine.compressCode(content);
   const dur = (performance.now() - start).toFixed(2);
 
-  console.log(`  ● Archivo: \x1b[1m${filePath}\x1b[0m (${content.length} caracteres, ${dur} ms)`);
+  console.log(`  ● Archivo: \x1b[1m${target}\x1b[0m (${content.length} caracteres, ${dur} ms)`);
   console.log(`  ● Paleta de Símbolos Únicos: \x1b[1;36m${compressed.palette.length} entradas\x1b[0m`);
   console.log(`  ● Ancho de Bits por Token: \x1b[1;33m${compressed.bitWidth} bits\x1b[0m`);
   console.log(`  ● Palabras de 64-bit Empaquetadas: \x1b[1m${compressed.words.length}\x1b[0m`);
@@ -1464,15 +1476,29 @@ export async function runVoxelBiomes(targetDir: string = '.', filePath?: string)
   console.log('');
 }
 
-export async function runVoxelHorizon(targetDir: string = '.', focusFile: string, radius: number = 2): Promise<void> {
-  const root = path.resolve(targetDir);
+export async function runVoxelHorizon(targetDirOrFile: string = '.', focusFile?: string, radius: number = 2): Promise<void> {
+  let root = '.';
+  let focus = focusFile;
+  if (!focus) {
+    if (fs.existsSync(targetDirOrFile) && !fs.statSync(targetDirOrFile).isDirectory()) {
+      focus = targetDirOrFile;
+      root = '.';
+    } else {
+      root = targetDirOrFile;
+      focus = 'src/index.ts';
+    }
+  } else {
+    root = targetDirOrFile;
+  }
+  const fullRoot = path.resolve(root);
+
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
   console.log(`🎫 \x1b[1mOCTERACT WORKING SET HORIZON: CHUNK TICKET MANAGER (LEVELS 31-44)\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
 
   const indexer = new ProjectIndexer();
-  if (!indexer.loadIndex(root)) {
-    indexer.indexDirectory({ rootDir: root });
+  if (!indexer.loadIndex(fullRoot)) {
+    indexer.indexDirectory({ rootDir: fullRoot });
   }
 
   const space = indexer.getSpace();
@@ -1482,25 +1508,39 @@ export async function runVoxelHorizon(targetDir: string = '.', focusFile: string
     manager.registerNeighbors(v.path, v.dependencies);
   }
 
-  manager.addTicket('cli-focus-ticket', focusFile, 31, radius);
+  manager.addTicket('cli-focus-ticket', focus, 31, radius);
 
   const horizon = manager.getHorizonSummary();
-  console.log(`  ● Archivo Foco: \x1b[1m${focusFile}\x1b[0m (Radio: ${radius})`);
+  console.log(`  ● Archivo Foco: \x1b[1m${focus}\x1b[0m (Radio: ${radius})`);
   console.log(`  ● Nivel 31 (ACTIVE - AST Completo en RAM):       \x1b[1;32m${horizon.activeCount} archivos\x1b[0m`);
   console.log(`  ● Nivel 32 (CONTRACT_ONLY - Solo Firmas):        \x1b[1;36m${horizon.contractOnlyCount} archivos\x1b[0m`);
   console.log(`  ● Nivel 33 (SKELETON_ONLY - Esqueleto de Tipos): \x1b[1;33m${horizon.skeletonOnlyCount} archivos\x1b[0m`);
   console.log(`  ● Nivel 34+ (EVICTED - Liberados de RAM):        \x1b[31m${horizon.evictedCount} archivos\x1b[0m\n`);
 }
 
-export async function runVoxelStarlight(targetDir: string = '.', sourceFile: string): Promise<void> {
-  const root = path.resolve(targetDir);
+export async function runVoxelStarlight(targetDirOrFile: string = '.', sourceFile?: string): Promise<void> {
+  let root = '.';
+  let src = sourceFile;
+  if (!src) {
+    if (fs.existsSync(targetDirOrFile) && !fs.statSync(targetDirOrFile).isDirectory()) {
+      src = targetDirOrFile;
+      root = '.';
+    } else {
+      root = targetDirOrFile;
+      src = 'src/index.ts';
+    }
+  } else {
+    root = targetDirOrFile;
+  }
+  const fullRoot = path.resolve(root);
+
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
   console.log(`✨ \x1b[1mOCTERACT STARLIGHT BLAST: PROPAGACIÓN DE LUZ BFS (NIVEL 15 A 0)\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
 
   const indexer = new ProjectIndexer();
-  if (!indexer.loadIndex(root)) {
-    indexer.indexDirectory({ rootDir: root });
+  if (!indexer.loadIndex(fullRoot)) {
+    indexer.indexDirectory({ rootDir: fullRoot });
   }
 
   const space = indexer.getSpace();
@@ -1523,9 +1563,11 @@ export async function runVoxelStarlight(targetDir: string = '.', sourceFile: str
     }
   }
 
-  const sourceId = nodeMap.get(sourceFile);
+  // Normalizar ruta de archivo respecto a fullRoot si es necesario
+  const relSrc = path.isAbsolute(src) ? path.relative(fullRoot, src) : src;
+  const sourceId = nodeMap.get(src) ?? nodeMap.get(relSrc);
   if (sourceId === undefined) {
-    console.error(`\x1b[1;31m✖ Error: Archivo '${sourceFile}' no encontrado en el grafo topológico.\x1b[0m\n`);
+    console.error(`\x1b[1;31m✖ Error: Archivo '${src}' no encontrado en el grafo topológico.\x1b[0m\n`);
     return;
   }
 
@@ -1533,7 +1575,7 @@ export async function runVoxelStarlight(targetDir: string = '.', sourceFile: str
   const blast = starlight.propagateLight(sourceId, 15);
   const dur = (performance.now() - start).toFixed(2);
 
-  console.log(`  ● Fuente de Luz: \x1b[1m${sourceFile}\x1b[0m (Nivel 15)`);
+  console.log(`  ● Fuente de Luz: \x1b[1m${src}\x1b[0m (Nivel 15)`);
   console.log(`  ● Nodos Iluminados: \x1b[1;32m${blast.illuminatedNodes.length}\x1b[0m en ${dur} ms (${blast.propagateTimeUs} µs de CPU)\n`);
 
   for (const n of blast.illuminatedNodes.slice(0, 8)) {
@@ -1603,9 +1645,21 @@ export async function runVoxelJigsaw(targetDir: string = '.', rootPieceId: strin
   console.log(`  ● Sockets Sin Satisfacer: \x1b[1;33m${assembly.unmatchedSockets.length}\x1b[0m\n`);
 }
 
-export async function runVoxelCuller(targetDir: string = '.', filePath: string): Promise<void> {
-  const root = path.resolve(targetDir);
-  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(root, filePath);
+export async function runVoxelCuller(targetDirOrFile: string = '.', filePath?: string): Promise<void> {
+  let root = '.';
+  let target = filePath;
+  if (!target) {
+    if (fs.existsSync(targetDirOrFile) && !fs.statSync(targetDirOrFile).isDirectory()) {
+      target = targetDirOrFile;
+      root = '.';
+    } else {
+      root = targetDirOrFile;
+      target = 'src/index.ts';
+    }
+  } else {
+    root = targetDirOrFile;
+  }
+  const fullPath = path.isAbsolute(target) ? target : path.join(path.resolve(root), target);
   if (!fs.existsSync(fullPath)) {
     console.error(`\x1b[1;31m✖ Error: Archivo '${fullPath}' no existe.\x1b[0m\n`);
     return;
@@ -1621,14 +1675,27 @@ export async function runVoxelCuller(targetDir: string = '.', filePath: string):
   const result = culler.cullAndMesh(content);
   const dur = (performance.now() - start).toFixed(2);
 
-  console.log(`  ● Archivo: \x1b[1m${filePath}\x1b[0m (${dur} ms)`);
+  console.log(`  ● Archivo: \x1b[1m${target}\x1b[0m (${dur} ms)`);
   console.log(`  ● Líneas Originales: \x1b[1m${result.originalLines}\x1b[0m ➔ Líneas Malladas: \x1b[1;32m${result.culledLines}\x1b[0m`);
   console.log(`  ● Tokens Estimados Iniciales: \x1b[31m${result.originalEstimatedTokens}\x1b[0m ➔ Tokens Mallados: \x1b[1;32m${result.compressedEstimatedTokens}\x1b[0m`);
   console.log(`  ● Ahorro de Tokens: \x1b[1;32m${result.tokenSavingsPercent}%\x1b[0m para Context Window LLM\n`);
 }
 
-export async function runVoxelObserver(targetDir: string = '.', targetFile: string): Promise<void> {
-  const root = path.resolve(targetDir);
+export async function runVoxelObserver(targetDirOrFile: string = '.', targetFile?: string): Promise<void> {
+  let root = '.';
+  let target = targetFile;
+  if (!target) {
+    if (fs.existsSync(targetDirOrFile) && !fs.statSync(targetDirOrFile).isDirectory()) {
+      target = targetDirOrFile;
+      root = '.';
+    } else {
+      root = targetDirOrFile;
+      target = 'src/index.ts';
+    }
+  } else {
+    root = targetDirOrFile;
+  }
+
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
   console.log(`🔴 \x1b[1mOCTERACT OBSERVER PULSE: SEÑAL REDSTONE REACTIVA DE 0-TICKS\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
@@ -1637,10 +1704,10 @@ export async function runVoxelObserver(targetDir: string = '.', targetFile: stri
   const signals: any[] = [];
   observer.onPulse((sig) => signals.push(sig));
 
-  observer.observeNode(targetFile, 'sha256_initial_hash_v1');
-  const pulse = observer.notifyStateChange(targetFile, 'sha256_mutated_hash_v2', { reason: 'AST mutation' });
+  observer.observeNode(target, 'sha256_initial_hash_v1');
+  const pulse = observer.notifyStateChange(target, 'sha256_mutated_hash_v2', { reason: 'AST mutation' });
 
-  console.log(`  ● Nodo Observado: \x1b[1m${targetFile}\x1b[0m`);
+  console.log(`  ● Nodo Observado: \x1b[1m${target}\x1b[0m`);
   console.log(`  ● Detección de Mutación 0-Tick: \x1b[1;32mPULSO EMITIDO\x1b[0m`);
   console.log(`  ● Potencia de Redstone: \x1b[1;31m${pulse?.power}/15\x1b[0m`);
   console.log(`  ● Tick Actual: \x1b[1;36m${observer.getCurrentTick()}\x1b[0m`);
@@ -1728,6 +1795,40 @@ export async function runReaArmor(filePath: string): Promise<void> {
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
   console.log(`🛡️ \x1b[1mOCTERACT TARGET ARMOR: BLINDAJE CONTRA INYECCIÓN DE PROMPTS\x1b[0m`);
   console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+
+  const stat = fs.statSync(fullPath);
+  if (stat.isDirectory()) {
+    console.log(`  ● Escaneando Directorio: \x1b[1m${path.basename(fullPath)}\x1b[0m`);
+    let totalScanned = 0;
+    let totalThreats = 0;
+    let maxRisk = 0;
+
+    const scanDir = (dir: string) => {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.name.startsWith('.') || entry.name === 'node_modules' || entry.name === 'dist') continue;
+        const p = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          scanDir(p);
+        } else if (/\.(ts|js|py|json|md|html|sh)$/.test(entry.name)) {
+          totalScanned++;
+          const code = fs.readFileSync(p, 'utf-8');
+          const res = OcteractTargetArmor.scan(code);
+          if (!res.isClean) {
+            totalThreats += res.threats.length;
+            maxRisk = Math.max(maxRisk, res.riskScore);
+            console.log(`    - [${res.threatLevel}] ${path.relative(fullPath, p)}: ${res.threats.length} amenazas (Riesgo: ${res.riskScore}/100)`);
+          }
+        }
+      }
+    };
+    scanDir(fullPath);
+
+    console.log(`  ● Archivos Analizados: \x1b[1m${totalScanned}\x1b[0m`);
+    console.log(`  ● Estado Global: \x1b[1;${totalThreats === 0 ? '32' : '31'}m${totalThreats === 0 ? 'LIMPIO Y SEGURO' : 'VECTORES DETECTADOS'}\x1b[0m`);
+    console.log(`  ● Amenazas Totales: \x1b[1m${totalThreats}\x1b[0m (Riesgo Máximo: ${maxRisk}/100)\n`);
+    return;
+  }
 
   const code = fs.readFileSync(fullPath, 'utf-8');
   const result = OcteractTargetArmor.scan(code);

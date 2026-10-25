@@ -2118,6 +2118,10 @@ export class MCPServer {
 
         // Escritura segura autorizada por el hipercubo
         const fullPath = path.isAbsolute(targetPath) ? targetPath : path.join(this.rootDir, targetPath);
+        const dirName = path.dirname(fullPath);
+        if (!fs.existsSync(dirName)) {
+          fs.mkdirSync(dirName, { recursive: true });
+        }
         fs.writeFileSync(fullPath, proposedContent, 'utf-8');
 
         this.shadow.resetAttempts(targetPath);
