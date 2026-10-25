@@ -1,7 +1,7 @@
 {
   "name": "octeract-context",
-  "version": "4.6.0",
-  "description": "Octeract v4.6 Dragon Curve Suite: Heighway Origami AST Folding (>85% token compression), Hausdorff Fractal Shockwave Blast, Knuth Base-(1+i)/(1+O) Octonionic Spatial Hashing, 4-Dragon Periodic Tessellation, Crease Bifurcation Stress Fuzzer, REA Reverse-Engineering Suite, Minecraft-Voxel Engine, and Voynich-EVA Engine",
+  "version": "4.7.0",
+  "description": "Octeract v4.7 4 Master Apertures Facade: Unified Porcelain (doctor, see, impact, safe-write, ask) with Adaptive MCP Profiles (90% prompt token reduction), Heighway Origami AST Folding, Hausdorff Shockwave Blast, REA Reverse-Engineering Suite, Minecraft-Voxel Engine, and Voynich-EVA Engine",
   "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",

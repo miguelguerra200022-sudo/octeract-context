@@ -75,6 +75,13 @@ import {
   OcteractDragonTile,
   OcteractDragonCreaseFuzz,
 } from '../dragon/index.ts';
+import {
+  OcteractDoctor,
+  OcteractSee,
+  OcteractImpact,
+  OcteractSafeWrite,
+  OcteractAsk,
+} from '../unified/index.ts';
 
 export async function runInit(targetDir: string = '.'): Promise<void> {
   await runUniversalInit(targetDir);
@@ -1927,11 +1934,116 @@ export async function runDragonCreaseFuzz(filePath: string): Promise<void> {
   console.log();
 }
 
+export async function runDoctor(targetDir: string = '.', options: { deep?: boolean; sarif?: boolean } = {}): Promise<void> {
+  const root = path.resolve(targetDir);
+  console.log(`\x1b[1;36m========================================================================\x1b[0m`);
+  console.log(`🩺 \x1b[1mOCTERACT DOCTOR: DIAGNÓSTICO HOLÍSTICO UNIVERSAL (8D + DRAGON + REA)\x1b[0m`);
+  console.log(`\x1b[1;36m========================================================================\x1b[0m`);
 
+  const report = await OcteractDoctor.diagnose(root, options);
+  const color = report.healthScore >= 90 ? '\x1b[1;32m' : (report.healthScore >= 75 ? '\x1b[1;33m' : '\x1b[1;31m');
 
+  console.log(`  ● Salud Global: ${color}${report.healthScore}/100\x1b[0m (Veredicto: \x1b[1m${report.verdict}\x1b[0m)`);
+  console.log(`  ● Archivos / Símbolos Indexados: \x1b[1m${report.totalFiles}\x1b[0m archivos | \x1b[1m${report.totalSymbols}\x1b[0m símbolos`);
+  console.log(`  ● Fracturas R^8: \x1b[1;${report.fracturesCount > 0 ? '31' : '32'}m${report.fracturesCount}\x1b[0m`);
+  console.log(`  ● Fugas de Límite (Dragon Tile): \x1b[1;${report.boundaryLeaksCount > 0 ? '31' : '32'}m${report.boundaryLeaksCount}\x1b[0m`);
+  console.log(`  ● Biomas Dominantes: \x1b[1;34m${report.dominantBiomes.map((b) => `${b.biome} (${b.filesCount})`).join(', ') || 'Equilibrado'}\x1b[0m`);
 
+  if (report.fractures.length > 0) {
+    console.log(`\n  ● Detalle de Fracturas Críticas / Advertencias:`);
+    for (const f of report.fractures.slice(0, 5)) {
+      const fileName = f.file ? path.basename(f.file) : 'desconocido';
+      console.log(`    - [${(f.severity || 'INFO').toUpperCase()}] ${fileName}${f.line ? `:${f.line}` : ''}: ${f.message}`);
+    }
+  }
 
+  if (report.boundaryLeaks.length > 0) {
+    console.log(`\n  ● Detalle de Fugas de Límite:`);
+    for (const l of report.boundaryLeaks.slice(0, 3)) {
+      console.log(`    - [${l.fromQuadrant} ➔ ${l.toQuadrant}] ${path.basename(l.fromFile)} ➔ ${path.basename(l.toFile)}: ${l.reason}`);
+    }
+  }
 
+  console.log(`\n  ● \x1b[1;32mAcción Quirúrgica Recomendada:\x1b[0m`);
+  for (const rec of report.topRecommendations) {
+    console.log(`    ➔ \x1b[36m${rec}\x1b[0m`);
+  }
+  console.log();
+}
 
+export async function runSee(
+  filePath: string,
+  symbol?: string,
+  mode: 'origami' | 'skeleton' | 'full' | 'eva' = 'origami'
+): Promise<void> {
+  const result = await OcteractSee.inspect(filePath, { symbol, mode });
+  console.log(`\x1b[1;36m========================================================================\x1b[0m`);
+  console.log(`👁️ \x1b[1mOCTERACT SEE: LENTE DE LECTURA FRACTAL [Modo: ${result.mode.toUpperCase()}]\x1b[0m`);
+  console.log(`\x1b[1;36m========================================================================\x1b[0m`);
+  console.log(`  ● Archivo: \x1b[1m${result.filePath}\x1b[0m${result.symbol ? ` (Símbolo: \x1b[33m${result.symbol}\x1b[0m)` : ''}`);
+  console.log(`  ● Líneas: \x1b[1m${result.lineCount}\x1b[0m | Tokens Originales: ~${result.originalTokensApprox} ➔ Comprimidos: ~${result.compressedTokensApprox}`);
+  console.log(`  ● Ahorro de Tokens: \x1b[1;32m${result.compressionSavingsPercent}%\x1b[0m\n`);
+  console.log(result.content);
+  console.log();
+}
 
+export async function runImpact(
+  filePath: string,
+  symbol?: string,
+  maxHops: number = 15
+): Promise<void> {
+  const report = await OcteractImpact.analyze(filePath, { symbol, maxHops });
+  const riskColor = report.riskLevel === 'LOW' ? '\x1b[1;32m' : (report.riskLevel === 'MEDIUM' ? '\x1b[1;33m' : '\x1b[1;31m');
 
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`💥 \x1b[1mOCTERACT IMPACT: ONDA DE CHOQUE FRACTAL HEIGHWAY (d_H/2 ≈ 0.7618)\x1b[0m`);
+  console.log(`\x1b[1;35m========================================================================\x1b[0m`);
+  console.log(`  ● Epicentro: \x1b[1m${report.epicenter.file}\x1b[0m${report.epicenter.symbol ? ` -> \x1b[33m${report.epicenter.symbol}\x1b[0m` : ''}`);
+  console.log(`  ● Nivel de Riesgo: ${riskColor}${report.riskLevel}\x1b[0m (Puntuación: ${report.impactScore}/100)`);
+  console.log(`  ● Total Nodos Alcanzados: \x1b[1m${report.totalAffectedNodes}\x1b[0m`);
+
+  if (report.tier1DirectDependents.length > 0) {
+    console.log(`\n  ● Dependientes Directos Inmediatos (Tier 1):`);
+    for (const d of report.tier1DirectDependents.slice(0, 6)) {
+      console.log(`    - ${d.file} (${d.symbol}): ${d.reason}`);
+    }
+  } else {
+    console.log(`\n  ● Sin dependientes directos (Módulo aislado).`);
+  }
+
+  if (report.safeRefactorOrder.length > 0) {
+    console.log(`\n  ● Secuencia Segura de Refactorización (Topological Bottom-Up):`);
+    console.log(`    ${report.safeRefactorOrder.map((f) => path.basename(f)).join(' ➔ ')}`);
+  }
+  console.log();
+}
+
+export async function runAsk(query: string, targetDir: string = '.'): Promise<void> {
+  console.log(`\x1b[1;34m========================================================================\x1b[0m`);
+  console.log(`🧠 \x1b[1mOCTERACT ASK: MOTOR SEMÁNTICO GEODÉSICO DE PREGUNTAS\x1b[0m`);
+  console.log(`\x1b[1;34m========================================================================\x1b[0m`);
+  console.log(`  ● Pregunta: \x1b[1;33m"${query}"\x1b[0m\n`);
+
+  const result = await OcteractAsk.query(query, { rootDir: targetDir });
+
+  console.log(`  ● \x1b[1;32mRespuesta Directa:\x1b[0m\n    ${result.answer}\n`);
+
+  if (result.relevantFiles.length > 0) {
+    console.log(`  ● Archivos y Ubicaciones Relevantes:`);
+    for (const f of result.relevantFiles) {
+      console.log(`    - \x1b[1m${f.path}\x1b[0m${f.lines && f.lines.length > 0 ? ` (Líneas: ${f.lines.slice(0, 3).join(', ')})` : ''}`);
+      if (f.snippet) {
+        console.log(`        \x1b[90m${f.snippet.slice(0, 80)}\x1b[0m`);
+      }
+    }
+  }
+
+  if (result.keySymbols.length > 0) {
+    console.log(`\n  ● Símbolos Clave: \x1b[36m${result.keySymbols.join(', ')}\x1b[0m`);
+  }
+
+  if (result.suggestedAction) {
+    console.log(`\n  ● Comando Sugerido: \x1b[1;32m${result.suggestedAction}\x1b[0m`);
+  }
+  console.log();
+}

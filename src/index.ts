@@ -5,13 +5,178 @@ import * as fs from 'node:fs';
  * TESSERACT-CONTEXT: Punto de Entrada Principal
  */
 
-import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats, runGrep, runOrchestrate, runFunSearch, runDeductive, runAlphaDev, runPairformer, runProgramSlice, runReproduce, runSpeculativePatch, runMcts, runEVAAST, runMontemurro, runSlotMachine, runCurrier, runEntropyH2, runCardanFuzz, runVoxelPalette, runVoxelBiomes, runVoxelHorizon, runVoxelStarlight, runVoxelAnvil, runVoxelJigsaw, runVoxelCuller, runVoxelObserver, runReaBundle, runReaCompare, runReaArmor, runReaNative, runDragonFold, runDragonBlast, runDragonCoords, runDragonTile, runDragonCreaseFuzz } from './cli/commands.ts';
+import { runInit, runIndex, runStats, runSlice, runMCP, runTUI, runShadow, runUI, runWatch, runSafeWrite, runAudit, runFlow, runHybridAudit, runBlast, runPatch, runTrial, runAutoHeal, runSarif, runDiff, runHook, runLicense, runSWECI, runLSC, runMesh, runPreflight, runPortfolio, runSwarm, runMutate, runTransmute, runAsymptotic, runCausal, runAsyncAudit, runOcteractStats, runGrep, runOrchestrate, runFunSearch, runDeductive, runAlphaDev, runPairformer, runProgramSlice, runReproduce, runSpeculativePatch, runMcts, runEVAAST, runMontemurro, runSlotMachine, runCurrier, runEntropyH2, runCardanFuzz, runVoxelPalette, runVoxelBiomes, runVoxelHorizon, runVoxelStarlight, runVoxelAnvil, runVoxelJigsaw, runVoxelCuller, runVoxelObserver, runReaBundle, runReaCompare, runReaArmor, runReaNative, runDragonFold, runDragonBlast, runDragonCoords, runDragonTile, runDragonCreaseFuzz, runDoctor, runSee, runImpact, runAsk } from './cli/commands.ts';
 
 async function main() {
   const args = process.argv.slice(2);
   const command = args[0] || (process.stdin.isTTY ? 'help' : 'mcp');
 
   switch (command) {
+    case 'doctor': {
+      const targetDir = args[1] && !args[1].startsWith('-') ? args[1] : '.';
+      const deep = args.includes('--deep');
+      const sarif = args.includes('--sarif');
+      await runDoctor(targetDir, { deep, sarif });
+      break;
+    }
+    case 'see': {
+      const targetFile = args[1];
+      if (!targetFile) {
+        console.error('Uso: octeract see <archivo> [símbolo] [--mode=origami|skeleton|full|eva]');
+        process.exit(1);
+      }
+      let symbol: string | undefined;
+      let mode: 'origami' | 'skeleton' | 'full' | 'eva' = 'origami';
+      for (let i = 2; i < args.length; i++) {
+        if (args[i].startsWith('--mode=')) {
+          mode = args[i].split('=')[1] as any;
+        } else if (!symbol) {
+          symbol = args[i];
+        }
+      }
+      await runSee(targetFile, symbol, mode);
+      break;
+    }
+    case 'impact': {
+      const targetFile = args[1];
+      if (!targetFile) {
+        console.error('Uso: octeract impact <archivo> [símbolo] [saltos]');
+        process.exit(1);
+      }
+      const symbol = args[2] && !args[2].match(/^\d+$/) ? args[2] : undefined;
+      const maxHopsArg = args[2] && args[2].match(/^\d+$/) ? args[2] : args[3];
+      const maxHops = maxHopsArg ? parseInt(maxHopsArg, 10) : 15;
+      await runImpact(targetFile, symbol, maxHops);
+      break;
+    }
+    case 'ask': {
+      const question = args.slice(1).join(' ');
+      if (!question) {
+        console.error('Uso: octeract ask <pregunta en lenguaje natural>');
+        process.exit(1);
+      }
+      await runAsk(question);
+      break;
+    }
+    case 'dragon': {
+      const sub = args[1] || 'help';
+      switch (sub) {
+        case 'fold':
+          if (!args[2]) { console.error('Uso: octeract dragon fold <archivo> [símbolo]'); process.exit(1); }
+          await runDragonFold(args[2], args[3]);
+          break;
+        case 'blast':
+          if (!args[2]) { console.error('Uso: octeract dragon blast <archivo> [energía]'); process.exit(1); }
+          await runDragonBlast(args[2], args[3] ? parseFloat(args[3]) : 1.0);
+          break;
+        case 'coords':
+          if (!args[2]) { console.error('Uso: octeract dragon coords <archivo> [archivo2]'); process.exit(1); }
+          await runDragonCoords(args[2], args[3]);
+          break;
+        case 'tile':
+          await runDragonTile(args[2] || '.');
+          break;
+        case 'fuzz':
+          if (!args[2]) { console.error('Uso: octeract dragon fuzz <archivo>'); process.exit(1); }
+          await runDragonCreaseFuzz(args[2]);
+          break;
+        default:
+          console.log(`\x1b[1;36mOcteract Dragon Suite\x1b[0m: fold | blast | coords | tile | fuzz`);
+          break;
+      }
+      break;
+    }
+    case 'rea': {
+      const sub = args[1] || 'help';
+      switch (sub) {
+        case 'bundle':
+          if (!args[2]) { console.error('Uso: octeract rea bundle <archivoBundle>'); process.exit(1); }
+          await runReaBundle(args[2]);
+          break;
+        case 'compare':
+          if (!args[2] || !args[3]) { console.error('Uso: octeract rea compare <sourceFile> <bundleFile>'); process.exit(1); }
+          await runReaCompare(args[2], args[3]);
+          break;
+        case 'armor':
+          if (!args[2]) { console.error('Uso: octeract rea armor <archivo>'); process.exit(1); }
+          await runReaArmor(args[2]);
+          break;
+        case 'native':
+          if (!args[2]) { console.error('Uso: octeract rea native <archivo>'); process.exit(1); }
+          await runReaNative(args[2]);
+          break;
+        default:
+          console.log(`\x1b[1;36mOcteract REA Suite\x1b[0m: bundle | compare | armor | native`);
+          break;
+      }
+      break;
+    }
+    case 'voxel': {
+      const sub = args[1] || 'help';
+      switch (sub) {
+        case 'palette':
+          await runVoxelPalette(args[2] || '.');
+          break;
+        case 'biomes':
+          await runVoxelBiomes(args[2] || '.', args[3]);
+          break;
+        case 'horizon':
+          await runVoxelHorizon(args[2] || '.');
+          break;
+        case 'starlight':
+          if (!args[2]) { console.error('Uso: octeract voxel starlight <archivo>'); process.exit(1); }
+          await runVoxelStarlight(args[2]);
+          break;
+        case 'anvil':
+          await runVoxelAnvil(args[2] || '.');
+          break;
+        case 'jigsaw':
+          await runVoxelJigsaw(args[2] || '.');
+          break;
+        case 'culler':
+          if (!args[2]) { console.error('Uso: octeract voxel culler <archivo>'); process.exit(1); }
+          await runVoxelCuller(args[2]);
+          break;
+        case 'pulse':
+          await runVoxelObserver(args[2] || '.');
+          break;
+        default:
+          console.log(`\x1b[1;36mOcteract Voxel Suite\x1b[0m: palette | biomes | horizon | starlight | anvil | jigsaw | culler | pulse`);
+          break;
+      }
+      break;
+    }
+    case 'voynich': {
+      const sub = args[1] || 'help';
+      switch (sub) {
+        case 'eva':
+          if (!args[2]) { console.error('Uso: octeract voynich eva <archivo>'); process.exit(1); }
+          await runEVAAST(args[3] || '.', args[2]);
+          break;
+        case 'montemurro':
+          await runMontemurro(args[2] || '.');
+          break;
+        case 'slot':
+          if (!args[2]) { console.error('Uso: octeract voynich slot <archivo>'); process.exit(1); }
+          await runSlotMachine(args[3] || '.', args[2]);
+          break;
+        case 'currier':
+          await runCurrier(args[2] || '.', args[3]);
+          break;
+        case 'entropy':
+          if (!args[2]) { console.error('Uso: octeract voynich entropy <archivo>'); process.exit(1); }
+          await runEntropyH2(args[3] || '.', args[2]);
+          break;
+        case 'cardan':
+          if (!args[2]) { console.error('Uso: octeract voynich cardan <archivo>'); process.exit(1); }
+          await runCardanFuzz(args[3] || '.', args[2], args[4] ? parseInt(args[4], 10) : 5);
+          break;
+        default:
+          console.log(`\x1b[1;36mOcteract Voynich Suite\x1b[0m: eva | montemurro | slot | currier | entropy | cardan`);
+          break;
+      }
+      break;
+    }
     case 'blast': {
       const targetDir = args[1] || '.';
       const targetFile = args[2];
@@ -132,9 +297,18 @@ async function main() {
       break;
     }
     case 'safe-write': {
-      const targetDir = args[1] || '.';
-      const targetFile = args[2];
-      const proposedContent = args[3] || '';
+      let targetDir = '.';
+      let targetFile = args[1];
+      let proposedContent = args[2] || '';
+      if (args[3] !== undefined) {
+        targetDir = args[1];
+        targetFile = args[2];
+        proposedContent = args[3];
+      }
+      if (!targetFile) {
+        console.error('Uso: octeract safe-write <archivo> <codigoPropuesto> (o <dir> <archivo> <codigo>)');
+        process.exit(1);
+      }
       await runSafeWrite(targetDir, targetFile, proposedContent);
       break;
     }
@@ -599,7 +773,7 @@ async function main() {
     }
     case '--version':
     case '-v': {
-      console.log('Octeract-Context v4.6.0 (8D Universal Suite - Dragon Curve, REA Reverse Engineering, Minecraft Voxel & Voynich-EVA Engine)');
+      console.log('Octeract-Context v4.7.0 (8D Universal Suite - 4 Master Apertures Facade, Dragon Curve & REA Armor)');
       break;
     }
     case 'help':
@@ -607,48 +781,25 @@ async function main() {
     case '-h':
     default: {
       console.log(`
-\x1b[1;36mOCTERACT-CONTEXT (8D)\x1b[0m: Motor de Contexto 8D (T^8 / E8) y Servidor MCP Universal
-Uso: octeract-context <comando> [opciones] (o 'octeract' / 'tesseract')
+\x1b[1;36mOCTERACT-CONTEXT (8D Universal Suite v4.7.0)\x1b[0m: Motor de Contexto 8D y Servidor MCP Universal
+Uso: octeract <comando> [opciones] (o 'octeract-context' / 'tesseract')
 
-Comandos disponibles:
-  \x1b[32maudit\x1b[0m [directorio]    Auditoría estática determinista sin IA (0 tokens) de fracturas en R^8 / R^4
-  \x1b[32mblast\x1b[0m [dir] <file> [sym] [hops] Radio de explosión interprocedural y efecto dominó (< 300 tokens)
-  \x1b[32mpatch\x1b[0m [dir] <file> [sym]  Sintetiza un parche retrocompatible zero-touch para fracturas
-  \x1b[32mtrial\x1b[0m [dir] <file> <code  Ensayo transaccional en RAM con remapeo delta y rollback automático
-  \x1b[32mautoheal\x1b[0m [dir] <id> [--commit] Mini-subagente autónomo: sintetiza parche, ensaya en RAM y aplica
-  \x1b[32mflow\x1b[0m [dir] <pregunta> Trazado causal geodésico en T^8 a partir de lenguaje natural (< 500 tokens)
-  \x1b[32mhybrid-audit\x1b[0m [dir]    Triage colaborativo Octeracto + IA para auditoría semántica de código
-  \x1b[32mmcp\x1b[0m [directorio]      Inicia el servidor MCP JSON-RPC para agentes IA (Cursor/Claude/Windsurf)
-  \x1b[32mui\x1b[0m [directorio] [puerto] Inicia el Dashboard 8D interactivo táctil para Celulares y PCs (localhost:4444)
-  \x1b[32mwatch\x1b[0m [directorio]    Inicia el Guardián Autónomo en disco (Shield Watcher)
-  \x1b[32minit\x1b[0m [directorio]     Inicializa la protección autónoma (AGENTS.md, .cursorrules, .mcp.json)
-  \x1b[32msafe-write\x1b[0m [dir] <file> <code  Modifica un archivo solo si supera la validación topológica 8D
-  \x1b[32mindex\x1b[0m [directorio]    Escanea y construye el árbol fractal 8D en memoria
-  \x1b[32mgrep\x1b[0m [dir] <query>    Grep semántico en lenguaje natural y estructural por líneas con snippets (< 150 tokens)
-  \x1b[32mstats\x1b[0m [directorio]    Muestra métricas topológicas y salud arquitectónica
-  \x1b[32mocteract\x1b[0m [dir]        Muestra métricas completas del Octeracto 8D (T^8, E8, Phi, Psi, Omega)
-  \x1b[32mdragon-fold\x1b[0m <file> [sym] Compresión Origami de AST fractal (superficie valle vs montaña 0 tokens)
-  \x1b[32mdragon-blast\x1b[0m <file> [e]   Onda de choque fractal Heighway con amortiguación Hausdorff
-  \x1b[32mdragon-coords\x1b[0m <f> [f2]    Mapeo espacial base-(1+i)/(1+O), giros y distancia XOR
-  \x1b[32mdragon-tile\x1b[0m [dir]        Teselación periódica en 4 dragones y detección de boundary leaks
-  \x1b[32mdragon-fuzz\x1b[0m <file>       Fuzzer de fatiga en líneas de pliegue origami (crease bifurcation)
-  \x1b[32meva-ast\x1b[0m [dir] <file>  Transliteración canónica EVA (Código Voynich) con compresión AST > 80%
-  \x1b[32mmontemurro\x1b[0m [dir]       Clustering de información mutua I(w,S) de Montemurro & Zanette a 0 tokens
-  \x1b[32mslot-machine\x1b[0m [dir] <file> Validación en O(1) autómata DFA de Zattera (< 0.1 ms)
-  \x1b[32mcurrier\x1b[0m [dir] [file]   Clasificación de dialectos Currier A/B/C y tolerancia de cizallamiento
-  \x1b[32mentropy-h2\x1b[0m [dir] <file> Guardián de entropía condicional de Markov Bennett-Lindemann (h2)
-  \x1b[32mcardan-fuzz\x1b[0m [dir] <f> [n] Fuzzing sintético en RAM por Rejilla de Cardano (Gordon Rugg) a > 1,000/s
-  \x1b[32masymptotic\x1b[0m [dir] <f>  Analiza complejidad Big-O estática (Dimensión Phi)
-  \x1b[32mcausal\x1b[0m [dir] <f> <c>   Inferencia causal SCM Judea Pearl / Do-Calculus (Dimensión Psi)
-  \x1b[32momega\x1b[0m [dir] <f>        Audita Event Loop y promesas flotantes (Dimensión Omega)
-  \x1b[32mpreflight\x1b[0m [dir]    Auditoría 5D de empaquetado (Shebang, POSIX bits 100755, dist, exports)
-  \x1b[32mportfolio\x1b[0m [dir]    Frontera eficiente de Markowitz (Sharpe Ratio, Kelly f*, Vibe Advisor)
-  \x1b[32mslice\x1b[0m [dir] [celda]   Prueba un corte hiperdimensional quirúrgico con presupuesto de tokens
-  \x1b[32mswarm\x1b[0m [dir] <agents.json> Coordinador de Voronoi: detecta colisiones semánticas y deadlocks
-  \x1b[32mmutate\x1b[0m [dir] <file> [test] Fuzzing de mutación AST en RAM: detecta tests tramposos o tautológicos
-  \x1b[32mtransmute\x1b[0m [dir] <f> <s> <sig> Transmutador atómico de cierre transitivo multi-archivo G*
-  \x1b[32mtui\x1b[0m [directorio]      Inicia la visualización interactiva del hipercubo en terminal
-  \x1b[32mhelp\x1b[0m                  Muestra esta ayuda
+\x1b[1;33m🌟 LAS 5 APERTURAS MAESTRAS (FACHADA PRINCIPAL RECOMENDADA):\x1b[0m
+  \x1b[1;32mdoctor\x1b[0m [dir] [--deep]       🩺 Diagnóstico holístico universal: Salud 8D, Dragones, Biomas y Armadura (< 250 tokens)
+  \x1b[1;32msee\x1b[0m <file> [sym] [--mode]  👁️ Lente Origami AST y Esqueleto: Plegado valle/montaña (< 200 tokens)
+  \x1b[1;32mimpact\x1b[0m <file> [sym] [hops] 💥 Onda de choque fractal Heighway (Hausdorff dH/2) y efecto dominó (< 250 tokens)
+  \x1b[1;32msafe-write\x1b[0m <file> <codigo>  🛡️ Escritura quirúrgica: Crease Fuzz + Escudo 4D + Reducción de entropía
+  \x1b[1;32mask\x1b[0m <pregunta en texto>    🧠 Motor semántico geodésico: Trazado causal T^8 + Grep BM25F (< 300 tokens)
+
+\x1b[1;34m🧭 ESPACIOS DE NOMBRES ESPECIALIZADOS (Comandos avanzados):\x1b[0m
+  \x1b[36mdragon\x1b[0m <fold|blast|coords|tile|fuzz>   Suites de la Curva del Dragón (Origami, Hausdorff, Teselación)
+  \x1b[36mrea\x1b[0m <bundle|compare|armor|native>       Ingeniería Inversa REA (Evidencias, Bundles, Armaduras)
+  \x1b[36mvoxel\x1b[0m <palette|biomes|horizon|...>     Motores Voxel tipo Minecraft (Paletas, Starlight, Anvil)
+  \x1b[36mvoynich\x1b[0m <eva|montemurro|slot|...>      Motores Lingüísticos Voynich (EVA AST, Entropía h2, Cardano)
+  \x1b[36mcore\x1b[0m <mcp|ui|watch|init|stats|diff>    Servidores de integración y herramientas del núcleo
+
+\x1b[1;35m⚙️ HERRAMIENTAS INDIVIDUALES HEREDADAS (100% Retrocompatibles):\x1b[0m
+  \x1b[32maudit\x1b[0m, \x1b[32mblast\x1b[0m, \x1b[32mpatch\x1b[0m, \x1b[32mtrial\x1b[0m, \x1b[32mautoheal\x1b[0m, \x1b[32mflow\x1b[0m, \x1b[32mmcp\x1b[0m, \x1b[32mui\x1b[0m, \x1b[32mwatch\x1b[0m, \x1b[32minit\x1b[0m, \x1b[32mindex\x1b[0m, \x1b[32mgrep\x1b[0m, \x1b[32mslice\x1b[0m, \x1b[32mswarm\x1b[0m...
       `);
       break;
     }
@@ -710,3 +861,4 @@ export * from './voynich/index.ts';
 export * from './voxel/index.ts';
 export * from './rea/index.ts';
 export * from './dragon/index.ts';
+export * from './unified/index.ts';

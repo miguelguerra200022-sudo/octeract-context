@@ -5,7 +5,7 @@ import * as fs from 'node:fs';
 import { MCPServer } from '../src/mcp/server.ts';
 
 test('MCPServer: Protocolo JSON-RPC 2.0 y Herramientas 4D', async () => {
-  const server = new MCPServer({ rootDir: '.' });
+  const server = new MCPServer({ rootDir: '.', profile: 'full' });
   await server.init();
 
   // 1. Prueba de initialize

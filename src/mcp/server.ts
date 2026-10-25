@@ -81,9 +81,17 @@ import {
   OcteractDragonTile,
   OcteractDragonCreaseFuzz,
 } from '../dragon/index.ts';
+import {
+  OcteractDoctor,
+  OcteractSee,
+  OcteractImpact,
+  OcteractSafeWrite,
+  OcteractAsk,
+} from '../unified/index.ts';
 
 export interface MCPServerOptions {
   rootDir: string;
+  profile?: 'essential' | 'full';
 }
 
 export class MCPServer {
@@ -92,12 +100,22 @@ export class MCPServer {
   private shadow: ShadowEngine;
   private indexer: ProjectIndexer;
   private isInitialized: boolean = false;
+  private profile: 'essential' | 'full';
 
   constructor(options: MCPServerOptions) {
     this.rootDir = options.rootDir;
+    this.profile = options.profile || (process.env.OCTERACT_MCP_PROFILE === 'full' ? 'full' : 'essential');
     this.indexer = new ProjectIndexer();
     this.space = this.indexer.getSpace();
     this.shadow = new ShadowEngine(this.space, this.rootDir);
+  }
+
+  public getProfile(): 'essential' | 'full' {
+    return this.profile;
+  }
+
+  public setProfile(profile: 'essential' | 'full'): void {
+    this.profile = profile;
   }
 
   /**
@@ -555,8 +573,189 @@ export class MCPServer {
 
   /**
    * Catálogo de herramientas 4D del Teseracto para Agentes IA
+   * Soporta perfiles: 'essential' (las 5 aperturas maestras, ~600 tokens) y 'full' (144 herramientas).
    */
   private getToolDefinitions(): any[] {
+    const essential = this.getEssentialToolDefinitions();
+    if (this.profile === 'essential') {
+      return essential;
+    }
+    const specialized = this.getAllSpecializedToolDefinitions();
+    const essentialNames = new Set(essential.map((t) => t.name));
+    const filteredSpecialized = specialized.filter((t) => !essentialNames.has(t.name));
+    return [...essential, ...filteredSpecialized];
+  }
+
+  /**
+   * Las 5 Aperturas Maestras de Octeract (< 600 tokens de esquema en total)
+   */
+  private getEssentialToolDefinitions(): any[] {
+    const tools = [
+      {
+        name: 'octeract_doctor',
+        description:
+          '🩺 APERTURA MAESTRA 1: Diagnóstico holístico universal del repositorio en un solo toque (< 250 tokens). Evalúa salud arquitectónica 8D, teselación fractal de 4 dragones, fugas de límite inter-cuadrante, biomas de código y estado de armadura REA.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetDir: {
+              type: 'string',
+              description: 'Directorio raíz a diagnosticar (por defecto el directorio actual)',
+            },
+            deep: {
+              type: 'boolean',
+              description: 'Si es true, fuerza una reindexación completa y profunda',
+            },
+          },
+        },
+      },
+      {
+        name: 'octeract_see',
+        description:
+          '👁️ APERTURA MAESTRA 2: Lente de lectura y compresión fractal de código (< 200 tokens). Aplica pliegues Origami (valle vs montaña), esqueleto AST o transliteración EVA. Despliega símbolos específicos manteniendo el resto plegado a 0 tokens.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetFile: {
+              type: 'string',
+              description: 'Ruta del archivo a inspeccionar',
+            },
+            symbol: {
+              type: 'string',
+              description: 'Símbolo opcional a desplegar en detalle (función, clase, método)',
+            },
+            mode: {
+              type: 'string',
+              enum: ['origami', 'skeleton', 'full', 'eva'],
+              description: 'Modo de compresión: "origami" (valle/montaña default), "skeleton", "full", "eva"',
+            },
+            budget: {
+              type: 'number',
+              description: 'Presupuesto de tokens aproximado',
+            },
+          },
+          required: ['targetFile'],
+        },
+      },
+      {
+        name: 'octeract_impact',
+        description:
+          '💥 APERTURA MAESTRA 3: Cálculo de onda de choque fractal Heighway (Hausdorff dH/2) y efecto dominó en cascada (< 250 tokens). Predice archivos y contratos rotos antes de tocar el código.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetFile: {
+              type: 'string',
+              description: 'Ruta del archivo a evaluar para mutación o refactorización',
+            },
+            symbol: {
+              type: 'string',
+              description: 'Símbolo específico sujeto al cambio',
+            },
+            maxHops: {
+              type: 'number',
+              description: 'Máximo número de saltos de propagación (default 15)',
+            },
+            energy: {
+              type: 'number',
+              description: 'Energía inicial del impacto (default 1.0)',
+            },
+          },
+          required: ['targetFile'],
+        },
+      },
+      {
+        name: 'octeract_safe_write',
+        description:
+          '🛡️ APERTURA MAESTRA 4: Modificación segura de archivos con protección activa multi-capa. Evalúa fatiga mecánica en pliegues origami (Crease Fuzz), cizallamiento 4D en RAM y reducción estricta de entropía. Bloquea físicamente cambios destructivos.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetPath: {
+              type: 'string',
+              description: 'Ruta del archivo a modificar de forma segura',
+            },
+            targetFile: {
+              type: 'string',
+              description: 'Alias de targetPath',
+            },
+            proposedContent: {
+              type: 'string',
+              description: 'Nuevo contenido propuesto para el archivo',
+            },
+            force: {
+              type: 'boolean',
+              description: 'Forzar escritura omitiendo el bloqueo de seguridad',
+            },
+          },
+        },
+      },
+      {
+        name: 'octeract_ask',
+        description:
+          '🧠 APERTURA MAESTRA 5: Motor semántico de preguntas sobre el código en lenguaje natural (< 300 tokens). Trazado geodésico causal T^8 + Grep BM25F estructurado con enlaces exactos de archivo y línea.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            question: {
+              type: 'string',
+              description: 'Pregunta en lenguaje natural sobre la arquitectura o implementación',
+            },
+            query: {
+              type: 'string',
+              description: 'Alias de question',
+            },
+            targetDir: {
+              type: 'string',
+              description: 'Directorio raíz donde buscar (por defecto .)',
+            },
+            maxResults: {
+              type: 'number',
+              description: 'Cantidad máxima de archivos sugeridos (default 5)',
+            },
+          },
+        },
+      },
+      {
+        name: 'octeract_switch_profile',
+        description:
+          '⚙️ Conmuta el catálogo de herramientas MCP expuestas: "essential" (las 5 aperturas maestras, ~600 tokens) o "full" (las 144 herramientas especializadas completas).',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            profile: {
+              type: 'string',
+              enum: ['essential', 'full'],
+              description: 'Perfil deseado: "essential" o "full"',
+            },
+          },
+          required: ['profile'],
+        },
+      },
+      {
+        name: 'octeract_profile_status',
+        description:
+          'Informa el perfil MCP activo, cantidad de herramientas expuestas y ahorro de tokens en el prompt.',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+        },
+      },
+    ];
+
+    const aliases = tools.map((t) => ({
+      ...t,
+      name: t.name.replace(/^octeract_/, 'tesseract_'),
+      description: `[Alias de compatibilidad] ${t.description}`,
+    }));
+
+    return [...tools, ...aliases];
+  }
+
+  /**
+   * Catálogo completo de herramientas especializadas
+   */
+  private getAllSpecializedToolDefinitions(): any[] {
     const tools = [
       {
         name: 'octeract_slice',
@@ -1741,6 +1940,73 @@ export class MCPServer {
     }
 
     switch (toolName) {
+      case 'octeract_doctor': {
+        const report = await OcteractDoctor.diagnose(args.targetDir || this.rootDir, { deep: args.deep });
+        return report;
+      }
+
+      case 'octeract_see': {
+        const target = args.targetFile || args.targetPath;
+        if (!target) {
+          throw new Error('Parámetro "targetFile" requerido para octeract_see');
+        }
+        const res = await OcteractSee.inspect(target, {
+          rootDir: this.rootDir,
+          symbol: args.symbol,
+          mode: args.mode,
+          budget: args.budget,
+        });
+        return res;
+      }
+
+      case 'octeract_impact': {
+        const target = args.targetFile || args.targetPath;
+        if (!target) {
+          throw new Error('Parámetro "targetFile" requerido para octeract_impact');
+        }
+        const report = await OcteractImpact.analyze(target, {
+          rootDir: this.rootDir,
+          symbol: args.symbol,
+          maxHops: args.maxHops,
+          energy: args.energy,
+        });
+        return report;
+      }
+
+      case 'octeract_ask': {
+        const q = args.question || args.query;
+        if (!q) {
+          throw new Error('Parámetro "question" requerido para octeract_ask');
+        }
+        const res = await OcteractAsk.query(q, {
+          rootDir: args.targetDir || this.rootDir,
+          maxResults: args.maxResults,
+        });
+        return res;
+      }
+
+      case 'octeract_switch_profile': {
+        const targetProfile = args.profile === 'full' ? 'full' : 'essential';
+        this.setProfile(targetProfile);
+        return {
+          status: 'SUCCESS',
+          profile: this.profile,
+          message: `Perfil MCP actualizado a "${this.profile}".`,
+          toolsExposed: this.getToolDefinitions().length,
+          schemaTokenOverheadApprox: this.profile === 'essential' ? '~600 tokens' : '~19,000 tokens',
+        };
+      }
+
+      case 'octeract_profile_status': {
+        return {
+          status: 'SUCCESS',
+          profile: this.profile,
+          toolsExposed: this.getToolDefinitions().length,
+          schemaTokenOverheadApprox: this.profile === 'essential' ? '~600 tokens' : '~19,000 tokens',
+          isEssential: this.profile === 'essential',
+        };
+      }
+
       case 'octeract_slice': {
         const mode = args.mode || 'skeleton';
         const result = this.space.slice({
@@ -1780,8 +2046,9 @@ export class MCPServer {
       }
 
       case 'octeract_safe_write': {
-        const targetPath = args.targetPath;
-        const proposedContent = args.proposedContent;
+        const targetPath = args.targetPath || args.targetFile;
+        const proposedContent = args.proposedContent ?? args.content ?? '';
+        const creaseFuzz = OcteractDragonCreaseFuzz.evaluateStress(proposedContent, targetPath || 'file.ts');
 
         // 1. Capa 5: Circuit Breaker (Máximo 2 intentos fallidos consecutivos)
         if (this.shadow.isCircuitBreakerTripped(targetPath)) {

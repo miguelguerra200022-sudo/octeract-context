@@ -3,10 +3,23 @@
 CRITICAL INSTRUCTIONS FOR ALL AI AGENTS (Antigravity, Cursor, Windsurf, Claude Code, Cline, Roo, Copilot):
 This repository is monitored, indexed, and actively protected by the **Octeract-Context 8D Hypercube Engine (E8 Riemannian Torus T^8)**.
 
-## 0. MANDATORY ONBOARDING DIRECTIVE (ZERO-TOUCH PROTOCOL)
+## 0. THE 4 MASTER APERTURES & ADAPTIVE MCP PROFILES (RECOMMENDED)
+Octeract-Context v4.7 introduces the **Unified 4 Master Apertures Facade** to eliminate cognitive overload and slash LLM schema token consumption by 90%:
+1. 🩺 **`octeract_doctor` / `octeract doctor`**: Diagnóstico holístico universal del repositorio en un solo toque (< 250 tokens). Salud 8D, teselación de 4 dragones, fugas de límite, biomas de código y armadura REA.
+2. 👁️ **`octeract_see` / `octeract see`**: Lente de inspección fractal Origami AST (< 200 tokens). Pliega cuerpos internos (montañas) preservando contratos públicos (valles), con despliegue selectivo de símbolos.
+3. 💥 **`octeract_impact` / `octeract impact`**: Onda de choque fractal Heighway ($d_H/2 \approx 0.7618$) y efecto dominó en cascada (< 250 tokens).
+4. 🛡️ **`octeract_safe_write` / `octeract safe-write`**: Modificación protegida multi-capa (Crease Fuzz + Escudo 4D + Invarianza de Entropía). Bloquea físicamente cambios destructivos o truncados.
+5. 🧠 **`octeract_ask` / `octeract ask`**: Motor semántico geodésico de preguntas en lenguaje natural (< 300 tokens). Trazado causal $T^8$ + Grep BM25F estructurado con enlaces exactos de archivo y línea.
+
+**Perfiles MCP Adaptativos:**
+- Por defecto, Octeract opera en **`profile: 'essential'`**, exponiendo únicamente las 5 herramientas maestras (reduciendo el esquema MCP de ~20,860 tokens a ~2,018 tokens).
+- Si necesitas herramientas hiper-especializadas (Voynich, Voxel, REA bajo nivel, DeepMind Horn), invoca **`octeract_switch_profile({ profile: 'full' })`**.
+- Retrocompatibilidad 100%: Cualquier herramienta especializada puede ser invocada directamente en cualquier momento vía `tools/call`.
+
+## 0.1 MANDATORY ONBOARDING DIRECTIVE (ZERO-TOUCH PROTOCOL)
 When you install Octeract, initialize, or are asked to set up the MCP:
 - **DO NOT merely say "MCP installed" and stop.**
-- You **MUST** immediately inspect the pre-existing health status from `.octeract/HEALTH_REPORT.md` or `.tesseract/HEALTH_REPORT.md` (or call `octeract_audit_health` / `octeract_hybrid_audit` / `octeract_stats`).
+- You **MUST** immediately inspect the pre-existing health status from `.octeract/HEALTH_REPORT.md` or `.tesseract/HEALTH_REPORT.md` (or call `octeract_doctor`).
 - You **MUST** deliver a detailed, comprehensive report directly to the user in your response:
   1. **Executive Summary:** Total files indexed in the 8D Octeract ($E_8$ Torus $T^8$) and overall health score.
   2. **Every Critical Fracture Detected:** Broken imports, contract mismatches, altered methods, dead-ends, topological sinks, unmatched events, unreachable zombie islands, floating promises, dead exports, boundary violations, secret leaks, asymptotic degradations, and spurious causal fixes.
