@@ -73,5 +73,9 @@
     "README.md",
     "LICENSE.md",
     "AGENTS.md"
-  ]
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  }
 }

@@ -6,6 +6,16 @@
 import * as readline from 'node:readline';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
+} from '@modelcontextprotocol/sdk/types.js';
 import { HypercubeSpace } from '../core/hypercube.ts';
 import { ShadowEngine } from '../core/shadow.ts';
 import { ProjectIndexer } from '../core/indexer.ts';
@@ -101,6 +111,7 @@ export class MCPServer {
   private indexer: ProjectIndexer;
   private isInitialized: boolean = false;
   private profile: 'essential' | 'full';
+  private sdkServer: Server;
 
   constructor(options: MCPServerOptions) {
     this.rootDir = options.rootDir;
@@ -108,6 +119,21 @@ export class MCPServer {
     this.indexer = new ProjectIndexer();
     this.space = this.indexer.getSpace();
     this.shadow = new ShadowEngine(this.space, this.rootDir);
+
+    this.sdkServer = new Server(
+      {
+        name: 'octeract-context',
+        version: '4.8.1',
+      },
+      {
+        capabilities: {
+          tools: {},
+          resources: {},
+          prompts: {},
+        },
+      }
+    );
+    this.registerSDKHandlers();
   }
 
   public getProfile(): 'essential' | 'full' {
@@ -143,50 +169,83 @@ export class MCPServer {
   }
 
   /**
-   * Inicia el bucle de escucha JSON-RPC 2.0 sobre stdin/stdout
+   * Inicia el bucle de escucha JSON-RPC 2.0 sobre stdin/stdout usando el SDK Oficial
    */
-  public startStdio(): void {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-      terminal: false,
-    });
-
-    rl.on('line', async (line) => {
-      const trimmed = line.trim();
-      if (!trimmed) return;
-
-      try {
-        const message = JSON.parse(trimmed);
-        const response = await this.handleMessage(message);
-        if (response) {
-          process.stdout.write(JSON.stringify(response) + '\n');
-        }
-      } catch (err: any) {
-        console.error('[OCTERACT-MCP ERROR]', err);
-        const errorResponse = {
-          jsonrpc: '2.0',
-          id: null,
-          error: {
-            code: -32700,
-            message: 'Parse error: ' + (err?.message || 'Invalid JSON'),
-          },
-        };
-        process.stdout.write(JSON.stringify(errorResponse) + '\n');
-      }
-    });
-
-    console.error('[OCTERACT-MCP] Servidor stdio iniciado.');
+  public async startStdio(): Promise<void> {
+    const transport = new StdioServerTransport();
+    await this.sdkServer.connect(transport);
+    console.error('[OCTERACT-MCP] Servidor stdio oficial conectado y listo.');
   }
 
   /**
-   * Enrutador de mensajes JSON-RPC 2.0
+   * Registra los controladores de herramientas, recursos y prompts en el SDK Oficial de MCP
+   */
+  private registerSDKHandlers(): void {
+    this.sdkServer.setRequestHandler(ListToolsRequestSchema, async () => {
+      return {
+        tools: this.getToolDefinitions(),
+      };
+    });
+
+    this.sdkServer.setRequestHandler(CallToolRequestSchema, async (request) => {
+      const toolName = request.params.name;
+      const toolArgs = request.params.arguments || {};
+      try {
+        const result = await this.callTool(toolName, toolArgs);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: typeof result === 'string' ? result : JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      } catch (err: any) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text',
+              text: `[OCTERACT-ERROR] ${err?.message || 'Error al ejecutar herramienta'}`,
+            },
+          ],
+        };
+      }
+    });
+
+    this.sdkServer.setRequestHandler(ListResourcesRequestSchema, async () => {
+      return {
+        resources: this.getResourceDefinitions(),
+      };
+    });
+
+    this.sdkServer.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+      const rawUri = request.params.uri || '';
+      return this.readResource(rawUri);
+    });
+
+    this.sdkServer.setRequestHandler(ListPromptsRequestSchema, async () => {
+      return {
+        prompts: this.getPromptDefinitions(),
+      };
+    });
+
+    this.sdkServer.setRequestHandler(GetPromptRequestSchema, async (request) => {
+      const promptName = request.params.name;
+      const promptArgs = request.params.arguments || {};
+      return this.getPrompt(promptName, promptArgs);
+    });
+  }
+
+  /**
+   * Enrutador de mensajes JSON-RPC 2.0 (Compatible con invocación directa / tests)
    */
   public async handleMessage(msg: any): Promise<any | null> {
+    if (!msg || typeof msg !== 'object') return null;
     const { id, method, params } = msg;
 
-    // Manejo de notificaciones (sin respuesta id)
-    if (method === 'notifications/initialized') {
+    // Manejo estricto de notificaciones RFC JSON-RPC 2.0: Las notificaciones NUNCA reciben respuesta
+    if (id === undefined || method === 'notifications/initialized' || method?.startsWith('notifications/')) {
       return null;
     }
 
@@ -255,169 +314,26 @@ export class MCPServer {
           jsonrpc: '2.0',
           id,
           result: {
-            resources: [
-              {
-                uri: 'octeract://health',
-                name: 'Informe de Salud Topológica y Fracturas 8D',
-                mimeType: 'application/json',
-              },
-              {
-                uri: 'tesseract://health',
-                name: 'Informe de Salud Topológica (Alias)',
-                mimeType: 'application/json',
-              },
-              {
-                uri: 'octeract://topology',
-                name: 'Resumen Topológico 8D',
-                mimeType: 'application/json',
-              },
-              {
-                uri: 'tesseract://topology',
-                name: 'Resumen Topológico (Alias)',
-                mimeType: 'application/json',
-              },
-              {
-                uri: 'octeract://cells',
-                name: 'Distribución de Celdas Cúbicas 3D',
-                mimeType: 'application/json',
-              },
-              {
-                uri: 'tesseract://cells',
-                name: 'Distribución de Celdas Cúbicas (Alias)',
-                mimeType: 'application/json',
-              },
-              {
-                uri: 'octeract://sarif',
-                name: 'Registro OASIS SARIF 2.1.0 para GitHub Code Scanning',
-                mimeType: 'application/json',
-              },
-              {
-                uri: 'tesseract://sarif',
-                name: 'Registro OASIS SARIF (Alias)',
-                mimeType: 'application/json',
-              },
-              {
-                uri: 'octeract://audit-triage',
-                name: 'Triage de Auditoría Híbrida (Octeract + IA)',
-                mimeType: 'application/json',
-              },
-              {
-                uri: 'tesseract://audit-triage',
-                name: 'Triage de Auditoría Híbrida (Alias)',
-                mimeType: 'application/json',
-              },
-              {
-                uri: 'octeract://stats',
-                name: 'Métricas del Hiperespacio 8D (Octeract Tree y Variedad Toroidal T^8)',
-                mimeType: 'application/json',
-              },
-              {
-                uri: 'tesseract://octeract',
-                name: 'Métricas del Hiperespacio 8D (Alias)',
-                mimeType: 'application/json',
-              },
-            ],
+            resources: this.getResourceDefinitions(),
           },
         };
 
       case 'resources/read': {
         const rawUri = params?.uri || '';
-        const uri = rawUri.replace(/^tesseract:\/\//, 'octeract://');
-
-        if (uri === 'octeract://health') {
-          const auditor = new TopologicalAuditor();
-          const report = auditor.audit(this.space);
+        try {
+          const res = this.readResource(rawUri);
           return {
             jsonrpc: '2.0',
             id,
-            result: {
-              contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(report, null, 2) }],
-            },
+            result: res,
           };
-        }
-        if (uri === 'octeract://sarif') {
-          const auditor = new TopologicalAuditor();
-          const report = auditor.audit(this.space);
-          const sarif = SarifExporter.generateSarif(report, this.rootDir);
+        } catch (err: any) {
           return {
             jsonrpc: '2.0',
             id,
-            result: {
-              contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(sarif, null, 2) }],
-            },
+            error: { code: -32602, message: err?.message || `Recurso no encontrado: ${rawUri}` },
           };
         }
-        if (uri === 'octeract://topology') {
-          const stats = this.space.getHyperStats();
-          return {
-            jsonrpc: '2.0',
-            id,
-            result: {
-              contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(stats, null, 2) }],
-            },
-          };
-        }
-        if (uri === 'octeract://cells') {
-          const vertices = this.space.getVertices();
-          const distribution: Record<string, number> = {};
-          for (const v of vertices) {
-            distribution[v.cell] = (distribution[v.cell] || 0) + 1;
-          }
-          return {
-            jsonrpc: '2.0',
-            id,
-            result: {
-              contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(distribution, null, 2) }],
-            },
-          };
-        }
-        if (uri?.startsWith('octeract://cell/')) {
-          const cellName = uri.replace('octeract://cell/', '');
-          const vertices = this.space.getVertices().filter((v) => v.cell.toLowerCase() === cellName.toLowerCase());
-          return {
-            jsonrpc: '2.0',
-            id,
-            result: {
-              contents: [
-                {
-                  uri: rawUri,
-                  mimeType: 'application/json',
-                  text: JSON.stringify(
-                    vertices.map((v) => ({ id: v.id, lines: v.lines, symbols: v.symbols.map((s) => s.name) })),
-                    null,
-                    2
-                  ),
-                },
-              ],
-            },
-          };
-        }
-        if (uri === 'octeract://audit-triage') {
-          const auditor = new TopologicalAuditor();
-          const triage = auditor.getHybridAuditTriage(this.space, this.rootDir);
-          return {
-            jsonrpc: '2.0',
-            id,
-            result: {
-              contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(triage, null, 2) }],
-            },
-          };
-        }
-        if (uri === 'octeract://stats' || uri === 'octeract://octeract') {
-          const stats = this.space.getOcteractStats();
-          return {
-            jsonrpc: '2.0',
-            id,
-            result: {
-              contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(stats, null, 2) }],
-            },
-          };
-        }
-        return {
-          jsonrpc: '2.0',
-          id,
-          error: { code: -32602, message: `Recurso no encontrado: ${rawUri}` },
-        };
       }
 
       case 'prompts/list':
@@ -425,138 +341,27 @@ export class MCPServer {
           jsonrpc: '2.0',
           id,
           result: {
-            prompts: [
-              {
-                name: 'octeract-safe-refactor',
-                description: 'Flujo guiado de refactorización segura con radio de explosión, ensayo en RAM y escritura bajo el escudo 8D.',
-                arguments: [
-                  {
-                    name: 'targetPath',
-                    description: 'Ruta relativa del archivo a refactorizar',
-                    required: true,
-                  },
-                  {
-                    name: 'goal',
-                    description: 'Objetivo de la refactorización',
-                    required: false,
-                  },
-                ],
-              },
-              {
-                name: 'tesseract-safe-refactor',
-                description: 'Flujo guiado de refactorización segura (Alias de compatibilidad)',
-                arguments: [
-                  {
-                    name: 'targetPath',
-                    description: 'Ruta relativa del archivo a refactorizar',
-                    required: true,
-                  },
-                  {
-                    name: 'goal',
-                    description: 'Objetivo de la refactorización',
-                    required: false,
-                  },
-                ],
-              },
-              {
-                name: 'octeract-audit-diagnostic',
-                description: 'Diagnóstico integral de salud arquitectónica 8D para presentar al usuario con evidencia quirúrgica y plan de curación.',
-                arguments: [],
-              },
-              {
-                name: 'tesseract-audit-diagnostic',
-                description: 'Diagnóstico integral de salud arquitectónica (Alias de compatibilidad)',
-                arguments: [],
-              },
-              {
-                name: 'octeract-8d-audit',
-                description: 'Diagnóstico universal octodimensional 8D (Topología, Big-O Phi, Pearl Causal Psi, Async Omega, Packaging Xi) en el toroide T^8.',
-                arguments: [],
-              },
-            ],
+            prompts: this.getPromptDefinitions(),
           },
         };
 
       case 'prompts/get': {
         const rawPromptName = params?.name || '';
-        const promptName = rawPromptName.replace(/^tesseract-/, 'octeract-');
         const promptArgs = params?.arguments || {};
-
-        if (promptName === 'octeract-safe-refactor') {
-          const target = promptArgs.targetPath || 'archivo_objetivo.ts';
-          const goal = promptArgs.goal || 'Optimizar y refactorizar';
-          const isTesseract = rawPromptName.startsWith('tesseract-');
-          const blastTool = isTesseract ? 'tesseract_blast_radius' : 'octeract_blast_radius';
-          const healTool = isTesseract ? 'tesseract_trial_heal' : 'octeract_trial_heal';
-          const writeTool = isTesseract ? 'tesseract_safe_write' : 'octeract_safe_write';
+        try {
+          const promptRes = this.getPrompt(rawPromptName, promptArgs);
           return {
             jsonrpc: '2.0',
             id,
-            result: {
-              description: isTesseract
-                ? 'Flujo guiado de refactorización segura bajo el escudo de Tesseract'
-                : 'Flujo guiado de refactorización segura bajo el escudo 8D de Octeract',
-              messages: [
-                {
-                  role: 'user',
-                  content: {
-                    type: 'text',
-                    text: `Por favor, ejecuta la siguiente refactorización de forma segura:\nObjetivo: ${goal}\nArchivo objetivo: ${target}\n\nREGLAS DE PROTECCIÓN OBLIGATORIAS:\n1. Invoca primero '${blastTool}' para verificar qué módulos sufrirán el efecto dominó.\n2. Diseña el código y pruébalo en RAM con '${healTool}' verificando que la distancia de cizallamiento sea <= 0.10 y 0 regresiones.\n3. Aplica los cambios usando '${writeTool}'.`,
-                  },
-                },
-              ],
-            },
+            result: promptRes,
           };
-        }
-
-        if (promptName === 'octeract-audit-diagnostic') {
-          const auditor = new TopologicalAuditor();
-          const report = auditor.audit(this.space);
+        } catch (err: any) {
           return {
             jsonrpc: '2.0',
             id,
-            result: {
-              description: 'Diagnóstico 8D de salud arquitectónica del repositorio',
-              messages: [
-                {
-                  role: 'user',
-                  content: {
-                    type: 'text',
-                    text: `Genera un informe de salud para el usuario con base en el estado del hipercubo 8D:\nSalud actual: ${report.healthScore}/100 (${report.status})\nTotal de fracturas: ${report.totalFractures}\nArchivos auditados: ${report.totalFilesAudited}\nSigue los 4 pilares: Radiografía, Peligro Oculto, Evidencia en Código y Solución Quirúrgica.`,
-                  },
-                },
-              ],
-            },
+            error: { code: -32602, message: err?.message || `Prompt no encontrado: ${rawPromptName}` },
           };
         }
-
-        if (promptName === 'octeract-8d-audit') {
-          const auditor = new TopologicalAuditor();
-          const report = auditor.audit(this.space);
-          const octStats = this.space.getOcteractStats();
-          return {
-            jsonrpc: '2.0',
-            id,
-            result: {
-              description: 'Auditoría Universal Octodimensional 8D (T^8 / E8)',
-              messages: [
-                {
-                  role: 'user',
-                  content: {
-                    type: 'text',
-                    text: `Genera un informe integral del Octeracto 8D:\nSalud: ${report.healthScore}/100\nTotal vértices 8D: ${octStats.totalVertices}\nProfundidad máxima 8D: ${octStats.maxDepth || octStats.octeractDepth}\nDensidad de empaquetamiento E8: ${octStats.packingDensity || octStats.e8LatticeDensity}\nDimensiones 8D activas: X, Y, Z, W, PHI (Big-O), PSI (Pearl Causal), OMEGA (Async Flow), XI (Packaging).`,
-                  },
-                },
-              ],
-            },
-          };
-        }
-
-        return {
-          jsonrpc: '2.0',
-          id,
-          error: { code: -32602, message: `Prompt no encontrado: ${rawPromptName}` },
-        };
       }
 
       default:
@@ -569,6 +374,266 @@ export class MCPServer {
           },
         };
     }
+  }
+
+  /**
+   * Catálogo de Recursos MCP
+   */
+  public getResourceDefinitions(): any[] {
+    return [
+      {
+        uri: 'octeract://health',
+        name: 'Informe de Salud Topológica y Fracturas 8D',
+        mimeType: 'application/json',
+      },
+      {
+        uri: 'tesseract://health',
+        name: 'Informe de Salud Topológica (Alias)',
+        mimeType: 'application/json',
+      },
+      {
+        uri: 'octeract://topology',
+        name: 'Resumen Topológico 8D',
+        mimeType: 'application/json',
+      },
+      {
+        uri: 'tesseract://topology',
+        name: 'Resumen Topológico (Alias)',
+        mimeType: 'application/json',
+      },
+      {
+        uri: 'octeract://cells',
+        name: 'Distribución de Celdas Cúbicas 3D',
+        mimeType: 'application/json',
+      },
+      {
+        uri: 'tesseract://cells',
+        name: 'Distribución de Celdas Cúbicas (Alias)',
+        mimeType: 'application/json',
+      },
+      {
+        uri: 'octeract://sarif',
+        name: 'Registro OASIS SARIF 2.1.0 para GitHub Code Scanning',
+        mimeType: 'application/json',
+      },
+      {
+        uri: 'tesseract://sarif',
+        name: 'Registro OASIS SARIF (Alias)',
+        mimeType: 'application/json',
+      },
+      {
+        uri: 'octeract://audit-triage',
+        name: 'Triage de Auditoría Híbrida (Octeract + IA)',
+        mimeType: 'application/json',
+      },
+      {
+        uri: 'tesseract://audit-triage',
+        name: 'Triage de Auditoría Híbrida (Alias)',
+        mimeType: 'application/json',
+      },
+      {
+        uri: 'octeract://stats',
+        name: 'Métricas del Hiperespacio 8D (Octeract Tree y Variedad Toroidal T^8)',
+        mimeType: 'application/json',
+      },
+      {
+        uri: 'tesseract://octeract',
+        name: 'Métricas del Hiperespacio 8D (Alias)',
+        mimeType: 'application/json',
+      },
+    ];
+  }
+
+  /**
+   * Lectura de Recursos MCP
+   */
+  public readResource(rawUri: string): { contents: { uri: string; mimeType: string; text: string }[] } {
+    const uri = (rawUri || '').replace(/^tesseract:\/\//, 'octeract://');
+
+    if (uri === 'octeract://health') {
+      const auditor = new TopologicalAuditor();
+      const report = auditor.audit(this.space);
+      return {
+        contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(report, null, 2) }],
+      };
+    }
+    if (uri === 'octeract://sarif') {
+      const auditor = new TopologicalAuditor();
+      const report = auditor.audit(this.space);
+      const sarif = SarifExporter.generateSarif(report, this.rootDir);
+      return {
+        contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(sarif, null, 2) }],
+      };
+    }
+    if (uri === 'octeract://topology') {
+      const stats = this.space.getHyperStats();
+      return {
+        contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(stats, null, 2) }],
+      };
+    }
+    if (uri === 'octeract://cells') {
+      const vertices = this.space.getVertices();
+      const distribution: Record<string, number> = {};
+      for (const v of vertices) {
+        distribution[v.cell] = (distribution[v.cell] || 0) + 1;
+      }
+      return {
+        contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(distribution, null, 2) }],
+      };
+    }
+    if (uri?.startsWith('octeract://cell/')) {
+      const cellName = uri.replace('octeract://cell/', '');
+      const vertices = this.space.getVertices().filter((v) => v.cell.toLowerCase() === cellName.toLowerCase());
+      return {
+        contents: [
+          {
+            uri: rawUri,
+            mimeType: 'application/json',
+            text: JSON.stringify(
+              vertices.map((v) => ({ id: v.id, lines: v.lines, symbols: v.symbols.map((s) => s.name) })),
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    }
+    if (uri === 'octeract://audit-triage') {
+      const auditor = new TopologicalAuditor();
+      const triage = auditor.getHybridAuditTriage(this.space, this.rootDir);
+      return {
+        contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(triage, null, 2) }],
+      };
+    }
+    if (uri === 'octeract://stats' || uri === 'octeract://octeract') {
+      const stats = this.space.getOcteractStats();
+      return {
+        contents: [{ uri: rawUri, mimeType: 'application/json', text: JSON.stringify(stats, null, 2) }],
+      };
+    }
+    throw new Error(`Recurso no encontrado: ${rawUri}`);
+  }
+
+  /**
+   * Catálogo de Prompts MCP
+   */
+  public getPromptDefinitions(): any[] {
+    return [
+      {
+        name: 'octeract-safe-refactor',
+        description: 'Flujo guiado de refactorización segura con radio de explosión, ensayo en RAM y escritura bajo el escudo 8D.',
+        arguments: [
+          {
+            name: 'targetPath',
+            description: 'Ruta relativa del archivo a refactorizar',
+            required: true,
+          },
+          {
+            name: 'goal',
+            description: 'Objetivo de la refactorización',
+            required: false,
+          },
+        ],
+      },
+      {
+        name: 'tesseract-safe-refactor',
+        description: 'Flujo guiado de refactorización segura (Alias de compatibilidad)',
+        arguments: [
+          {
+            name: 'targetPath',
+            description: 'Ruta relativa del archivo a refactorizar',
+            required: true,
+          },
+          {
+            name: 'goal',
+            description: 'Objetivo de la refactorización',
+            required: false,
+          },
+        ],
+      },
+      {
+        name: 'octeract-audit-diagnostic',
+        description: 'Diagnóstico integral de salud arquitectónica 8D para presentar al usuario con evidencia quirúrgica y plan de curación.',
+        arguments: [],
+      },
+      {
+        name: 'tesseract-audit-diagnostic',
+        description: 'Diagnóstico integral de salud arquitectónica (Alias de compatibilidad)',
+        arguments: [],
+      },
+      {
+        name: 'octeract-8d-audit',
+        description: 'Diagnóstico universal octodimensional 8D (Topología, Big-O Phi, Pearl Causal Psi, Async Omega, Packaging Xi) en el toroide T^8.',
+        arguments: [],
+      },
+    ];
+  }
+
+  /**
+   * Obtención de Prompts MCP
+   */
+  public getPrompt(rawPromptName: string, promptArgs: any): { description: string; messages: any[] } {
+    const promptName = (rawPromptName || '').replace(/^tesseract-/, 'octeract-');
+
+    if (promptName === 'octeract-safe-refactor') {
+      const target = promptArgs?.targetPath || 'archivo_objetivo.ts';
+      const goal = promptArgs?.goal || 'Optimizar y refactorizar';
+      const isTesseract = (rawPromptName || '').startsWith('tesseract-');
+      const blastTool = isTesseract ? 'tesseract_blast_radius' : 'octeract_blast_radius';
+      const healTool = isTesseract ? 'tesseract_trial_heal' : 'octeract_trial_heal';
+      const writeTool = isTesseract ? 'tesseract_safe_write' : 'octeract_safe_write';
+      return {
+        description: isTesseract
+          ? 'Flujo guiado de refactorización segura bajo el escudo de Tesseract'
+          : 'Flujo guiado de refactorización segura bajo el escudo 8D de Octeract',
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: `Por favor, ejecuta la siguiente refactorización de forma segura:\nObjetivo: ${goal}\nArchivo objetivo: ${target}\n\nREGLAS DE PROTECCIÓN OBLIGATORIAS:\n1. Invoca primero '${blastTool}' para verificar qué módulos sufrirán el efecto dominó.\n2. Diseña el código y pruébalo en RAM con '${healTool}' verificando que la distancia de cizallamiento sea <= 0.10 y 0 regresiones.\n3. Aplica los cambios usando '${writeTool}'.`,
+            },
+          },
+        ],
+      };
+    }
+
+    if (promptName === 'octeract-audit-diagnostic') {
+      const auditor = new TopologicalAuditor();
+      const report = auditor.audit(this.space);
+      return {
+        description: 'Diagnóstico 8D de salud arquitectónica del repositorio',
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: `Genera un informe de salud para el usuario con base en el estado del hipercubo 8D:\nSalud actual: ${report.healthScore}/100 (${report.status})\nTotal de fracturas: ${report.totalFractures}\nArchivos auditados: ${report.totalFilesAudited}\nSigue los 4 pilares: Radiografía, Peligro Oculto, Evidencia en Código y Solución Quirúrgica.`,
+            },
+          },
+        ],
+      };
+    }
+
+    if (promptName === 'octeract-8d-audit') {
+      const auditor = new TopologicalAuditor();
+      const report = auditor.audit(this.space);
+      const octStats = this.space.getOcteractStats();
+      return {
+        description: 'Auditoría Universal Octodimensional 8D (T^8 / E8)',
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              text: `Genera un informe integral del Octeracto 8D:\nSalud: ${report.healthScore}/100\nTotal vértices 8D: ${octStats.totalVertices}\nProfundidad máxima 8D: ${octStats.maxDepth || octStats.octeractDepth}\nDensidad de empaquetamiento E8: ${octStats.packingDensity || octStats.e8LatticeDensity}\nDimensiones 8D activas: X, Y, Z, W, PHI (Big-O), PSI (Pearl Causal), OMEGA (Async Flow), XI (Packaging).`,
+            },
+          },
+        ],
+      };
+    }
+
+    throw new Error(`Prompt no encontrado: ${rawPromptName}`);
   }
 
   /**
