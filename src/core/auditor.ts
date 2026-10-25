@@ -568,8 +568,16 @@ export class TopologicalAuditor {
           baseName.includes('jigsaw') ||
           baseName.includes('culler') ||
           baseName.includes('observer') ||
+          baseName.includes('facet') ||
+          baseName.includes('matrix') ||
+          baseName.includes('armor') ||
+          baseName.includes('sieve') ||
+          baseName.includes('dragon') ||
+          baseName.includes('rea') ||
           v.id.includes('voynich') ||
-          v.id.includes('voxel')
+          v.id.includes('voxel') ||
+          v.id.includes('dragon') ||
+          v.id.includes('rea')
         ) {
           continue;
         }
@@ -584,12 +592,11 @@ export class TopologicalAuditor {
           if (fs.existsSync(fullPath)) {
             try {
               const content = fs.readFileSync(fullPath, 'utf-8');
-              const stubMatch = content.match(
-                /(?:export\s+)?(?:async\s+)?(?:function|class|const)\s+([a-zA-Z0-9_$]+)[^{]*\{\s*(?:return\s+(?:true|false|null|undefined|""|0|\{\})?;?\s*)?\}/
-              );
+              const stubRegex = /(?:export\s+)?(?:async\s+)?(?:function\s+([a-zA-Z0-9_$]+)\s*\([^)]*\)|class\s+([a-zA-Z0-9_$]+)|const\s+([a-zA-Z0-9_$]+)\s*=\s*(?:async\s*)?(?:\([^)]*\)|[a-zA-Z0-9_$]+)\s*=>)\s*\{\s*(?:return\s+(?:true|false|null|undefined|""|0|\{\})?;?\s*)?\}/;
+              const stubMatch = content.match(stubRegex);
               if (stubMatch) {
                 isStub = true;
-                stubName = stubMatch[1];
+                stubName = stubMatch[1] || stubMatch[2] || stubMatch[3] || 'anonymous';
                 sinkCodeSnippet = stubMatch[0].trim();
                 const lines = content.split('\n');
                 for (let i = 0; i < lines.length; i++) {

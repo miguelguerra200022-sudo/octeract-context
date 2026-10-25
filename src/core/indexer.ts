@@ -36,6 +36,7 @@ export class ProjectIndexer {
     'dist',
     'build',
     '.tesseract',
+    '.octeract',
     '.gemini',
     '.cache',
     'tmp',
@@ -43,6 +44,7 @@ export class ProjectIndexer {
     '.idea',
     'coverage',
     'fixtures',
+    '.log',
   ];
 
   constructor(space?: HypercubeSpace) {
@@ -352,7 +354,7 @@ export class ProjectIndexer {
         const fullPath = path.join(currentDir, entry.name);
         const relPath = path.relative(rootDir, fullPath);
 
-        if (ignoreList.some((pattern) => entry.name === pattern || relPath.includes(pattern))) {
+        if (ignoreList.some((pattern) => entry.name === pattern || relPath.includes(pattern) || entry.name.endsWith(pattern))) {
           continue;
         }
 

@@ -1,32 +1,43 @@
 # OCTERACT 8D CONTEXT & AUTONOMOUS SHIELD PROTOCOL
 
 CRITICAL INSTRUCTIONS FOR ALL AI AGENTS (Antigravity, Cursor, Windsurf, Claude Code, Cline, Roo, Copilot):
-This repository is monitored, indexed, and actively protected by the **Octeract-Context 8D Hypercube Engine (E8 Riemannian Torus T^8)**.
+Este repositorio está gobernado, indexado y blindado activamente en memoria RAM por el motor **Octeract-Context 8D**.
 
-## 0. MANDATORY ONBOARDING DIRECTIVE (ZERO-TOUCH PROTOCOL)
-When you install Octeract, initialize, or are asked to set up the MCP:
-- **DO NOT merely say "MCP installed" and stop.**
-- You **MUST** immediately inspect the pre-existing health status from `.octeract/HEALTH_REPORT.md` or `.tesseract/HEALTH_REPORT.md` (or call `octeract_audit_health` / `octeract_hybrid_audit` / `octeract_stats`).
-- You **MUST** deliver a detailed, comprehensive report directly to the user in your response:
-  1. **Executive Summary:** Total files indexed in the 8D Octeract ($E_8$ Torus $T^8$) and overall health score.
-  2. **Every Critical Fracture Detected:** Broken imports, contract mismatches, altered methods, dead-ends, topological sinks, unmatched events, unreachable zombie islands, floating promises, dead exports, boundary violations, secret leaks, asymptotic degradations, and spurious causal fixes.
-  3. **Connected Network (Ripple Effect):** List all modules and subsystems connected to each broken file that are failing or will fail in cascade.
-  4. **Unified In-Depth Universal Diagnostic:** Deliver a single, deeply detailed, comprehensive analysis with 4 universal pillars:
-     - 🔍 **Radiografía del Problema:** Precise facts, exact variables/methods, why it fails silently or produces an issue.
-     - 💥 **El Peligro Oculto y Efecto Dominó:** All connected modules and downstream systemic consequences.
-     - 📜 **Evidencia en Código:** File, exact line number, and verbatim snippet.
-     - 🛡️ **Solución Quirúrgica Recomendada:** Exact fix verified via `octeract_safe_write`.
-  5. **Safe Healing Proposal:** Recommend exact surgical fixes using `octeract_safe_write` to prevent cascading regressions.
+---
 
-## 1. SURGICAL CONTEXT (TOKEN CONSERVATION)
-- NEVER perform blind grep scans or dump thousands of raw code lines into the context window.
-- ALWAYS invoke `octeract_slice` with the target cell (CoreLogic, Storage, UI, Security, Config, Telemetry, Tests) or `octeract_trace_flow` to work in < 500 tokens.
-- For 8D spatial localization, invoke `octeract_slice` or `octeract_octeract_slice` to query geodesic neighborhoods in $T^8$ via the 256-ary fractal tree.
-- BEFORE modifying central interfaces, invoke `octeract_blast_radius` to preview multi-hop ripple effects (< 300 tokens).
+## 0. LAS 5 APERTURAS MAESTRAS (CATÁLOGO UNIFICADO < 450 TOKENS)
+Usa las 5 Aperturas Maestras de Octeract como si fueran extensiones nativas de tus propios sentidos y capacidades de análisis:
+1. 🩺 **`octeract_doctor`**: Chequeo médico holístico del repositorio + Filtro Sieve de logs/tests (`logOrOutput`).
+2. 👁️ **`octeract_see`**: Vista de rayos X con compresión fractal (Origami AST, Skeleton, EVA o Sieve para logs/datos).
+3. 💥 **`octeract_impact`**: Cálculo de onda de choque Heighway y efecto dominó en cascada.
+4. 🛡️ **`octeract_safe_write`**: Modificación protegida multi-capa en RAM (bloquea truncamientos y código roto).
+5. 🧠 **`octeract_ask`**: Motor semántico de preguntas en lenguaje natural con trazado causal de archivo y línea.
 
-## 2. ACTIVE WRITE SHIELD & 8-AXIS EXOSKELETON (MANDATORY SAFE WRITES)
-- NEVER modify or overwrite existing files directly with blind write tools.
-- ALWAYS execute file changes through the MCP tool: `octeract_safe_write`.
-  * The 8-Axis Exoskeleton ($X$ AST Syntax, $Y$ Contract Topology, $Z$ Ephemeral Sandbox, $W$ Shannon Security, $\Phi$ Big-O Asymptotics, $\Psi$ Pearl Causal SCM, $\Omega$ Event Loop Dynamics, $\Xi$ Packaging & Runtime) verifies that both the Euclidean distance $D_{\text{shear}} \le 0.75$ and 8D Riemannian Torus distance $D_{\text{shear8D}}$ remain strictly within stability bounds.
-  * If `octeract_safe_write` returns `WRITTEN_SAFELY`, the change is safe and written to disk.
-  * If `octeract_safe_write` returns `BLOCKED_BY_SHIELD` or `BLOCKED_BY_4D_SHIELD`, the write is physically rejected to prevent catastrophic cascading collapse or data loss. Use the returned `synthesizedPatch` or safe alternative for immediate zero-touch remediation.
+---
+
+## 1. PROTOCOLO DE CLARIDAD UNIVERSAL Y DIAGNÓSTICO INTEGRAL (CERO PAJA, CERO OMISIONES)
+El objetivo primordial es que **cualquier persona**, tenga experiencia en programación o no, comprenda a la perfección el estado del sistema, el impacto de cada cambio y los diagnósticos de Octeract:
+
+### A. Cero Paja Conversacional (Zero-Slop):
+- Elimina saludos de cortesía, disculpas, introducciones vacías ("¡Hola! Como modelo de lenguaje...") y recapitulaciones obvias. Ve directo a los hechos y a la evidencia.
+
+### B. Claridad y Pedagogía Universal (Para Todo Público):
+- Todo concepto técnico o métrica compleja debe ser explicado de forma intuitiva con **analogías claras de la vida real** (como casas, vehículos, tuberías o sistemas eléctricos).
+- La explicación debe ser lo suficientemente transparente para que un usuario no técnico entienda de inmediato *qué pasa*, *por qué importa* y *cómo se arregla*, sin sacrificar los datos duros para un desarrollador senior.
+
+### C. Mandato de Transparencia Total (1, Varias o Todas las Herramientas):
+- NUNCA respondas con resúmenes vagos o simplistas como "Se ejecutó OK" o "No hay problemas mayores".
+- Sin importar si ejecutas **1 sola herramienta**, **un conjunto de ellas** o **las 37 herramientas MCP**, debes explicar con precisión quirúrgica todo lo que Octeract descubra:
+  1. 🔍 **Radiografía Clara (Qué está pasando):** Explicación clara del diagnóstico con métricas exactas (salud 0-100, tokens ahorrados, archivos analizados).
+  2. 💥 **El Peligro Oculto y Efecto Dominó (Por qué importa):** Qué consecuencias reales experimentará un usuario si esto no se soluciona, y qué módulos aguas abajo fallarán en cascada.
+  3. 📜 **Evidencia Nítida en Código (Dónde está):** Enlace directo al archivo con línea (`file:///...#L123`) y fragmento textual exacto.
+  4. 🛡️ **Solución Quirúrgica y Protección Activa (Cómo se arregla de forma segura):** Acción concreta validada por `octeract_safe_write` con código 100% completo y atómico.
+
+---
+
+## 2. ESCUDO DE ESCRITURA ACTIVO (MANDATORY SAFE WRITES)
+- NUNCA modifiques ni sobrescribas archivos directamente con herramientas de escritura ciega sin verificar.
+- SIEMPRE ejecuta los cambios a través de la herramienta MCP: `octeract_safe_write`.
+  * Si `octeract_safe_write` retorna `WRITTEN_SAFELY`, el cambio es matemáticamente seguro y se aplica al disco.
+  * Si `octeract_safe_write` retorna `BLOCKED_BY_4D_SHIELD`, la modificación es rechazada físicamente en memoria RAM para evitar destrucción o desestabilización del sistema.
+  * **Cero Truncamiento en Código:** En chat sé claro y pedagógico, pero el código escrito mediante `octeract_safe_write` DEBE SER 100% COMPLETO. Cualquier elisión o comentario perezoso (`// ... rest of code`, `/* resto del código igual */`) activa el bloqueo físico inmediato.

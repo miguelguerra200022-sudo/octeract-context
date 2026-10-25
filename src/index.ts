@@ -773,7 +773,7 @@ async function main() {
     }
     case '--version':
     case '-v': {
-      console.log('Octeract-Context v4.7.0 (8D Universal Suite - 4 Master Apertures Facade, Dragon Curve & REA Armor)');
+      console.log('Octeract-Context v4.8.1 (8D Universal Suite - 5 Master Apertures Facade, Dragon Curve & REA Armor)');
       break;
     }
     case 'help':
@@ -781,7 +781,7 @@ async function main() {
     case '-h':
     default: {
       console.log(`
-\x1b[1;36mOCTERACT-CONTEXT (8D Universal Suite v4.7.0)\x1b[0m: Motor de Contexto 8D y Servidor MCP Universal
+\x1b[1;36mOCTERACT-CONTEXT (8D Universal Suite v4.8.1)\x1b[0m: Motor de Contexto 8D y Servidor MCP Universal
 Uso: octeract <comando> [opciones] (o 'octeract-context' / 'tesseract')
 
 \x1b[1;33m🌟 LAS 5 APERTURAS MAESTRAS (FACHADA PRINCIPAL RECOMENDADA):\x1b[0m

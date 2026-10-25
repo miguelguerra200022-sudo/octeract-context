@@ -204,7 +204,7 @@ export class MCPServer {
             },
             serverInfo: {
               name: 'octeract-context',
-              version: '4.4.0',
+              version: '4.8.1',
             },
           },
         };
