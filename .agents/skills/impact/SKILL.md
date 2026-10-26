@@ -8,8 +8,9 @@ description: Cálculo de onda de choque Heighway y efecto dominó en cascada ant
 Cuando el usuario invoque `/impact`:
 1. Identifica el archivo o módulo que se planea modificar o refactorizar.
 2. Ejecuta la herramienta MCP `octeract_impact` con `targetFile`.
-3. Reporta el cálculo de impacto:
+3. Reporta el cálculo de impacto completo sin omitir ningún dato:
    - Nivel de riesgo (LOW, MEDIUM, HIGH, CRITICAL) y puntaje de impacto (0-100).
-   - Módulos alcanzados en la onda expansiva Heighway (Tier 1 directos y Tier 2 aguas abajo).
+   - Explicación directa y detallada de la onda expansiva sin analogías.
+   - Módulos alcanzados (Tier 1 directos y Tier 2 aguas abajo).
    - Amortiguación fractal Hausdorff y vueltas espirales Raup recorridas.
    - **Orden Seguro de Actualización**: Secuencia exacta para aplicar cambios sin romper contratos.

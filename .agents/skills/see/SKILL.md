@@ -11,4 +11,4 @@ Cuando el usuario invoque `/see`:
    - `targetFile`: Archivo a inspeccionar.
    - `mode`: Modo de compresión (`origami`, `skeleton`, `eva`, o `sieve`). Por defecto `origami`.
    - `focusSymbol`: Símbolo específico a enfocar (opcional).
-3. Reporta el resultado indicando los tokens originales vs entregados, porcentaje de ahorro y proyección del código limpio.
+3. Reporta el resultado completo explicando claramente qué hace el archivo y qué descubrió la herramienta en lenguaje directo (sin analogías), indicando líneas, tokens originales vs entregados, porcentaje de ahorro y la proyección del código limpio.
