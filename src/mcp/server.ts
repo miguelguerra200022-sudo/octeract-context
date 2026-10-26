@@ -125,7 +125,7 @@ export class MCPServer {
     this.sdkServer = new Server(
       {
         name: 'octeract-context',
-        version: '4.8.1',
+        version: '4.9.0',
       },
       {
         capabilities: {
@@ -273,7 +273,7 @@ export class MCPServer {
             },
             serverInfo: {
               name: 'octeract-context',
-              version: '4.8.1',
+              version: '4.9.0',
             },
           },
         };
