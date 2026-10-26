@@ -150,7 +150,9 @@ export async function runMCP(targetDir: string = '.'): Promise<void> {
   const root = path.resolve(targetDir);
   const server = new MCPServer({ rootDir: root });
   await server.startStdio();
-  await server.init();
+  server.init().catch((err: any) => {
+    console.error('[OCTERACT-MCP] Error en background init:', err?.message || err);
+  });
 }
 
 export async function runTUI(targetDir: string = '.'): Promise<void> {

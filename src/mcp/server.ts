@@ -111,6 +111,7 @@ export class MCPServer {
   private shadow: ShadowEngine;
   private indexer: ProjectIndexer;
   private isInitialized: boolean = false;
+  private initPromise: Promise<void> | null = null;
   private profile: 'essential' | 'full';
   private sdkServer: Server;
 
@@ -150,23 +151,28 @@ export class MCPServer {
    */
   public async init(): Promise<void> {
     if (this.isInitialized) return;
+    if (this.initPromise) return this.initPromise;
 
-    const loaded = this.indexer.loadIndex(this.rootDir);
-    if (!loaded) {
-      console.error('[OCTERACT-MCP] Indexando repositorio por primera vez...');
-      this.indexer.indexDirectory({ rootDir: this.rootDir });
-      this.indexer.saveIndex(this.rootDir);
-    }
-    this.isInitialized = true;
-    console.error(`[OCTERACT-MCP] Listo. ${this.space.getVertices().length} vértices en memoria hiperdimensional.`);
+    this.initPromise = (async () => {
+      const loaded = this.indexer.loadIndex(this.rootDir);
+      if (!loaded) {
+        console.error('[OCTERACT-MCP] Indexando repositorio por primera vez...');
+        this.indexer.indexDirectory({ rootDir: this.rootDir });
+        this.indexer.saveIndex(this.rootDir);
+      }
+      this.isInitialized = true;
+      console.error(`[OCTERACT-MCP] Listo. ${this.space.getVertices().length} vértices en memoria hiperdimensional.`);
 
-    // Auto-Auditoría Inmediata al instalar/iniciar el MCP en cualquier proyecto
-    try {
-      const initialAudit = this.indexer.auditRepository(this.rootDir);
-      console.error(`[OCTERACT-MCP] Auto-Auditoría Determinista Inicial: Salud ${initialAudit.healthScore}/100 | ${initialAudit.totalFractures} Fracturas detectadas en 0 tokens.`);
-    } catch (err: any) {
-      console.error('[OCTERACT-MCP] Auto-Auditoría inicial diferida:', err?.message);
-    }
+      // Auto-Auditoría Inmediata al instalar/iniciar el MCP en cualquier proyecto
+      try {
+        const initialAudit = this.indexer.auditRepository(this.rootDir);
+        console.error(`[OCTERACT-MCP] Auto-Auditoría Determinista Inicial: Salud ${initialAudit.healthScore}/100 | ${initialAudit.totalFractures} Fracturas detectadas en 0 tokens.`);
+      } catch (err: any) {
+        console.error('[OCTERACT-MCP] Auto-Auditoría inicial diferida:', err?.message);
+      }
+    })();
+
+    return this.initPromise;
   }
 
   /**
@@ -192,6 +198,9 @@ export class MCPServer {
       const toolName = request.params.name;
       const toolArgs = request.params.arguments || {};
       try {
+        if (!this.isInitialized && this.initPromise) {
+          await this.initPromise;
+        }
         const result = await this.callTool(toolName, toolArgs);
         return {
           content: [
