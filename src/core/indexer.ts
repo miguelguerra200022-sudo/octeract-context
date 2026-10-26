@@ -104,11 +104,16 @@ export class ProjectIndexer {
 
     // 3. Telemetría y Observabilidad
     if (
-      lower.includes('log') ||
-      lower.includes('metric') ||
-      lower.includes('trace') ||
-      lower.includes('telemetry') ||
-      lower.includes('monitor')
+      !lower.includes('morphology') &&
+      !lower.includes('logic') &&
+      (lower.includes('/log') ||
+        lower.includes('logger') ||
+        lower.includes('logging') ||
+        lower.endsWith('.log') ||
+        lower.includes('metric') ||
+        lower.includes('trace') ||
+        lower.includes('telemetry') ||
+        lower.includes('monitor'))
     ) {
       return CubicCell.Telemetry;
     }

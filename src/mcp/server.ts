@@ -97,6 +97,7 @@ import {
   OcteractImpact,
   OcteractSafeWrite,
   OcteractAsk,
+  OcteractRaupMorphospace,
 } from '../unified/index.ts';
 
 export interface MCPServerOptions {
@@ -695,8 +696,8 @@ export class MCPServer {
             },
             mode: {
               type: 'string',
-              enum: ['origami', 'skeleton', 'full', 'eva', 'sieve'],
-              description: 'Modo de compresión: "origami" (valle/montaña default), "skeleton", "full", "eva", "sieve" (logs/datos)',
+              enum: ['origami', 'skeleton', 'full', 'eva', 'sieve', 'nautilus'],
+              description: 'Modo de compresión: "origami" (valle/montaña default), "skeleton", "full", "eva", "sieve" (logs/datos), "nautilus" (partición acrecionaria de concha con 85%+ ahorro)',
             },
             budget: {
               type: 'number',
@@ -812,6 +813,24 @@ export class MCPServer {
         inputSchema: {
           type: 'object',
           properties: {},
+        },
+      },
+      {
+        name: 'octeract_raup_morphology',
+        description:
+          '🐚 Diagnóstico Concológico y Morfospace 3D de David M. Raup (1966). Modela el código como una concha biológica gobernada por (W: expansión/fan-out, D: ombligo/distancia al núcleo, T: espira/capas). Detecta el Cubo Vacío (formas inviables o con dependencias circulares) y particiona en Cámaras Septales del Nautilus con 85%+ de ahorro de contexto.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            targetDir: {
+              type: 'string',
+              description: 'Directorio raíz a analizar (por defecto el directorio actual)',
+            },
+            activeFile: {
+              type: 'string',
+              description: 'Archivo activo bajo inspección para posicionar la Cámara de Habitación Viva del Nautilus',
+            },
+          },
         },
       },
     ];
@@ -2082,6 +2101,25 @@ export class MCPServer {
           schemaTokenOverheadApprox: this.profile === 'essential' ? '~600 tokens' : '~19,000 tokens',
           isEssential: this.profile === 'essential',
         };
+      }
+
+      case 'octeract_raup_morphology': {
+        const root = path.resolve(args.targetDir || this.rootDir);
+        const indexer = new ProjectIndexer();
+        const loaded = indexer.loadIndex(root);
+        if (!loaded) {
+          indexer.indexDirectory({ rootDir: root, maxFiles: 1000 });
+        }
+        const space = indexer.getSpace();
+        const report = OcteractRaupMorphospace.auditMorphology(space, root);
+        if (args.activeFile) {
+          const partition = OcteractRaupMorphospace.partitionNautilusChambers(space, args.activeFile, root);
+          return {
+            ...report,
+            activePartition: partition,
+          };
+        }
+        return report;
       }
 
       case 'octeract_slice': {

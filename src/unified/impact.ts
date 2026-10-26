@@ -8,6 +8,7 @@ import * as path from 'node:path';
 import { ProjectIndexer } from '../core/indexer.ts';
 import { BlastRadiusCalculator } from '../core/blast.ts';
 import { OcteractDragonBlast } from '../dragon/dragonBlast.ts';
+import { OcteractRaupMorphospace } from '../morphology/index.ts';
 import type { OcteractImpactOptions, OcteractImpactReport } from './types.ts';
 
 export class OcteractImpact {
@@ -113,11 +114,15 @@ export class OcteractImpact {
       targetFile,
     ].filter((f, idx, arr) => arr.indexOf(f) === idx);
 
+    // Cálculo de Onda de Choque en Espiral Logarítmica Raup O(log N)
+    const spiralBlast = OcteractRaupMorphospace.calculateSpiralBlast(space, matchedEpicenter);
+
     // Resumen Markdown Ultracompacto (< 250 tokens)
     const summaryMarkdown = [
       `### 💥 Octeract Impact Report: **Riesgo ${riskLevel}** (${impactScore}/100)`,
       `- **Epicentro**: \`${targetFile}\`${options.symbol ? ` -> \`${options.symbol}\`` : ''}`,
       `- **Onda Expansiva**: ${totalAffected} archivos alcanzados (Profundidad: ${maxHopsReached} saltos)`,
+      `- **Espiral Logarítmica Raup**: ${spiralBlast.spiralWhorlsVisited} vueltas espirales recorridas | ${spiralBlast.totalAffectedFiles} módulos en onda`,
       `- **Amortiguación Hausdorff Fractal**: ${dragonBlast.nodesPrunedByFractalDamping} nodos periféricos podados`,
       `- **Dependientes Directos (Tier 1)**: ${tier1DirectDependents.length > 0 ? tier1DirectDependents.map((d) => path.basename(d.file)).slice(0, 4).join(', ') : 'Ninguno (Aislado)'}`,
       `- **Orden Seguro de Actualización**: ${safeRefactorOrder.map((f) => path.basename(f)).slice(0, 4).join(' ➔ ')}`,
@@ -133,6 +138,10 @@ export class OcteractImpact {
       totalAffectedNodes: totalAffected,
       tier1DirectDependents,
       tier2Downstream: tier2Downstream.slice(0, 10),
+      spiralBlast: {
+        spiralWhorlsVisited: spiralBlast.spiralWhorlsVisited,
+        totalAffectedFiles: spiralBlast.totalAffectedFiles,
+      },
       safeRefactorOrder,
       summaryMarkdown,
     };

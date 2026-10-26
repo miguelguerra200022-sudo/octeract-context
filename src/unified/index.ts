@@ -9,3 +9,4 @@ export { OcteractSee } from './see.ts';
 export { OcteractImpact } from './impact.ts';
 export { OcteractSafeWrite } from './safeWrite.ts';
 export { OcteractAsk } from './ask.ts';
+export { OcteractRaupMorphospace } from '../morphology/index.ts';

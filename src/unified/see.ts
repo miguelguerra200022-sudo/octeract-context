@@ -10,6 +10,8 @@ import { OcteractDragonFold } from '../dragon/dragonFold.ts';
 import { ASTSkeletonizer } from '../core/skeleton.ts';
 import { OcteractEVAAST } from '../voynich/eva-ast.ts';
 import { OcteractSieve } from '../core/sieve.ts';
+import { ProjectIndexer } from '../core/indexer.ts';
+import { OcteractRaupMorphospace } from '../morphology/index.ts';
 import type { OcteractSeeOptions, OcteractSeeResult } from './types.ts';
 
 export class OcteractSee {
@@ -89,6 +91,45 @@ export class OcteractSee {
         compressedTokensApprox: skelRes.skeletonTokensEstimated,
         compressionSavingsPercent: skelRes.reductionPercentage,
         content: skelRes.skeletonCode,
+      };
+    }
+
+    if (mode === 'nautilus') {
+      const indexer = new ProjectIndexer();
+      const loaded = indexer.loadIndex(root);
+      if (!loaded) {
+        indexer.indexDirectory({ rootDir: root, maxFiles: 500 });
+      }
+      const space = indexer.getSpace();
+      const partition = OcteractRaupMorphospace.partitionNautilusChambers(space, relPath, root);
+
+      const chamberLines = [
+        `// 🐚 [OCTERACT NAUTILUS CHAMBERS: Partición Acrecionaria de Concha (Raup 1966)]`,
+        `// Cámara de Habitación Activa (100% fidelidad): ${partition.livingChamber.filePath} (~${partition.livingChamber.tokensApprox} tokens)`,
+        `// Cámaras Septales Adyacentes (Hop 1): ${partition.adjacentChambers.length} módulos (~${partition.adjacentChambers.reduce((a, b) => a + b.tokensApprox, 0)} tokens)`,
+        `// Cámaras Ancestrales Selladas (Hop 2+): ${partition.sealedSepta.length} módulos (~${partition.sealedSepta.length * 3} tokens)`,
+        `// Ahorro Total de Contexto: ${partition.contextSavingsPercent}% (${partition.totalUncompressedTokens} -> ${partition.totalChamberTokens} tokens)\n`,
+        `// === [CÁMARA DE HABITACIÓN ACTIVA: ${relPath}] ===`,
+        partition.livingChamber.content,
+        `\n// === [CÁMARAS SEPTALES ADYACENTES (HOP 1: ESQUELETOS AST)] ===`,
+        ...partition.adjacentChambers.map((c) => `// --- Cámara #${c.chamberIndex}: ${c.filePath} ---\n${c.content}`),
+        `\n// === [CÁMARAS ANCESTRALES TABICADAS Y SELLADAS (HOP 2+: 1 TOKEN/TABIQUE)] ===`,
+        ...partition.sealedSepta.map((s) => s.septumSummary),
+      ];
+
+      const content = chamberLines.join('\n');
+      const compressedTokens = partition.totalChamberTokens;
+
+      return {
+        filePath: relPath,
+        symbol: options.symbol,
+        mode: 'nautilus',
+        lineCount: content.split('\n').length,
+        originalTokensApprox: partition.totalUncompressedTokens,
+        compressedTokensApprox: compressedTokens,
+        compressionSavingsPercent: partition.contextSavingsPercent,
+        content,
+        nautilusPartition: partition,
       };
     }
 

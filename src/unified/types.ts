@@ -2,7 +2,21 @@
  * OCTERACT UNIFIED FACADE: Tipos y Estructuras de Datos
  * Las 4 Grandes Aperturas Maestras + Motor Semántico de Preguntas
  */
-export const UNIFIED_FACADE_VERSION = '4.8.0';
+import type {
+  RaupParameters,
+  NautilusChamberPartition,
+  RaupMorphologyReport,
+  ConchologicalArchetype,
+} from '../morphology/index.ts';
+
+export type {
+  RaupParameters,
+  NautilusChamberPartition,
+  RaupMorphologyReport,
+  ConchologicalArchetype,
+};
+
+export const UNIFIED_FACADE_VERSION = '4.9.0';
 
 export interface OcteractDoctorReport {
   healthScore: number; // 0 a 100
@@ -35,6 +49,7 @@ export interface OcteractDoctorReport {
     intactTargets: number;
     driftDetected: boolean;
   };
+  raupMorphology?: RaupMorphologyReport;
   sieveSummary?: string;
   topRecommendations: string[];
   summaryMarkdown: string;
@@ -43,19 +58,20 @@ export interface OcteractDoctorReport {
 export interface OcteractSeeOptions {
   rootDir?: string;
   symbol?: string;
-  mode?: 'origami' | 'skeleton' | 'full' | 'eva' | 'sieve';
+  mode?: 'origami' | 'skeleton' | 'full' | 'eva' | 'sieve' | 'nautilus';
   budget?: number; // Límite de tokens sugerido (default: 200)
 }
 
 export interface OcteractSeeResult {
   filePath: string;
   symbol?: string;
-  mode: 'origami' | 'skeleton' | 'full' | 'eva' | 'sieve';
+  mode: 'origami' | 'skeleton' | 'full' | 'eva' | 'sieve' | 'nautilus';
   lineCount: number;
   originalTokensApprox: number;
   compressedTokensApprox: number;
   compressionSavingsPercent: number;
   content: string;
+  nautilusPartition?: NautilusChamberPartition;
   sieveSummary?: string;
   valleyFoldsCount?: number;
   mountainFoldsCount?: number;
@@ -86,6 +102,10 @@ export interface OcteractImpactReport {
     symbol: string;
     distance: number;
   }>;
+  spiralBlast?: {
+    spiralWhorlsVisited: number;
+    totalAffectedFiles: number;
+  };
   safeRefactorOrder: string[];
   summaryMarkdown: string;
 }

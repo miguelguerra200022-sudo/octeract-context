@@ -11,6 +11,7 @@ import { OcteractDragonTile } from '../dragon/dragonTile.ts';
 import { OcteractMultiNoiseBiomes } from '../voxel/multi-noise.ts';
 import { OcteractTargetArmor } from '../rea/targetArmor.ts';
 import { OcteractSieve } from '../core/sieve.ts';
+import { OcteractRaupMorphospace } from '../morphology/index.ts';
 import type { OcteractDoctorReport } from './types.ts';
 
 export class OcteractDoctor {
@@ -74,15 +75,21 @@ export class OcteractDoctor {
       intactTargets = 1;
     }
 
-    // 4. Puntuación Unificada de Salud
+    // 4. Auditoría Concológica de Raup (1966 3D Morphospace & Accretionary Chambers)
+    const raupMorphology = OcteractRaupMorphospace.auditMorphology(space, root);
+
+    // 5. Puntuación Unificada de Salud
     let finalScore = rawAudit.healthScore;
     if (tiling.illegalBoundaryLeaks.length > 0) {
       finalScore = Math.max(0, finalScore - Math.min(15, tiling.illegalBoundaryLeaks.length * 2));
     }
+    if (raupMorphology.raupVector.isEmptyMorphospace) {
+      finalScore = Math.max(10, Math.round(finalScore * 0.85));
+    }
     finalScore = Math.round(finalScore);
 
     let verdict: 'PRISTINE' | 'STABLE' | 'DEGRADED' | 'CRITICAL_COLLAPSE';
-    if (finalScore >= 95 && tiling.illegalBoundaryLeaks.length === 0) {
+    if (finalScore >= 95 && tiling.illegalBoundaryLeaks.length === 0 && !raupMorphology.raupVector.isEmptyMorphospace) {
       verdict = 'PRISTINE';
     } else if (finalScore >= 80) {
       verdict = 'STABLE';
@@ -92,7 +99,7 @@ export class OcteractDoctor {
       verdict = 'CRITICAL_COLLAPSE';
     }
 
-    // 5. Mapeo y Recomendaciones Quirúrgicas Top
+    // 6. Mapeo y Recomendaciones Quirúrgicas Top
     const mappedFractures = rawAudit.fractures.map((f: any) => ({
       id: f.id,
       file: f.source || f.file || 'desconocido',
@@ -116,11 +123,16 @@ export class OcteractDoctor {
         `Desacoplar ${tiling.illegalBoundaryLeaks.length} fugas de límite entre cuadrantes (${tiling.illegalBoundaryLeaks[0].fromQuadrant} -> ${tiling.illegalBoundaryLeaks[0].toQuadrant}).`
       );
     }
-    if (recommendations.length === 0) {
-      recommendations.push('Estructura 8D y teselación fractal en estado impecable. Proceder normalmente.');
+
+    if (raupMorphology.raupVector.isEmptyMorphospace) {
+      recommendations.unshift(`[Morfología Raup] Desactivar auto-colisiones o hipertrofia: ${raupMorphology.raupVector.analogy}`);
     }
 
-    // 6. Procesamiento Sieve opcional de logs/terminales
+    if (recommendations.length === 0) {
+      recommendations.push('Estructura 8D, morfología concológica y teselación en estado impecable. Proceder normalmente.');
+    }
+
+    // 7. Procesamiento Sieve opcional de logs/terminales
     let sieveSummary: string | undefined;
     if (options.logOrOutput && options.logOrOutput.trim().length > 0) {
       const sieveRes = OcteractSieve.sieve(options.logOrOutput);
@@ -130,10 +142,12 @@ export class OcteractDoctor {
       }
     }
 
-    // 7. Resumen Markdown Ultracompacto (< 250 tokens)
+    // 8. Resumen Markdown Ultracompacto (< 250 tokens)
     const summaryLines = [
       `### 🩺 Octeract Doctor Report: **${verdict}** (${finalScore}/100)`,
       `- **Archivos / Símbolos**: ${vertices.length} archivos | ${rawAudit.metrics?.totalFunctions || vertices.length * 3} símbolos`,
+      `- **Morfología Concológica (Raup 1966)**: **${raupMorphology.raupVector.archetype}** (W=${raupMorphology.raupVector.w}, D=${raupMorphology.raupVector.d}, T=${raupMorphology.raupVector.t}) | Viabilidad: ${raupMorphology.raupVector.viabilityScore}%`,
+      `- **Compresión Septal Nautilus**: ${raupMorphology.septalCompressionFactor}x ahorro de contexto en RAM`,
       `- **Fracturas**: ${mappedFractures.length} detectadas (${criticals.length} críticas)`,
       `- **Teselación 4D**: Pureza ${tiling.tessellationPurity}% | ${tiling.illegalBoundaryLeaks.length} fugas de límite`,
       `- **Biomas Dominantes**: ${dominantBiomes.map((b) => b.biome).join(', ') || 'Equilibrado'}`,
@@ -166,6 +180,7 @@ export class OcteractDoctor {
         intactTargets,
         driftDetected,
       },
+      raupMorphology,
       sieveSummary,
       topRecommendations: recommendations,
       summaryMarkdown,
